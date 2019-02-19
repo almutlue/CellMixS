@@ -48,7 +48,7 @@ Generalized version of \code{\link{cms.pca}}. In default both functions are iden
 \code{\link{cms.cell}}, \code{\link{scale.cms}}, \code{\link{cms.pca}}.
 
 Other cms functions: \code{\link{cms.cell}},
-  \code{\link{cms.pca}}, \code{\link{filter.locmin}},
-  \code{\link{scale.cms}}
+  \code{\link{cms.pca}}, \code{\link{cms.summary}},
+  \code{\link{filter.locmin}}, \code{\link{scale.cms}}
 }
 \concept{cms functions}

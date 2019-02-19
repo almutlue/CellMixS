@@ -37,6 +37,6 @@ Reciprocal distances are used as weights. Returns a matrix with "scaled-cms" and
 
 Other cms functions: \code{\link{cms.cell}},
   \code{\link{cms.integration}}, \code{\link{cms.pca}},
-  \code{\link{filter.locmin}}
+  \code{\link{cms.summary}}, \code{\link{filter.locmin}}
 }
 \concept{cms functions}

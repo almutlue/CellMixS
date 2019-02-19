@@ -127,6 +127,7 @@ filter.locmin <- function(knn_cell, k_min){
 #' @importFrom SummarizedExperiment assay
 #' @importFrom FNN get.knn
 cms.pca <- function(sce, k, group, k_min = NA, scale = TRUE, n_pc = 30, cell_min = 10){
+  colData(sce)[,group] <- as.factor(colData(sce)[,group])
   cell_names <- colnames(sce)
   #run PCA, if PCs do not exist
   if(is.null(reducedDim(sce, "PCA"))){
@@ -198,12 +199,15 @@ cms.pca <- function(sce, k, group, k_min = NA, scale = TRUE, n_pc = 30, cell_min
 #' @importFrom SummarizedExperiment assay
 #' @importFrom FNN get.knn
 cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logcounts", k_min = NA, scale = TRUE, n_pc = 30, cell_min = 10){
+  #check group variable class
+  colData(sce)[,group] <- as.factor(colData(sce)[,group])
   cell_names <- colnames(sce)
+  # Check assay and embedding --> Use existing embedding, otherwise runPCA using logcounts (counts) or a specified value.
   if(!assay_name %in% c("logcounts", "counts") & !embedding %in% c("pca", "PCA", "Pca")){
     stop("Ambigious parameter: Please specify the subspace to use for distance calculations. If precalculated embeddings different from PCA shall be use, keep 'assay_name' as default. If a PCA based on the in 'assay_name' variable shall be used, specify embedding as one of default, or 'Pca', 'pca', 'PCA'.")
   }
   if(is.null(reducedDim(sce, embedding))){
-    if(!assay_name %in% names(assays(pbmc))){
+    if(!assay_name %in% names(assays(sce))){
       stop("Parameter not found: Please provide a valid value for assay_name. The default 'logcounts' is not present.")
     }
     warning("Embedding not found: PCA subspace is used to calculate distance distributions.")
@@ -307,16 +311,19 @@ scale.cms <- function(knn, cms_raw, cell_names, k_min, k){
 #'
 #' @examples
 #'
-#' @importFrom dplyr as_tibble group_by_ summarize_all
-#' @importFrom SingleCellexperiment colData
+#' @importFrom dplyr as_tibble group_by_ summarize_all funs
+#' @importFrom SingleCellExperiment colData
 #' @importFrom magrittr %>%
 cms.summary <- function(cms_res, sum_var = NULL, sce = NULL){
   if(is.null(sum_var)){
     cms_summarized <- as.data.frame(t(colMeans(as.data.frame(cms_res))))
   }else{
-    cms_res <- cms_res[colnames(sce),]
-    cms_merged <- cbind.data.frame(cms_res, colData(sce)[,sum_var])
-    colnames(cms_merged) <- c(colnames(cms_res), sum_var)
+    #to prevent type conversion if cms has 1 column only
+    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
+    colnames(cms_res_sorted) <- colnames(cms_res)
+    rownames(cms_res_sorted) <- colnames(sce)
+    cms_merged <- cbind.data.frame(cms_res_sorted, colData(sce)[,sum_var])
+    colnames(cms_merged) <- c(colnames(cms_res_sorted), sum_var)
 
     cms_summarized <- as_tibble(cms_merged) %>% group_by_(sum_var) %>% summarize_all(funs(mean))
     cms_summarized <- as.data.frame(cms_summarized)

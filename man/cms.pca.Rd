@@ -40,7 +40,7 @@ cms.pca uses a SingleCellExperiment \code{\link{SingleCellExperiment}} object as
 \code{\link{cms.cell}} for cms, \code{\link{scale.cms}} for scaling.
 
 Other cms functions: \code{\link{cms.cell}},
-  \code{\link{cms.integration}},
+  \code{\link{cms.integration}}, \code{\link{cms.summary}},
   \code{\link{filter.locmin}}, \code{\link{scale.cms}}
 }
 \concept{cms functions}

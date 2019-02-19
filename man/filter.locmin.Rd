@@ -31,6 +31,6 @@ filter.locmin is only applied, if k-min is specified as parameter in \code{\link
 
 Other cms functions: \code{\link{cms.cell}},
   \code{\link{cms.integration}}, \code{\link{cms.pca}},
-  \code{\link{scale.cms}}
+  \code{\link{cms.summary}}, \code{\link{scale.cms}}
 }
 \concept{cms functions}

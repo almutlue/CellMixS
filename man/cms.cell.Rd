@@ -33,7 +33,7 @@ This function is mainly intended as core function for a set of functions to calc
 \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms.pca}} for cms in PCA subspace, \code{\link{scale.cms}} for scaling.
 
 Other cms functions: \code{\link{cms.integration}},
-  \code{\link{cms.pca}}, \code{\link{filter.locmin}},
-  \code{\link{scale.cms}}
+  \code{\link{cms.pca}}, \code{\link{cms.summary}},
+  \code{\link{filter.locmin}}, \code{\link{scale.cms}}
 }
 \concept{cms functions}

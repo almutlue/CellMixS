@@ -22,8 +22,8 @@ Plots summarized cms scores from an input list or dataframe. This function is in
 \seealso{
 \code{\link{compare.cluster}}
 
-Other plot cms functions: \code{\link{compare.cluster}},
-  \code{\link{plot.cms}}, \code{\link{plot.group}},
-  \code{\link{plot.hist}}, \code{\link{plot.overview}}
+Other visualize cms functions: \code{\link{compare.cluster}},
+  \code{\link{vis.cms}}, \code{\link{vis.group}},
+  \code{\link{vis.hist}}, \code{\link{vis.overview}}
 }
-\concept{plot cms functions}
+\concept{visualize cms functions}

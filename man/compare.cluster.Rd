@@ -4,15 +4,20 @@
 \alias{compare.cluster}
 \title{compare.cluster}
 \usage{
-compare.cluster(cms_res, cluster_var, cms_var = "cms", sce = NULL)
+compare.cluster(cms_res, cluster_var, cms_var = "cms", sce = NULL,
+  violin = TRUE)
 }
 \arguments{
 \item{cms_res}{data frame of cms scores to be summarized. The cms score should be in the first coulmn. It should either contain a second column with corresponding levels for cluster_var or  sce need to be specified.}
 
 \item{cluster_var}{character string specifying the name of the factor level variable to summarize cms scores on.}
 
-\item{sce}{SingleCellexperiment object should only be specified if cluster-var is not already provided in cms_res. Should contain 'cluster_var' within colData.
+\item{cms_var}{Character string specifying the name of the cms_res to use. Default is "cms".}
+
+\item{sce}{SingleCellexperiment object should only be specified if cluster_var is not already provided in cms_res. Should contain 'cluster_var' within colData.
 If sce is specified, rownames of cms_res need to correspond to colnames of sce (should contain the same cells).}
+
+\item{violin}{A logical, if true (default) violin plots are provided. Otherwise boxplots are generated.}
 }
 \description{
 Creates summary boxplots of cms scores for different groups/cluster.
@@ -26,8 +31,8 @@ Plots summarized cms scores for a specified list. This function is intended to v
 \seealso{
 \code{\link{compare.integration}}
 
-Other plot cms functions: \code{\link{compare.integration}},
-  \code{\link{plot.cms}}, \code{\link{plot.group}},
-  \code{\link{plot.hist}}, \code{\link{plot.overview}}
+Other visualize cms functions: \code{\link{compare.integration}},
+  \code{\link{vis.cms}}, \code{\link{vis.group}},
+  \code{\link{vis.hist}}, \code{\link{vis.overview}}
 }
-\concept{plot cms functions}
+\concept{visualize cms functions}
