@@ -9,7 +9,7 @@ cms.cell(cell, group, knn, k_min = NA, cell_min = 10)
 \arguments{
 \item{cell}{Character string defining the name of the cell to calculate cms for. Should be one of the rownames of knn.}
 
-\item{group}{Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in knn.}
+\item{group}{Character string specifying the variable name used to define groups (batches). Should have a corresonding element in knn.}
 
 \item{knn}{List containing distances and group information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable.
 Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.}
@@ -30,10 +30,10 @@ This can be used to adapt to the local structure of the datatset e.g. prevent ce
 This function is mainly intended as core function for a set of functions to calculate cms for a single cell containing object: \code{\link{cms.pca}}.
 }
 \seealso{
-\code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms.pca}} for cms in PCA subspace, \code{\link{scale.cms}} for scaling.
+\code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms.pca}} for cms in PCA subspace, \code{\link{smooth.cms}} for smoothing.
 
 Other cms functions: \code{\link{cms.integration}},
   \code{\link{cms.pca}}, \code{\link{cms.summary}},
-  \code{\link{filter.locmin}}, \code{\link{scale.cms}}
+  \code{\link{filter.locmin}}, \code{\link{smooth.cms}}
 }
 \concept{cms functions}

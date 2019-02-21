@@ -8,13 +8,13 @@ vis.cms(cms_res, sce, cms_var = "cms", dim_red = "TSNE",
   log10_val = FALSE, ...)
 }
 \arguments{
-\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or scaled cms scores.
+\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 Rownames need to correspond to colnames of sce. Colnames are allowed to be set different, but need to be specified in cms_var.}
 
 \item{sce}{Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
 If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.}
 
-\item{cms_var}{character string specifying the cms scores to use (usually "cms_scaled" or "cms").
+\item{cms_var}{character string specifying the cms scores to use (usually "cms_smoothened" or "cms").
 Needs to correspond to one of the colnames of cms_res. Default is "cms".}
 
 \item{dim_red}{Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.

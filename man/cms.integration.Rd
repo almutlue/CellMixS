@@ -5,7 +5,7 @@
 \title{cms.integration}
 \usage{
 cms.integration(sce, k, group, embedding = "PCA",
-  assay_name = "logcounts", k_min = NA, scale = TRUE, n_pc = 30,
+  assay_name = "logcounts", k_min = NA, smooth = TRUE, n_pc = 30,
   cell_min = 10)
 }
 \arguments{
@@ -24,7 +24,7 @@ Default is 'logcounts' and should not be changed, if other embeddings than PCA s
 \item{k_min}{Numeric giving the minimum number of k nearest neighbours to use. cells to include.
 If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.}
 
-\item{scale}{A logical value indicating if cms results should be scaled within each neighbourhood.}
+\item{smooth}{A logical indicating if cms results should be smoothened within each neighbourhood.}
 
 \item{n_pc}{Numeric giving the number of PCs to include to define the subspace to calculate cell distances in.}
 
@@ -36,19 +36,21 @@ Calculates cell-specific mixing scores based on euclidean distances within subsp
 }
 \details{
 The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cms.cell}}.
-In default the function uses all distances and group label defined in knn. If k_min is specified, the overall distance distribution is checked for the first local minimum, that includes at least kmin cells.
+In default the function uses all distances and group label defined in knn. f *k_min* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
-cms.pca uses a SingleCellExperiment \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
+cms.pca uses a *SingleCellExperiment* \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
+For *smoothening* weigthed means of cms scores within each cell's k-nearest neighbourhood are calculated.
+Reciprocal distances are used as weights.
 Generalized version of \code{\link{cms.pca}}. In default both functions are identical.
 }
 \examples{
 
 }
 \seealso{
-\code{\link{cms.cell}}, \code{\link{scale.cms}}, \code{\link{cms.pca}}.
+\code{\link{cms.cell}}, \code{\link{smooth.cms}}, \code{\link{cms.pca}}.
 
 Other cms functions: \code{\link{cms.cell}},
   \code{\link{cms.pca}}, \code{\link{cms.summary}},
-  \code{\link{filter.locmin}}, \code{\link{scale.cms}}
+  \code{\link{filter.locmin}}, \code{\link{smooth.cms}}
 }
 \concept{cms functions}

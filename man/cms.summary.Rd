@@ -28,6 +28,6 @@ In default the mean of each cloumn of cms_res is returned. Groups to summarize c
 
 Other cms functions: \code{\link{cms.cell}},
   \code{\link{cms.integration}}, \code{\link{cms.pca}},
-  \code{\link{filter.locmin}}, \code{\link{scale.cms}}
+  \code{\link{filter.locmin}}, \code{\link{smooth.cms}}
 }
 \concept{cms functions}

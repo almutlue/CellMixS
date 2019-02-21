@@ -5,11 +5,11 @@
 \title{vis.overview}
 \usage{
 vis.overview(cms_res, sce, group, dim_red = "TSNE",
-  scaled = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE),
+  smooth = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE),
   log10_val = FALSE, other_Var = NULL, ...)
 }
 \arguments{
-\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or scaled cms scores.
+\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 Rownames need to correspond to colnames of sce.}
 
 \item{sce}{Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
@@ -20,8 +20,8 @@ If precalculated dimension reduction embeddings are used, they need to be within
 \item{dim_red}{Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
 If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.}
 
-\item{scaled}{A logical value indicating if scaled cms scores should be plotted.
-If true cms_res needs to contain 2 colums with cms and cms_scaled results. Default is set by the length of colnames(cms_res)}
+\item{smooth}{A logical value indicating if smoothened cms scores should be plotted.
+If true cms_res needs to contain 2 colums with cms and cms_smoothened results. Default is set by the length of colnames(cms_res)}
 
 \item{log10_val}{A logical indicating if -log10(cms) should be plotted to visualize differences of small values}
 
@@ -31,11 +31,11 @@ Need to be specified in colData(sce).}
 \item{...}{Additional arguments to pass to \code{\link{runTSNE}} (CHECK!!!)}
 }
 \description{
-Plot cms, scaled cms, group label and other Variable defined in colData in a reduced dimensional representation.
+Plot cms, smoothened cms, group label and other Variable defined in colData in a reduced dimensional representation.
 }
 \details{
 Plots reduced dimensions (tsne as default) of cells using the group variable and the cms score as colors.
-Other color label as celltype label or scaled cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
+Other color label as celltype label or smoothened cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
 Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}}.
 }
 \examples{

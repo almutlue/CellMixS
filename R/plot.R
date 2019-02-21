@@ -5,11 +5,11 @@
 #'
 #' Plot pvalue histograms of cms score distributions
 #'
-#' @param cms cms result matrix with one or two columns containing cms scores and/or scaled cms scores.
+#' @param cms cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 #' @param ... Additional arguments to pass to \code{\link{ggplot2}}.
 #'
 #' @details Plots cms score distribution similar to a pvalue histogram distribution.
-#' Scaled cms should be close to a normal distribution centered around 0.5 and unscaled should be approx. flat, if no dataset-specific bias are expected.
+#' Smoothened cms should be close to a normal distribution centered around 0.5 and cms scores should be approx. flat, if no dataset-specific bias are expected.
 #'
 #' @family visualize cms functions
 #'
@@ -32,24 +32,24 @@ vis.hist <- function(cms, ...){
 
 #' vis.overview
 #'
-#' Plot cms, scaled cms, group label and other Variable defined in colData in a reduced dimensional representation.
+#' Plot cms, smoothened cms, group label and other Variable defined in colData in a reduced dimensional representation.
 #'
-#' @param cms_res cms result matrix with one or two columns containing cms scores and/or scaled cms scores.
+#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 #' Rownames need to correspond to colnames of sce.
 #' @param sce Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
 #' If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.
 #' @param group Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in colData(sce).
 #' @param dim_red Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
 #' If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.
-#' @param scaled A logical value indicating if scaled cms scores should be plotted.
-#' If true cms_res needs to contain 2 colums with cms and cms_scaled results. Default is set by the length of colnames(cms_res)
+#' @param smooth A logical value indicating if smoothened cms scores should be plotted.
+#' If true cms_res needs to contain 2 colums with cms and cms_smoothened results. Default is set by the length of colnames(cms_res)
 #' @param log10_val A logical indicating if -log10(cms) should be plotted to visualize differences of small values
 #' @param other_Var Character string defining other variables to be plotted asided (e.g. some specified celltype label).
 #' Need to be specified in colData(sce).
 #' @param ... Additional arguments to pass to \code{\link{runTSNE}} (CHECK!!!)
 #'
 #' @details Plots reduced dimensions (tsne as default) of cells using the group variable and the cms score as colors.
-#' Other color label as celltype label or scaled cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
+#' Other color label as celltype label or smoothened cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
 #' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}}.
 #'
 #' @family visualize cms functions
@@ -66,7 +66,7 @@ vis.hist <- function(cms, ...){
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
-vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", scaled = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE), log10_val = FALSE, other_Var = NULL, ...){
+vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE), log10_val = FALSE, other_Var = NULL, ...){
   cell_names <- colnames(sce)
   #Compare order sce and cms_restheme_classic
   stopifnot(rownames(cms_res) == cell_names)
@@ -115,8 +115,8 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", scaled = ifelse(
 
     p <- plot_grid(t_group, t_cms)
 
-    if(scaled == TRUE){
-      df$cms_scaled <- cms_res[,"cms_scaled"]
+    if(smooth == TRUE){
+      df$cms_smooth <- cms_res[,"cms_smooth"]
 
       t <- ggplot(df, aes_string(x="red_Dim1", y="red_Dim2")) +
         xlab(paste0(dim_red,"_1")) + ylab(paste0(dim_red,"_2")) +
@@ -124,10 +124,10 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", scaled = ifelse(
         theme(aspect.ratio=1, panel.grid.minor=element_blank(),
               panel.grid.major=element_line(color="grey", size=.3))
 
-      t_scaled <- t + geom_point(size=1, alpha = 0.3, aes_string(color="cms_scaled")) +
+      t_smooth <- t + geom_point(size=1, alpha = 0.3, aes_string(color="cms_smooth")) +
         guides(color=guide_legend(override.aes=list(size=0.5))) +
-        scale_color_viridis(option = "B") + ggtitle(paste0("scaled cms : ", group))
-      p <- plot_grid(t_group, t_cms, t_scaled)
+        scale_color_viridis(option = "B") + ggtitle(paste0("smooth cms : ", group))
+      p <- plot_grid(t_group, t_cms, t_smooth)
 
     }
 
@@ -149,8 +149,8 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", scaled = ifelse(
         t_other <- t_other + scale_color_manual(values = col_hist)
       }
 
-      if(scaled == TRUE){
-      p <- plot_grid(t_group, t_cms, t_scaled, t_other)
+      if(smooth == TRUE){
+      p <- plot_grid(t_group, t_cms, t_smooth, t_other)
       }else{
         p <- plot_grid(t_group, t_cms, t_other)
       }
@@ -170,11 +170,11 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", scaled = ifelse(
 #'
 #' Plot cms scores in a reduced dimensional plot like tsne.
 #'
-#' @param cms_res cms result matrix with one or two columns containing cms scores and/or scaled cms scores.
+#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 #' Rownames need to correspond to colnames of sce. Colnames are allowed to be set different, but need to be specified in cms_var.
 #' @param sce Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
 #' If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.
-#' @param cms_var character string specifying the cms scores to use (usually "cms_scaled" or "cms").
+#' @param cms_var character string specifying the cms scores to use (usually "cms_smoothened" or "cms").
 #' Needs to correspond to one of the colnames of cms_res. Default is "cms".
 #' @param dim_red Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
 #' If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.
@@ -396,9 +396,9 @@ compare.cluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, v
     rownames(cms_res_sorted) <- colnames(sce)
     cms_table <- data.frame(cms = cms_res_sorted[,cms_var], cluster = as.factor(colData(sce)[,cluster_var]))
   }else{
-    cms_table <- cms_res
+    cms_table <- cms_res[,c(cms_var, cluster_var)]
     if(ncol(cms_table)!= 2){
-     stop("Input error: Please provide a data frame with two columns one with the cms score and one with the coresponding levels of cluster_var")
+     stop("Input error: Please provide a data frame with at least two columns one with the cms score and one with the coresponding levels of cluster_var")
     }
     colnames(cms_table) <- c("cms", "cluster")
     cms_table$cluster <- as.factor(cms_table$cluster)

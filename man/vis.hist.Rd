@@ -7,7 +7,7 @@
 vis.hist(cms, ...)
 }
 \arguments{
-\item{cms}{cms result matrix with one or two columns containing cms scores and/or scaled cms scores.}
+\item{cms}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.}
 
 \item{...}{Additional arguments to pass to \code{\link{ggplot2}}.}
 }
@@ -16,7 +16,7 @@ Plot pvalue histograms of cms score distributions
 }
 \details{
 Plots cms score distribution similar to a pvalue histogram distribution.
-Scaled cms should be close to a normal distribution centered around 0.5 and unscaled should be approx. flat, if no dataset-specific bias are expected.
+Smoothened cms should be close to a normal distribution centered around 0.5 and cms scores should be approx. flat, if no dataset-specific bias are expected.
 }
 \examples{
 
