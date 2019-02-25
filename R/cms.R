@@ -83,7 +83,7 @@ filter.locmin <- function(knn_cell, k_min){
   loc_min <- distances[which(diff(sign(diff(dist_density)))== 2)+1]
   # Find first local minimum (that is larger than a minimal threshold of cells (kmin))
   all_locmin <- unlist(lapply(loc_min, function(minim){ind <- length(which(knn_cell$distance <= minim))}))
-  loc_th <- min(which(all_locmin > k_min))                #indice of first local minimum (>kmin)
+  loc_th <- suppressWarnings(min(which(all_locmin > k_min)))                #indice of first local minimum (>kmin)
   loc_dist_th <- loc_min[loc_th]                          #up to which distance are cells included
 
   #filter cells before first local minimum (>kmin)
@@ -125,7 +125,7 @@ filter.locmin <- function(knn_cell, k_min){
 #' @examples
 #'
 #' @importFrom scater runPCA
-#' @importFrom SingleCellExperiment reducedDim
+#' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assay
 #' @importFrom FNN get.knn
 cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_min = 10){
@@ -206,12 +206,17 @@ cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_mi
 #' @importFrom SummarizedExperiment assay
 #' @importFrom FNN get.knn
 cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logcounts", k_min = NA, smooth = TRUE, n_pc = 30, cell_min = 10){
+  if(cell_min < 10){
+    stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
+  }
   #check group variable class
   colData(sce)[,group] <- as.factor(colData(sce)[,group])
   cell_names <- colnames(sce)
   # Check assay and embedding --> Use existing embedding, otherwise runPCA using logcounts (counts) or a specified value.
   if(!assay_name %in% c("logcounts", "counts") & !embedding %in% c("pca", "PCA", "Pca")){
-    stop("Ambigious parameter: Please specify the subspace to use for distance calculations. If precalculated embeddings different from PCA shall be use, keep 'assay_name' as default. If a PCA based on the in 'assay_name' variable shall be used, specify embedding as one of default, or 'Pca', 'pca', 'PCA'.")
+    stop("Ambigious parameter: Please specify parameter for distance calculations.
+         * If precalculated embeddings shall be used, keep 'assay_name' as default.
+         * If a PCA based on 'assay_name' shall be used, keep 'embedding' as default.")
   }
   if(is.null(reducedDim(sce, embedding))){
     if(!assay_name %in% names(assays(sce))){
@@ -233,7 +238,9 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
   names(knn) <- c("indices", "distance")
 
   # group assignment of knn cells for each cell
-  knn[[group]] <- do.call(rbind, lapply(cell_names, function(cell_id){colData(sce)[knn[["indices"]][cell_id,], group]}))
+  knn[[group]] <- do.call(rbind, lapply(cell_names, function(cell_id){
+    colData(sce)[knn[["indices"]][cell_id,], group]
+    }))
   rownames(knn[[group]]) <- cell_names
 
   cms_raw <- do.call(rbind, lapply(cell_names, cms.cell, group = group, knn = knn, k_min=k_min, cell_min = cell_min))
@@ -327,6 +334,13 @@ cms.summary <- function(cms_res, sum_var = NULL, sce = NULL){
   if(is.null(sum_var)){
     cms_summarized <- as.data.frame(t(colMeans(as.data.frame(cms_res))))
   }else{
+    if(is.null(sce)){
+      stop("Missing variable: Please provide a 'sce' object.")
+    }
+    if(!sum_var %in% names(colData(sce))){
+      stop("Missing variable: Could not find 'sum_var'.
+           Please specify one of names(colData(sce)).")
+    }
     #to prevent type conversion if cms has 1 column only
     cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
     colnames(cms_res_sorted) <- colnames(cms_res)
