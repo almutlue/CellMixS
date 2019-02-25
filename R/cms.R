@@ -1,6 +1,6 @@
 # Functions to calculate cms
 
-#' cms.cell
+#' cms_cell
 #'
 #' Function to calculate a cellspecific mixing score (cms) of groups/batches.
 #'
@@ -8,7 +8,7 @@
 #' @param group Character string specifying the variable name used to define groups (batches). Should have a corresonding element in knn.
 #' @param knn List containing distances and group information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable.
 #' Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.
-#' @param k_min Numeric giving the minimum number of k nearest neighbours to use. cells to include.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use. cells to include.
 #' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
 #' @param cell_min Minimum number of cells from each group to be included into the AD test for calculation of cms.
 #' Should be > 10 to make the \code{\link{ad.test}} working.
@@ -16,16 +16,16 @@
 #' @details The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test.
 #' In default the function uses all distances and group label defined in knn. If k_min is specified, the overall distance distribution is checked for the first local minimum, that includes at least kmin cells.
 #' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
-#' This function is mainly intended as core function for a set of functions to calculate cms for a single cell containing object: \code{\link{cms.pca}}.
+#' This function is mainly intended as core function for a set of functions to calculate cms for a single cell containing object: \code{\link{cms}}.
 #'
-#' @seealso \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms.pca}} for cms in PCA subspace, \code{\link{smooth.cms}} for smoothing.
+#' @seealso \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{smooth_cms}}
 #' @family cms functions
 #' @return
 #' @export
 #'
 #' @examples
 #' @importFrom kSamples ad.test
-cms.cell <- function(cell, group, knn, k_min = NA, cell_min = 10){
+cms_cell <- function(cell, group, knn, kmin = NA, cell_min = 10){
   #get knn distances and group assignments
   knn_cell <- cbind(knn[["distance"]][cell,], knn[[group]][cell,])
   knn_cell <- as.data.frame(knn_cell)
@@ -33,8 +33,8 @@ cms.cell <- function(cell, group, knn, k_min = NA, cell_min = 10){
   knn_cell[,group] <- as.factor(knn_cell[,group])
 
   #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
-  if(!is.na(k_min)){
-    knn_cell <- filter.locmin(knn_cell, k_min)
+  if(!is.na(kmin)){
+    knn_cell <- filter_locmin(knn_cell, kmin)
   }
 
   #filter groups with to few cells (cell_min, default 10)
@@ -63,27 +63,27 @@ cms.cell <- function(cell, group, knn, k_min = NA, cell_min = 10){
 #'
 #' @param knn_cell Data frame with distances and group information of cells. Should have one column named "distance" with distances towards the k nearest neighbours and one column named after the group variable.
 #' Rows correspond to the knn cells and do not need rownames.
-#' @param k_min Numeric giving the minimum number of k nearest neighbours to use. cells to include.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use. cells to include.
 #' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
 #'
 #' @details  Internal function to filter cells used for cms testing to come from a continous overall density distribution function (similar to cluster definitions).
-#' filter.locmin is only applied, if k-min is specified as parameter in \code{\link{cms.cell}} or \code{\link{cms.pca}}.
+#' filter.locmin is only applied, if k-min is specified as parameter in \code{\link{cms_cell}} or \code{\link{cms}}.
 #'
-#' @seealso \code{\link{cms.cell}} for cms calculation
+#' @seealso \code{\link{cms_cell}} for cms calculation
 #' @family cms functions
 #' @return
 #'
 #' @examples
 #'
 #' @importFrom stats density
-filter.locmin <- function(knn_cell, k_min){
+filter_locmin <- function(knn_cell, kmin){
   distances <- density(knn_cell$distance)$x
   dist_density <- density(knn_cell$distance)$y
   #Find local minima
   loc_min <- distances[which(diff(sign(diff(dist_density)))== 2)+1]
   # Find first local minimum (that is larger than a minimal threshold of cells (kmin))
   all_locmin <- unlist(lapply(loc_min, function(minim){ind <- length(which(knn_cell$distance <= minim))}))
-  loc_th <- suppressWarnings(min(which(all_locmin > k_min)))                #indice of first local minimum (>kmin)
+  loc_th <- suppressWarnings(min(which(all_locmin > kmin)))                #indice of first local minimum (>kmin)
   loc_dist_th <- loc_min[loc_th]                          #up to which distance are cells included
 
   #filter cells before first local minimum (>kmin)
@@ -93,81 +93,9 @@ filter.locmin <- function(knn_cell, k_min){
   knn_cell
 }
 
-### Cms all functions
+### Calculate cms
 
-#' cms.pca
-#'
-#' Calculates cell-specific mixing scores based on euclidean distances within a PC defined subspace for all cells of an SingleCellExperiment object
-#'
-#' @param sce \code{\link{SingleCellExperiment}} object containing all cells of interest.
-#' @param k Numeric, defining the number of k-nearest neighbours to use for testing the "mixing" within the neighbourhood.
-#' @param group Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in knn.
-#' @param k_min Numeric giving the minimum number of k nearest neighbours to use. cells to include.
-#' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
-#' @param smooth A logical value indicating if cms results should be smoothened within each neighbourhood.
-#' @param n_pc Numeric giving the number of PCs to include to define the subspace to calculate cell distances in.
-#' @param cell_min Minimum number of cells from each group to be included into the AD test for calculation of cms.
-#' Should be > 10 to make the ad.test function working.
-#'
-#' @details Specified version of \code{\link{cms.integration}}. The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cms.cell}}.
-#' In default the function uses all distances and group label defined in knn. If *k_min* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
-#' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
-#' cms.pca uses a *SingleCellExperiment* \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
-#' For *smoothening* weigthed means of cms scores within each cell's k-nearest neighbourhood are calculated.
-#' Reciprocal distances are used as weights.
-#'
-#' @family cms functions
-#' @seealso \code{\link{cms.cell}} for cms, \code{\link{smooth.cms}} for smoothing.
-#'
-#' @return
-#' @export
-#'
-#' @examples
-#'
-#' @importFrom scater runPCA
-#' @importFrom SingleCellExperiment reducedDim colData
-#' @importFrom SummarizedExperiment assay
-#' @importFrom FNN get.knn
-cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_min = 10){
-  if(cell_min < 10){
-    stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
-  }
-  colData(sce)[,group] <- as.factor(colData(sce)[,group])
-  cell_names <- colnames(sce)
-  #run PCA, if PCs do not exist
-  if(is.null(reducedDim(sce, "PCA"))){
-    #use "logcounts" if availabe otherwise "counts"
-    if("logcounts" %in% names(assays(sce))){
-      sce <- runPCA(sce, ncomponents = n_pc)
-    }else{
-      sce <- runPCA(sce, ncomponents = n_pc, exprs_values = "counts")
-    }
-  }
-  pcs <- reducedDim(sce, "PCA")
-  #determine knn
-  knn <- get.knn(pcs, k=k, algorithm = 'cover_tree')
-  rownames(knn[[1]]) <- cell_names  #indices of knn cells (columns) per cell (rows)
-  rownames(knn[[2]]) <- cell_names  #euclidean dist of knn cells (columns) per cell (rows)
-  names(knn) <- c("indices", "distance")
-
-  # group assignment of knn cells for each cell
-  knn[[group]] <- do.call(rbind, lapply(cell_names, function(cell_id){colData(sce)[knn[["indices"]][cell_id,], group]}))
-  rownames(knn[[group]]) <- cell_names
-
-  cms_raw <- do.call(rbind, lapply(cell_names, cms.cell, group = group, knn = knn, k_min=k_min, cell_min = cell_min))
-  rownames(cms_raw) <- cell_names
-  colnames(cms_raw) <- "cms"
-
-  if(smooth == TRUE){
-    res_cms <- smooth.cms(knn, cms_raw, cell_names, k_min, k)
-  }else{
-    res_cms <- cms_raw
-  }
- res_cms
-}
-
-
-#' cms.integration
+#' cms
 #'
 #' Calculates cell-specific mixing scores based on euclidean distances within subspace of integrated data.
 #'
@@ -178,7 +106,7 @@ cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_mi
 #' The default PCA performs a principle component analysis and uses the n_pc first PCs to define the subspace.
 #' @param assay_name Character string defining the count assay to use. If not otherwise specified by 'embeddings', a PCA on this assay is performed to calculate a new PCA subspace. Must be one of 'names(assays(sce))'.
 #' Default is 'logcounts' and should not be changed, if other embeddings than PCA should be used.
-#' @param k_min Numeric giving the minimum number of k nearest neighbours to use. cells to include.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use. cells to include.
 #' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
 #' @param smooth A logical indicating if cms results should be smoothened within each neighbourhood.
 #' @param n_pc Numeric giving the number of PCs to include to define the subspace to calculate cell distances in.
@@ -186,15 +114,14 @@ cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_mi
 #' Should be > 10 to make the ad.test function working.
 #'
 #' @details The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cms.cell}}.
-#' In default the function uses all distances and group label defined in knn. f *k_min* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
+#' In default the function uses all distances and group label defined in knn. f *kmin* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 #' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
 #' cms.pca uses a *SingleCellExperiment* \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
 #' For *smoothening* weigthed means of cms scores within each cell's k-nearest neighbourhood are calculated.
 #' Reciprocal distances are used as weights.
-#' Generalized version of \code{\link{cms.pca}}. In default both functions are identical.
 #'
 #' @family cms functions
-#' @seealso \code{\link{cms.cell}}, \code{\link{smooth.cms}}, \code{\link{cms.pca}}.
+#' @seealso \code{\link{cms_cell}}, \code{\link{smooth_cms}}.
 #'
 #' @return
 #' @export
@@ -205,14 +132,18 @@ cms.pca <- function(sce, k, group, k_min = NA, smooth = TRUE, n_pc = 30, cell_mi
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assay
 #' @importFrom FNN get.knn
-cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logcounts", k_min = NA, smooth = TRUE, n_pc = 30, cell_min = 10){
+cms <- function(sce, k, group, embedding = "PCA", assay_name = "logcounts", kmin = NA, smooth = TRUE, n_pc = 30, cell_min = 10){
+
+  #------------------Check input parameter ---------------------------------#
   if(cell_min < 10){
     stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
   }
+
   #check group variable class
   colData(sce)[,group] <- as.factor(colData(sce)[,group])
   cell_names <- colnames(sce)
-  # Check assay and embedding --> Use existing embedding, otherwise runPCA using logcounts (counts) or a specified value.
+
+  # Check assay and embedding
   if(!assay_name %in% c("logcounts", "counts") & !embedding %in% c("pca", "PCA", "Pca")){
     stop("Ambigious parameter: Please specify parameter for distance calculations.
          * If precalculated embeddings shall be used, keep 'assay_name' as default.
@@ -220,21 +151,27 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
   }
   if(is.null(reducedDim(sce, embedding))){
     if(!assay_name %in% names(assays(sce))){
-      stop("Parameter not found: Please provide a valid value for assay_name. The default 'logcounts' is not present.")
+      stop("Parameter 'assay_name' not found: Please provide a valid value.")
     }
-    warning("Embedding not found: PCA subspace is used to calculate distance distributions.")
+
+    warning("Embedding not found: PCA subspace is used to calculate distances.")
+
     #run PCA, if PCs do not exist
     sce <- runPCA(sce, ncomponents = n_pc, exprs_values = assay_name)
     embedding <- "PCA"
+
   }else if(!assay_name %in% c("logcounts", "counts")){
     sce <- runPCA(sce, ncomponents = n_pc, exprs_values = assay_name)
     embedding <- "PCA"
   }
+  #---------------------------------------------------------------------------#
+
+  #----------------- determine knn matrix -----------------------------------#
   subspace <- reducedDim(sce, embedding)
   #determine knn
   knn <- get.knn(subspace, k=k, algorithm = 'cover_tree')
-  rownames(knn[[1]]) <- cell_names  #indices of knn cells (columns) per cell (rows)
-  rownames(knn[[2]]) <- cell_names  #euclidean dist of knn cells (columns) per cell (rows)
+  rownames(knn[[1]]) <- cell_names  #indices of knn cells per cell
+  rownames(knn[[2]]) <- cell_names  #euclidean dist of knn cells per cell
   names(knn) <- c("indices", "distance")
 
   # group assignment of knn cells for each cell
@@ -242,13 +179,16 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
     colData(sce)[knn[["indices"]][cell_id,], group]
     }))
   rownames(knn[[group]]) <- cell_names
+  #---------------------------------------------------------------------------#
 
-  cms_raw <- do.call(rbind, lapply(cell_names, cms.cell, group = group, knn = knn, k_min=k_min, cell_min = cell_min))
+  #----------------- calculate cms score  -----------------------------------#
+
+  cms_raw <- do.call(rbind, lapply(cell_names, cms_cell, group = group, knn = knn, kmin=kmin, cell_min = cell_min))
   rownames(cms_raw) <- cell_names
   colnames(cms_raw) <- "cms"
 
   if(smooth == TRUE){
-    res_cms <- smooth.cms(knn, cms_raw, cell_names, k_min, k)
+    res_cms <- smooth_cms(knn, cms_raw, cell_names, kmin, k)
   }else{
     res_cms <- cms_raw
   }
@@ -257,10 +197,10 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
 
 
 
-## Helpers for cms all functions
+## Helpers for cms function
 
 
-#' smooth.cms
+#' smooth_cms
 #'
 #' Performs weighted smoothening of cms scores
 #'
@@ -268,7 +208,7 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
 #' Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.
 #' @param cms_raw Matrix containing raw cms scores for all cells specified in cell_names and knn. Rownames need to correspond to cellnames and colnames should be "cms".
 #' @param cell_names Character vector with cell names corresponding to the rownames of the list elements in the knn object and the cms_raw object.
-#' @param k_min Numeric giving the minimum number of k nearest neighbours to use.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use.
 #' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
 #' @param k Numeric, defining the number of k-nearest neighbours to use for testing the "mixing" within the neighbourhood.
 #'
@@ -278,27 +218,31 @@ cms.integration <- function(sce, k, group, embedding = "PCA", assay_name = "logc
 #' Reciprocal distances are used as weights. Returns a matrix with "smoothened_cms" and original "cms" values.
 #'
 #' @family cms functions
-#' @seealso \code{\link{cms.cell}}, \code{\link{cms.integration}}, \code{\link{cms.pca}}
+#' @seealso \code{\link{cms_cell}}, \code{\link{cms}}
 #'
 #' @return
 #'
 #' @examples
 #'
 #' @importFrom stats weighted.mean
-smooth.cms <- function(knn, cms_raw, cell_names, k_min, k){
+smooth_cms <- function(knn, cms_raw, cell_names, kmin, k){
+
   # cms assignment of knn cells for each cell
-  knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){cms_raw[knn[["indices"]][cell_id,], "cms"]}))
+  knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){
+    cms_raw[knn[["indices"]][cell_id,], "cms"]}))
   rownames(knn[["cms"]]) <- cell_names
 
   # how many cells to smooth over
-  k_smooth <- ifelse(!is.na(k_min), k_min, k)
+  k_smooth <- ifelse(!is.na(kmin), kmin, k)
 
+  # calculate weigthed mean
   cms_smooth <- do.call(rbind, lapply(cell_names, function(cell_id){
-    # add 1 to ensure that distances < 1 are less weighted than the original cell
+    #add 1 to ensure that distances < 1 are less weighted than the original cell
     weights <- c(1,(1/(knn[[2]][cell_id,c(1:k_smooth)] + 1)))
     knn_cms <- c(cms_raw[cell_id,"cms"],knn[["cms"]][cell_id, c(1:k_smooth)])
-    smooth_cms <- weighted.mean(knn_cms, weights)
+    cms_new <- weighted.mean(knn_cms, weights)
   }))
+
   res_cms <- cbind(cms_smooth, cms_raw)
   rownames(res_cms) <- cell_names
   colnames(res_cms) <- c("cms_smooth", "cms")
@@ -308,7 +252,7 @@ smooth.cms <- function(knn, cms_raw, cell_names, k_min, k){
 
 ### summarize function
 
-#' cms.summary
+#' cms_summary
 #'
 #' Summarizes cms scores, if specified based on groups
 #'
@@ -320,7 +264,7 @@ smooth.cms <- function(knn, cms_raw, cell_names, k_min, k){
 #' In default the mean of each cloumn of cms_res is returned. Groups to summarize can be specified by sum_var and sce.
 #'
 #' @family cms functions
-#' @seealso \code{\link{compare.integration}}, \code{\link{compare.cluster}}
+#' @seealso \code{\link{compare_integration}}, \code{\link{compare_cluster}}
 #'
 #' @return
 #' @export
@@ -330,7 +274,7 @@ smooth.cms <- function(knn, cms_raw, cell_names, k_min, k){
 #' @importFrom dplyr as_tibble group_by_ summarize_all funs
 #' @importFrom SingleCellExperiment colData
 #' @importFrom magrittr %>%
-cms.summary <- function(cms_res, sum_var = NULL, sce = NULL){
+cms_summary <- function(cms_res, sum_var = NULL, sce = NULL){
   if(is.null(sum_var)){
     cms_summarized <- as.data.frame(t(colMeans(as.data.frame(cms_res))))
   }else{
