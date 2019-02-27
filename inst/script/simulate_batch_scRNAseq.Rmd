@@ -1,0 +1,170 @@
+---
+title: "Simulate_batch_scRNAseq"
+author: "Almut Lütge"
+date: "26 Februar 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Simulate multibatch testset
+
+Aim: Generate a multibatch testset as described in kBet. 
+
+### Packages
+```{r libraries}
+suppressPackageStartupMessages({
+  library(scater)
+  library(MASS)
+  library(here)
+  library(CellMixS)
+  library(scran)
+})
+
+set.seed(1234)
+```
+
+### Generate synthetic dataset 
+Modification of the *create_testset_multibatch* function from the *kbet* package, to control for differences between batches [Buttner2019]. 
+```{r sim dataset}
+
+#function to simulate multibatch datasets  
+# modified create_testset_multibatch function from kBet package.
+# Add parameter "batch_var" to define percentage of mean expression levels, that are multiplied by a gamma distributed random variable with variance 1.
+#Add "batch_var" to define batch size differences.
+
+sim_multibatch_data <- function(n.genes = 1000, n.batch = 3, batch_var = 0.1, batch_diff = 0, n_sample = 500) 
+{
+    mu <- rbeta(n.genes - 1, 2, 5) * 100
+    mu <- c(mean(mu), mu)
+    b0 <- -1.5
+    if(batch_diff == 0){
+    samples <- c(n_sample, rep(n_sample, n.batch))
+    }else{
+      samples <- c(n_sample, rep(n_sample * batch_diff, n.batch))
+    }
+    mu.batch <- sapply(c(0, floor(n.genes * rep(batch_var, n.batch -1))), 
+        function(x, mu) {
+            c(rgamma(x, 1), rep(1, n.genes - x)) * mu
+        }, mu)
+    b2 <- apply(mu.batch, 2, function(x) {
+        1/quantile(x, 0.5)
+    })
+    decay.prob2 <- apply(mu.batch, 2, function(mu, b0) {
+        b1 <- 1/quantile(mu, 0.5)
+        res <- 1/(1 + exp(-(b0 + b1 * mu)))
+    }, b0)
+    testset <- sapply(seq_len(n.genes), function(k, sample.size, 
+        decay.prob, mu) {
+        unlist(sapply(seq_len(n.batch), function(x, sample.size, 
+            decay.prob, mu) {
+            rnegbin(sample.size[x], mu = mu[k, x], 1) * rbinom(sample.size[x], 
+                1, decay.prob[k, x])
+        }, sample.size, decay.prob, mu))
+    }, samples, decay.prob2, mu.batch)
+    result <- list()
+    result$data <- testset
+    result$batch <- unlist(sapply(seq_len(n.batch), function(x, 
+        y) {
+        list(rep(x, y[x]))
+    }, samples))
+    return(result)
+}
+
+
+#generate batch_distributions
+batch_var_list <- c(0.01, 0.1, 0.3, 0.5)
+batch_diff_list <- c(0.3)
+
+any <- lapply(batch_diff_list, function(diff){
+  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 300, n.batch = 3, batch_diff = diff, n_sample = 500)
+  names(batch_list) <- c("batch1", "batch10", "batch30", "batch50")
+  batch_list
+})
+
+```
+
+
+### Create  list with SummarizedSingleCell Object 
+
+```{r sce}
+create_sce <- function(multibatch){
+  #multibatch <- get(multibatch_nam)
+    sce <- SingleCellExperiment(
+    assays = list(counts = t(multibatch$data)),
+    colData = as.data.frame(multibatch$batch)
+)
+    names(colData(sce)) <- "batch"
+    colnames(sce) <-  sprintf("cell_%s",seq(1:ncol(sce)))
+    sce <- runTSNE(sce, exprs_values = "counts")
+    sce <- runPCA(sce, ncomponents = 30, exprs_values = "counts")
+    sce
+}
+
+
+sim_list <- names(any[[1]])
+sce_list <- lapply(c(1:length(any)), function(diff_list){
+  batch_sce <- lapply(any[[diff_list]][sim_list], create_sce)
+  names(batch_sce) <- sim_list
+  batch_sce
+})
+
+names(sce_list) <- c("unbalanced30")
+
+
+```
+
+#### Plot simulation 
+
+```{r vis}
+
+batch_list <- names(sce_list[[1]])
+  
+lapply(batch_list, function(name){
+    sce_name <- sce_list[["unbalanced30"]][[name]]
+    visGroup(sce_name, "batch") + ggtitle(paste0("unbalanced30_", name))
+})
+  
+```
+
+#### Integrate data with mnnCorrect 
+
+Add a slot with integrated/corrected reduced dimensions using mnn as example for a data integration method. 
+ 
+```{r mnn}
+add_mnn <- function(batch_name){
+  sce <- sce_list[["unbalanced30"]][[batch_name]]
+  #split sce by batches
+  sce_single <- list()
+  colData(sce)$batch <- as.factor(colData(sce)$batch)
+  for(i in levels(colData(sce)$batch)){
+    sce_single[[i]] <- sce[, which(colData(sce)$batch %in% i)]
+  }
+  mnn_res <- fastMNN(sce_single[[1]], sce_single[[2]], sce_single[[3]], assay.type="counts")
+  reducedDim(sce, "MNN") <- mnn_res$corrected
+  sce
+}
+  
+sce_mnn <- lapply(batch_list, add_mnn)
+names(sce_mnn) <- batch_list
+
+```
+
+#### Visualize integration
+```{r vis mnn}
+lapply(batch_list, function(name){
+    sce <- sce_mnn[[name]]
+    visGroup(sce, "batch", dim_red = "MNN") + ggtitle(name)
+})
+```
+
+#### Save data and SessionInfo
+```{r save and session}
+data_path <- here::here("inst/extdata")
+sim_30 <- sce_mnn
+save(sim_30, file = paste0(data_path,"/sim30.rda"))
+sessionInfo()
+```
+

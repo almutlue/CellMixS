@@ -4,7 +4,7 @@
 \alias{cms}
 \title{cms}
 \usage{
-cms(sce, k, group, embedding = "PCA", assay_name = "logcounts",
+cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
   kmin = NA, smooth = TRUE, n_pc = 30, cell_min = 10)
 }
 \arguments{
@@ -14,10 +14,10 @@ cms(sce, k, group, embedding = "PCA", assay_name = "logcounts",
 
 \item{group}{Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in knn.}
 
-\item{embedding}{Character string specifying the embeddings to use as subspace to calculate distance distributions.
+\item{dim_red}{Character string specifying the embeddings to use as subspace to calculate distance distributions.
 The default PCA performs a principle component analysis and uses the n_pc first PCs to define the subspace.}
 
-\item{assay_name}{Character string defining the count assay to use. If not otherwise specified by 'embeddings', a PCA on this assay is performed to calculate a new PCA subspace. Must be one of 'names(assays(sce))'.
+\item{assay_name}{Character string defining the count assay to use. If not otherwise specified by 'dim_red', a PCA on this assay is performed to calculate a new PCA subspace. Must be one of 'names(assays(sce))'.
 Default is 'logcounts' and should not be changed, if other embeddings than PCA should be used.}
 
 \item{kmin}{Numeric giving the minimum number of k nearest neighbours to use. cells to include.
@@ -34,7 +34,7 @@ Should be > 10 to make the ad.test function working.}
 Calculates cell-specific mixing scores based on euclidean distances within subspace of integrated data.
 }
 \details{
-The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cms.cell}}.
+The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cmsCell}}.
 In default the function uses all distances and group label defined in knn. f *kmin* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
 cms.pca uses a *SingleCellExperiment* \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
@@ -45,10 +45,10 @@ Reciprocal distances are used as weights.
 
 }
 \seealso{
-\code{\link{cms_cell}}, \code{\link{smooth_cms}}.
+\code{\link{cmsCell}}, \code{\link{smoothCms}}.
 
-Other cms functions: \code{\link{cms_cell}},
-  \code{\link{cms_summary}}, \code{\link{filter_locmin}},
-  \code{\link{smooth_cms}}
+Other cms functions: \code{\link{cmsCell}},
+  \code{\link{cmsSummary}}, \code{\link{filterLocMin}},
+  \code{\link{smoothCms}}
 }
 \concept{cms functions}

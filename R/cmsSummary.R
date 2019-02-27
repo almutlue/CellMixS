@@ -1,0 +1,151 @@
+# Functions to summarize cms
+
+### summarize function
+
+#' cmsSummary
+#'
+#' Summarizes cms scores, if specified based on groups
+#'
+#' @param cms_res data frame of cms scores to be summarized. Columns should correspond to cms scores, rows to cells.
+#' @param sum_var variable to group summaries on. Need to correspond to a colData variable
+#' @param sce SingleCellExperiment object describing the cells specified in cms_res.
+#'
+#' @details Returns the mean of cms score to make different conditions/methods/.. comparable.
+#' In default the mean of each cloumn of cms_res is returned. Groups to summarize can be specified by sum_var and sce.
+#'
+#' @family cms functions
+#' @seealso \code{\link{compareIntegration}}, \code{\link{compareCluster}}
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#' @importFrom dplyr as_tibble group_by_ summarize_all funs
+#' @importFrom SingleCellExperiment colData
+#' @importFrom magrittr %>%
+cmsSummary <- function(cms_res, sum_var = NULL, sce = NULL){
+  if(is.null(sum_var)){
+    cms_summarized <- as.data.frame(t(colMeans(as.data.frame(cms_res))))
+  }else{
+    if(is.null(sce)){
+      stop("Missing variable: Please provide a 'sce' object.")
+    }
+    if(!sum_var %in% names(colData(sce))){
+      stop("Missing variable: Could not find 'sum_var'.
+           Please specify one of names(colData(sce)).")
+    }
+    #to prevent type conversion if cms has 1 column only
+    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
+    colnames(cms_res_sorted) <- colnames(cms_res)
+    rownames(cms_res_sorted) <- colnames(sce)
+    cms_merged <- cbind.data.frame(cms_res_sorted, colData(sce)[,sum_var])
+    colnames(cms_merged) <- c(colnames(cms_res_sorted), sum_var)
+
+    cms_summarized <- as_tibble(cms_merged) %>% group_by_(sum_var) %>% summarize_all(funs(mean))
+    cms_summarized <- as.data.frame(cms_summarized)
+  }
+  cms_summarized
+}
+
+
+## Plot summarized cms function
+
+#' compareIntegration
+#'
+#' Creates a summary boxplot of cms scores (for different integration methods).
+#'
+#' @param cms_res data frame, matrix or list of cms scores to be summarized.
+#' Each column of the dataframe or each element of the list should correspond to a set of cms score that shall be summarized.
+#' List elements need to have the same length and only one set of cms scores per list element is allowed.
+#'
+#' @details Plots summarized cms scores from an input list or dataframe. This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
+#'
+#' @seealso \code{\link{compareCluster}}
+#' @family visualize cms functions
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic labs
+#' @importFrom ggridges geom_density_ridges
+#' @importFrom tidyr gather_
+compareIntegration <- function(cms_res){
+  if(is.list(cms_res)){
+    average_table <- do.call(cbind.data.frame, cms_res)
+    colnames(average_table) <- names(cms_res)
+  }else{
+    average_table <- as.data.frame(cms_res)
+  }
+
+
+  #change to long format
+  #long format
+  keycol <- "alignment"
+  valuecol <- "average_metric"
+  gathercols <- colnames(average_table)
+  average_long <- gather_(average_table, keycol, valuecol, gathercols, factor_key=TRUE)
+
+
+  #plot
+  summarized_cms <- ggplot(average_long, aes(y=alignment, x=average_metric, fill=alignment)) +
+    geom_density_ridges(scale = 0.6)  +
+    labs(title="Summarized cms",y="alignment", x = "cms") +
+    scale_fill_manual(values= col_hist) + theme_classic()
+
+  summarized_cms
+}
+
+
+#' compareCluster
+#'
+#' Creates summary violin plots of cms scores for different groups/cluster.
+#'
+#' @param cms_res data frame of cms scores to be summarized. The cms score should be in the first coulmn. It should either contain a second column with corresponding levels for cluster_var or  sce need to be specified.
+#' @param cluster_var character string specifying the name of the factor level variable to summarize cms scores on.
+#' @param cms_var Character string specifying the name of the cms_res to use. Default is "cms".
+#' @param sce SingleCellexperiment object should only be specified if cluster_var is not already provided in cms_res. Should contain 'cluster_var' within colData.
+#' If sce is specified, rownames of cms_res need to correspond to colnames of sce (should contain the same cells).
+#' @param violin A logical, if true (default) violin plots are provided. Otherwise boxplots are generated.
+#'
+#' @details Plots summarized cms scores for a specified list. This function is intended to visualize and compare cms scores among clusters or other dataset variables.
+#'
+#' @seealso \code{\link{compareIntegration}}
+#' @family visualize cms functions
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#' @importFrom ggplot2 ggplot aes ylab xlab scale_fill_manual theme_classic labs geom_violin
+#' @importFrom tidyr gather_
+#' @importFrom SingleCellExperiment colData
+#' @importFrom ggridges geom_density_ridges
+compareCluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, violin = FALSE){
+  if(!is.null(sce)){
+    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
+    colnames(cms_res_sorted) <- colnames(cms_res)
+    rownames(cms_res_sorted) <- colnames(sce)
+    cms_table <- data.frame(cms = cms_res_sorted[,cms_var], cluster = as.factor(colData(sce)[,cluster_var]))
+  }else{
+    cms_table <- cms_res[,c(cms_var, cluster_var)]
+    colnames(cms_table) <- c("cms", "cluster")
+    cms_table$cluster <- as.factor(cms_table$cluster)
+  }
+
+  #plot
+  if(violin == TRUE){
+    summarized_cms <- ggplot(cms_table, aes(x=cluster, y=cms, fill=cluster)) +
+      geom_violin()  +
+      labs(title="Summarized cms", x=cluster_var, y = "cms") +
+      scale_fill_manual(values = col_hist) + theme_classic()
+
+  }else{
+    summarized_cms <- ggplot(cms_table, aes(y=cluster, x=cms, fill=cluster)) +
+      geom_density_ridges(scale = 0.6)  +
+      labs(title="Summarized cms", y=cluster_var, x = "cms") +
+      scale_fill_manual(values = col_hist) + theme_classic()
+  }
+  summarized_cms
+}

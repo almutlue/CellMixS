@@ -6,7 +6,7 @@ Author: Almut Lütge
 Maintainer: Almut Lütge <almut.luetge@uzh.ch>
 Description: Determine cellspecific mixing scores (CMS) for batches or conditions to evaluate data integration. CMS compares batch-/condition specific distance density distributions by testing the probability of an common underlying undefined distribution with the Anderson Darling test.
 License: GPL (>=2)
-Imports: kSamples, FNN, scater, ggplot2, gridExtra, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr
+Imports: kSamples, FNN, scater, ggplot2, gridExtra, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges
 Depends: R (>= 2.10)
 Encoding: UTF-8
 LazyData: true

@@ -1,12 +1,11 @@
-#Plot functions
+# Visualize cms and groups
 
 
-#' vis.hist
+#' visHist
 #'
 #' Plot pvalue histograms of cms score distributions
 #'
-#' @param cms cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
-#' @param ... Additional arguments to pass to \code{\link{ggplot2}}.
+#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
 #'
 #' @details Plots cms score distribution similar to a pvalue histogram distribution.
 #' Smoothened cms should be close to a normal distribution centered around 0.5 and cms scores should be approx. flat, if no dataset-specific bias are expected.
@@ -19,18 +18,18 @@
 #' @examples
 #'
 #' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab theme_classic
-#' @importFrom gridExtra grid.arrange
-vis.hist <- function(cms, ...){
-  p <- do.call(grid.arrange, c(lapply(colnames(cms), function(cms_name, ...){
-    ggplot(as.data.frame(cms), aes_string(x=cms_name)) +
-            geom_histogram(color="black", fill = col_hist[which(colnames(cms) %in% cms_name)]) +
+#' @importFrom cowplot plot_grid
+visHist <- function(cms_res){
+  p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name, ...){
+    ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
+            geom_histogram(color="black", fill = col_hist[which(colnames(cms_res) %in% cms_name)]) +
             ggtitle(cms_name) + xlab(cms_name) + theme_classic()
-  }), ncol = ifelse(length(colnames(cms)) > 1, 2, 1)))
+  }), ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1)))
   p
 }
 
 
-#' vis.overview
+#' visOverview
 #'
 #' Plot cms, smoothened cms, group label and other Variable defined in colData in a reduced dimensional representation.
 #'
@@ -45,15 +44,14 @@ vis.hist <- function(cms, ...){
 #' If true cms_res needs to contain 2 colums with cms and cms_smoothened results. Default is set by the length of colnames(cms_res)
 #' @param log10_val A logical indicating if -log10(cms) should be plotted to visualize differences of small values
 #' @param other_Var Character string defining other variables to be plotted asided (e.g. some specified celltype label).
-#' Need to be specified in colData(sce).
-#' @param ... Additional arguments to pass to \code{\link{runTSNE}} (CHECK!!!)
+#' Need correspond to one of colData(sce).
 #'
 #' @details Plots reduced dimensions (tsne as default) of cells using the group variable and the cms score as colors.
 #' Other color label as celltype label or smoothened cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
 #' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}}.
 #'
 #' @family visualize cms functions
-#' @seealso \code{\link{vis.cms}}, \code{\link{vis.group}}
+#' @seealso \code{\link{visCms}}, \code{\link{visGroup}}
 #'
 #' @return
 #' @export
@@ -66,14 +64,16 @@ vis.hist <- function(cms, ...){
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
-vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE), log10_val = FALSE, other_Var = NULL, ...){
+visOverview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(length(colnames(cms_res)) > 1, TRUE, FALSE), log10_val = FALSE, other_Var = NULL){
   cell_names <- colnames(sce)
   #Compare order sce and cms_restheme_classic
   stopifnot(rownames(cms_res) == cell_names)
   #custumized dimreduction
   if(!dim_red %in% "TSNE"){
     if(!dim_red %in% reducedDimNames(sce)){
-      stop("Please provide a dim_red method to be used that is listed in the reducedDim slot of sce")
+      stop("Ambigous parameter 'dim_red', provide one of:
+           * A dim_red method that is listed in reducedDimNames(sce).
+           * Default('TSNE') will call runTSNE to calculate a subspace.")
     }
     red_dim <- as.data.frame(reducedDim(sce, dim_red))
   }else{
@@ -166,7 +166,7 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(
 ### Single plots
 
 
-#' vis.cms
+#' visCms
 #'
 #' Plot cms scores in a reduced dimensional plot like tsne.
 #'
@@ -185,7 +185,7 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(
 #' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
 #' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
 #'
-#' @seealso \code{\link{vis.overview}}, \code{\link{vis.group}}
+#' @seealso \code{\link{visOverview}}, \code{\link{visGroup}}
 #' @family visualize cms functions
 #'
 #' @return
@@ -198,7 +198,7 @@ vis.overview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
-vis.cms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val = FALSE, ...){
+visCms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val = FALSE, ...){
   #Generate or specify dim reduction
   cell_names <- colnames(sce)
   #Compare order sce and cms_res
@@ -245,7 +245,7 @@ vis.cms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val =
 }
 
 
-#' vis.group
+#' visGroup
 #'
 #' Plot group label in a reduced dimensional plot like tsne or integrated embeddings.
 #'
@@ -260,7 +260,7 @@ vis.cms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val =
 #' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
 #' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
 #'
-#' @seealso \code{\link{vis.overview}}, \code{\link{vis.cms}}
+#' @seealso \code{\link{visOverview}}, \code{\link{visCms}}
 #' @family visualize cms functions
 #'
 #' @return
@@ -273,7 +273,7 @@ vis.cms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val =
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
-vis.group <- function(sce, group, dim_red = "TSNE", ...){
+visGroup <- function(sce, group, dim_red = "TSNE", ...){
   #Generate or specify dim reduction
   cell_names <- colnames(sce)
   #custumized dimreduction
@@ -320,101 +320,5 @@ vis.group <- function(sce, group, dim_red = "TSNE", ...){
   t_group
 }
 
-## Plot summariezed cms function
 
-#' compare.integration
-#'
-#' Creates a summary boxplot of cms scores (for different integration methods).
-#'
-#' @param cms_res data frame or list of cms scores to be summarized. Each column of the dataframe or each element of the list should correspond to a set of cms score that shall be summarized.
-#' List elements need to have the same length and only one set of cms scores per list element is allowed.
-#'
-#' @details Plots summarized cms scores from an input list or dataframe. This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
-#'
-#' @seealso \code{\link{compare.cluster}}
-#' @family visualize cms functions
-#' @return
-#' @export
-#'
-#' @examples
-#'
-#' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic geom_boxplot labs
-#' @importFrom tidyr gather_
-compare.integration <- function(cms_res){
-    if(is.list(cms_res)){
-      average_table <- do.call(cbind.data.frame, cms_res)
-      colnames(average_table) <- names(cms_res)
-    }else{
-      average_table <- as.data.frame(cms_res)
-    }
-
-
-    #change to long format
-    #long format
-    keycol <- "alignment"
-    valuecol <- "average_metric"
-    gathercols <- colnames(average_table)
-    average_long <- gather_(average_table, keycol, valuecol, gathercols, factor_key=TRUE)
-
-
-    #plot
-    summarized_cms <- ggplot(average_long, aes(x=alignment, y=average_metric, color=alignment)) +
-      geom_boxplot()  +
-      labs(title="Summarized cms",x="alignment", y = "cms") + scale_color_manual(values= col_hist) + theme_classic()
-
-    summarized_cms
-  }
-
-
-#' compare.cluster
-#'
-#' Creates summary boxplots of cms scores for different groups/cluster.
-#'
-#' @param cms_res data frame of cms scores to be summarized. The cms score should be in the first coulmn. It should either contain a second column with corresponding levels for cluster_var or  sce need to be specified.
-#' @param cluster_var character string specifying the name of the factor level variable to summarize cms scores on.
-#' @param cms_var Character string specifying the name of the cms_res to use. Default is "cms".
-#' @param sce SingleCellexperiment object should only be specified if cluster_var is not already provided in cms_res. Should contain 'cluster_var' within colData.
-#' If sce is specified, rownames of cms_res need to correspond to colnames of sce (should contain the same cells).
-#' @param violin A logical, if true (default) violin plots are provided. Otherwise boxplots are generated.
-#'
-#' @details Plots summarized cms scores for a specified list. This function is intended to visualize and compare cms scores among clusters or other dataset variables.
-#'
-#' @seealso \code{\link{compare.integration}}
-#' @family visualize cms functions
-#' @return
-#' @export
-#'
-#' @examples
-#'
-#' @importFrom ggplot2 ggplot aes ylab xlab scale_fill_manual theme_classic geom_boxplot labs geom_violin
-#' @importFrom tidyr gather_
-#' @importFrom SingleCellExperiment colData
-compare.cluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, violin = TRUE){
-  if(!is.null(sce)){
-    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
-    colnames(cms_res_sorted) <- colnames(cms_res)
-    rownames(cms_res_sorted) <- colnames(sce)
-    cms_table <- data.frame(cms = cms_res_sorted[,cms_var], cluster = as.factor(colData(sce)[,cluster_var]))
-  }else{
-    cms_table <- cms_res[,c(cms_var, cluster_var)]
-    if(ncol(cms_table)!= 2){
-     stop("Input error: Please provide a data frame with at least two columns one with the cms score and one with the coresponding levels of cluster_var")
-    }
-    colnames(cms_table) <- c("cms", "cluster")
-    cms_table$cluster <- as.factor(cms_table$cluster)
-  }
-
- #plot
-  if(violin == TRUE){
-    summarized_cms <- ggplot(cms_table, aes(x=cluster, y=cms, fill=cluster)) +
-      geom_violin()  +
-      labs(title="Summarized cms", x=cluster_var, y = "cms") + scale_fill_manual(values = col_hist) + theme_classic()
-
-  }else{
-    summarized_cms <- ggplot(cms_table, aes(x=cluster, y=cms, fill=cluster)) +
-      geom_boxplot()  +
-      labs(title="Summarized cms", x=cluster_var, y = "cms") + scale_fill_manual(values = col_hist) + theme_classic()
-  }
-  summarized_cms
-}
 

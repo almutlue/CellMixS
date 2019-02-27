@@ -1,0 +1,143 @@
+# Helper and internal functions for cms
+
+#' cmsCell
+#'
+#' Function to calculate a cellspecific mixing score (cms) of groups/batches.
+#'
+#' @param cell Character string defining the name of the cell to calculate cms for. Should be one of the rownames of knn.
+#' @param group Character string specifying the variable name used to define groups (batches). Should have a corresonding element in knn.
+#' @param knn List containing distances and group information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable.
+#' Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use. cells to include.
+#' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
+#' @param cell_min Minimum number of cells from each group to be included into the AD test for calculation of cms.
+#' Should be > 10 to make the \code{\link{ad.test}} working.
+#'
+#' @details The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test.
+#' In default the function uses all distances and group label defined in knn. If k_min is specified, the overall distance distribution is checked for the first local minimum, that includes at least kmin cells.
+#' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
+#' This function is mainly intended as core function for a set of functions to calculate cms for a single cell containing object: \code{\link{cms}}.
+#'
+#' @seealso \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{smoothCms}}
+#' @family cms functions
+#' @return
+#' @export
+#'
+#' @examples
+#' @importFrom kSamples ad.test
+cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
+  #get knn distances and group assignments
+  knn_cell <- cbind(knn[["distance"]][cell,], knn[[group]][cell,])
+  knn_cell <- as.data.frame(knn_cell)
+  colnames(knn_cell) <- c("distance", group)
+  knn_cell[,group] <- as.factor(knn_cell[,group])
+
+  #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
+  if(!is.na(kmin)){
+    knn_cell <- filterLocMin(knn_cell, kmin)
+  }
+
+  #filter groups with to few cells (cell_min, default 10)
+  groups_included <- levels(knn_cell[,group])[which(table(knn_cell[,group]) > cell_min)]
+
+  #do not perform AD test if only one group with enough cells is in neighbourhood
+  if(length(groups_included) <= 1){
+    p <- 0
+  }else{
+    dist_included <- lapply(groups_included, function(group_level){
+      dist <- knn_cell$distance[which(knn_cell[,group] %in% group_level)]
+    })
+    names(dist_included) <- groups_included
+    #perform AD test with remaining cells
+    k_samp <- ad.test(dist_included)
+    p <- mean(k_samp[["ad"]][," asympt. P-value"])
+  }
+  p
+}
+
+
+#' filterLocMin
+#'
+#' Function to filter number of knn to use for cms calculation by overall distance density distribution.
+#'
+#' @param knn_cell Data frame with distances and group information of cells. Should have one column named "distance" with distances towards the k nearest neighbours and one column named after the group variable.
+#' Rows correspond to the knn cells and do not need rownames.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use. cells to include.
+#' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
+#'
+#' @details  Internal function to filter cells used for cms testing to come from a continous overall density distribution function (similar to cluster definitions).
+#' filterLocMin is only applied, if k-min is specified as parameter in \code{\link{cmsCell}} or \code{\link{cms}}.
+#'
+#' @seealso \code{\link{cmsCell}} for cms calculation
+#' @family cms functions
+#' @return
+#'
+#' @examples
+#'
+#' @importFrom stats density
+filterLocMin <- function(knn_cell, kmin){
+  distances <- density(knn_cell$distance)$x
+  dist_density <- density(knn_cell$distance)$y
+  #Find local minima
+  loc_min <- distances[which(diff(sign(diff(dist_density)))== 2)+1]
+  # Find first local minimum (that is larger than a minimal threshold of cells (kmin))
+  all_locmin <- unlist(lapply(loc_min, function(minim){ind <- length(which(knn_cell$distance <= minim))}))
+  loc_th <- suppressWarnings(min(which(all_locmin > kmin)))                #indice of first local minimum (>kmin)
+  loc_dist_th <- loc_min[loc_th]                          #up to which distance are cells included
+
+  #filter cells before first local minimum (>kmin)
+  if(length(loc_min) > 0 & !is.na(loc_dist_th)){
+    knn_cell <- knn_cell[which(knn_cell$distance <= loc_dist_th),]
+  }
+  knn_cell
+}
+
+#' smoothCms
+#'
+#' Performs weighted smoothening of cms scores
+#'
+#' @param knn List containing distances and batch information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable specified in 'batch'.
+#' Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.
+#' @param cms_raw Matrix containing raw cms scores for all cells specified in cell_names and knn. Rownames need to correspond to cellnames and colnames should be "cms".
+#' @param cell_names Character vector with cell names corresponding to the rownames of the list elements in the knn object and the cms_raw object.
+#' @param kmin Numeric giving the minimum number of k nearest neighbours to use.
+#' If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.
+#' @param k Numeric, defining the number of k-nearest neighbours to use for testing the "mixing" within the neighbourhood.
+#'
+#' @details Internal function to smoothes cms scores. In a complete random setting cms scores are uniform distributed.
+#' To reduce the resulting random variance and enable visualization of local tendencies and pattern cms scores can be smoothened assuming that within one region mixing is uniform.
+#' Generates smoothened cms scores using weigthed means of cms scores within the k-nearest neighbourhood.
+#' Reciprocal distances are used as weights. Returns a matrix with "smoothened_cms" and original "cms" values.
+#'
+#' @family cms functions
+#' @seealso \code{\link{cmsCell}}, \code{\link{cms}}
+#'
+#' @return
+#'
+#' @examples
+#'
+#' @importFrom stats weighted.mean
+smoothCms <- function(knn, cms_raw, cell_names, kmin, k){
+
+  # cms assignment of knn cells for each cell
+  knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){
+    cms_raw[knn[["indices"]][cell_id,], "cms"]}))
+  rownames(knn[["cms"]]) <- cell_names
+
+  # how many cells to smooth over
+  k_smooth <- ifelse(!is.na(kmin), kmin, k)
+
+  # calculate weigthed mean
+  cms_smooth <- do.call(rbind, lapply(cell_names, function(cell_id){
+    #add 1 to ensure that distances < 1 are less weighted than the original cell
+    weights <- c(1,(1/(knn[[2]][cell_id,c(1:k_smooth)] + 1)))
+    knn_cms <- c(cms_raw[cell_id,"cms"],knn[["cms"]][cell_id, c(1:k_smooth)])
+    cms_new <- weighted.mean(knn_cms, weights)
+  }))
+
+  res_cms <- cbind(cms_smooth, cms_raw)
+  rownames(res_cms) <- cell_names
+  colnames(res_cms) <- c("cms_smooth", "cms")
+  res_cms
+}
+
