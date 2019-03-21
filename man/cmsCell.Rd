@@ -7,33 +7,36 @@
 cmsCell(cell, group, knn, kmin = NA, cell_min = 10)
 }
 \arguments{
-\item{cell}{Character string defining the name of the cell to calculate cms for. Should be one of the rownames of knn.}
+\item{cell}{Character. Name of the cell to calculate cms for. Needs to be one of \code{rownames(knn)}.}
 
-\item{group}{Character string specifying the variable name used to define groups (batches). Should have a corresonding element in knn.}
+\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(knn)}.}
 
-\item{knn}{List containing distances and group information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable.
-Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.}
+\item{knn}{List with three elements. First "indices" with indices of KNN cells.
+Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
 
-\item{kmin}{Numeric giving the minimum number of k nearest neighbours to use. cells to include.
-If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.}
+\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
-\item{cell_min}{Minimum number of cells from each group to be included into the AD test for calculation of cms.
-Should be > 10 to make the \code{\link{ad.test}} working.}
+\item{cell_min}{Numeric. Minimum number of cells from each group to be included into the AD test.
+Should be > 10 to make the ad.test function working.}
+}
+\value{
+A p.value as resulting from the ad.test.
 }
 \description{
 Function to calculate a cellspecific mixing score (cms) of groups/batches.
 }
 \details{
-The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test.
-In default the function uses all distances and group label defined in knn. If k_min is specified, the overall distance distribution is checked for the first local minimum, that includes at least kmin cells.
-This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
-This function is mainly intended as core function for a set of functions to calculate cms for a single cell containing object: \code{\link{cms}}.
+The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
+It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
+In default the function uses all distances and group label defined in knn.
+If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
+This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 }
 \seealso{
 \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{smoothCms}}
 
-Other cms functions: \code{\link{cmsSummary}},
-  \code{\link{cms}}, \code{\link{filterLocMin}},
+Other helper functions: \code{\link{defineSubspace}},
+  \code{\link{filterLocMin}}, \code{\link{ldfKnn}},
   \code{\link{smoothCms}}
 }
-\concept{cms functions}
+\concept{helper functions}

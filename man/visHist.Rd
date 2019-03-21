@@ -4,19 +4,26 @@
 \alias{visHist}
 \title{visHist}
 \usage{
-visHist(cms_res)
+visHist(cms_res, ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1))
 }
 \arguments{
-\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.}
+\item{cms_res}{Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.}
+
+\item{ncol}{Numeric. Number of columns of the pval histogram.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
 Plot pvalue histograms of cms score distributions
 }
 \details{
 Plots cms score distribution similar to a pvalue histogram distribution.
-Smoothened cms should be close to a normal distribution centered around 0.5 and cms scores should be approx. flat, if no dataset-specific bias are expected.
+Without dataset-specific bias, cms scores should be approx. flat distributed.
 }
 \examples{
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+visHist(cms_sim30)
 
 }
 \seealso{

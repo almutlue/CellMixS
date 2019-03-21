@@ -8,31 +8,36 @@ visCms(cms_res, sce, cms_var = "cms", dim_red = "TSNE",
   log10_val = FALSE, ...)
 }
 \arguments{
-\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
-Rownames need to correspond to colnames of sce. Colnames are allowed to be set different, but need to be specified in cms_var.}
+\item{cms_res}{Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.}
 
-\item{sce}{Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.}
+\item{sce}{A \code{SingleCellExperiment} object with the combined data corresponding to 'cms_res'.}
 
-\item{cms_var}{character string specifying the cms scores to use (usually "cms_smoothened" or "cms").
-Needs to correspond to one of the colnames of cms_res. Default is "cms".}
+\item{cms_var}{Character Name of the cms scores to use (usually "cms_smoothened" or "cms").}
 
-\item{dim_red}{Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
 
-\item{log10_val}{A logical indicating if -log10(cms) should be plotted to visualize differences of small values}
+\item{log10_val}{Logical. Indicating if -log10(cms) should be plotted.}
 
-\item{...}{Additional arguments to pass to \code{\link{ggplot}}}
+\item{...}{Additional arguments to pass to \code{\link{ggplot}}.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
-Plot cms scores in a reduced dimensional plot like tsne.
+Plot cms scores in a reduced dimensional plot.
 }
 \details{
-Plots a reduced dimension plot (tsne as default) colored by cms scores.
-The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
-Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
+Plots a reduced dimension plot colored by cms scores.
+The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed using \code{runTSNE}.
+Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50, 500:550)]
+
+visCms(cms_res = cms_sim30, sce = sce)
 
 }
 \seealso{

@@ -5,50 +5,55 @@
 \title{cms}
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
-  kmin = NA, smooth = TRUE, n_pc = 30, cell_min = 10)
+  kmin = NA, smooth = TRUE, n_dim = 20, cell_min = 10)
 }
 \arguments{
-\item{sce}{SingleCellExperiment \code{\link{SingleCellExperiment}} object containing all cells of interest.}
+\item{sce}{A \code{SingleCellExperiment} object with the combined data.}
 
-\item{k}{Numeric, defining the number of k-nearest neighbours to use for testing the "mixing" within the neighbourhood.}
+\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 
-\item{group}{Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in knn.}
+\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}}
 
-\item{dim_red}{Character string specifying the embeddings to use as subspace to calculate distance distributions.
-The default PCA performs a principle component analysis and uses the n_pc first PCs to define the subspace.}
+\item{dim_red}{Character. Name of embeddings to use as subspace for distance distributions. Default is "PCA".}
 
-\item{assay_name}{Character string defining the count assay to use. If not otherwise specified by 'dim_red', a PCA on this assay is performed to calculate a new PCA subspace. Must be one of 'names(assays(sce))'.
-Default is 'logcounts' and should not be changed, if other embeddings than PCA should be used.}
+\item{assay_name}{Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
+Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 
-\item{kmin}{Numeric giving the minimum number of k nearest neighbours to use. cells to include.
-If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.}
+\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
-\item{smooth}{A logical indicating if cms results should be smoothened within each neighbourhood.}
+\item{smooth}{Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.}
 
-\item{n_pc}{Numeric giving the number of PCs to include to define the subspace to calculate cell distances in.}
+\item{n_dim}{Numeric. Number of dimensions to include to define the subspace.}
 
-\item{cell_min}{Minimum number of cells from each group to be included into the AD test for calculation of cms.
+\item{cell_min}{Numeric. Minimum number of cells from each group to be included into the AD test.
 Should be > 10 to make the ad.test function working.}
 }
+\value{
+A matrix with cells as rows and cms (and cms_smooth) as columns.
+}
 \description{
-Calculates cell-specific mixing scores based on euclidean distances within subspace of integrated data.
+Calculates cell-specific mixing scores based on euclidean distances within a subspace of integrated data.
 }
 \details{
-The cms tests the hypothesis, that group-specific distance distributions of the k-nearest neighbouring cells have the same underlying unspecified distribution using the Anderson-Darling test as implemented in \code{\link{cmsCell}}.
-In default the function uses all distances and group label defined in knn. f *kmin* is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
-This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included, while keeping the overall number of k nearest neighbours reasonable large.
-cms.pca uses a *SingleCellExperiment* \code{\link{SingleCellExperiment}} object as input and calculates euclidean distances within the subspace defined by the n_pc argument (default = 30).
-For *smoothening* weigthed means of cms scores within each cell's k-nearest neighbourhood are calculated.
-Reciprocal distances are used as weights.
+The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
+It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
+In default the function uses all distances and group label defined in knn.
+If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
+This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
+If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50)]
+
+cms_smooth <- cms(sce, k = 20, group = "batch")
+cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
 
 }
 \seealso{
 \code{\link{cmsCell}}, \code{\link{smoothCms}}.
 
-Other cms functions: \code{\link{cmsCell}},
-  \code{\link{cmsSummary}}, \code{\link{filterLocMin}},
-  \code{\link{smoothCms}}
+Other cms functions: \code{\link{cmsSummary}}
 }
 \concept{cms functions}

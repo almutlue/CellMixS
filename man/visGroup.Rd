@@ -7,25 +7,32 @@
 visGroup(sce, group, dim_red = "TSNE", ...)
 }
 \arguments{
-\item{sce}{Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.}
+\item{sce}{A \code{SingleCellExperiment} object.}
 
-\item{group}{character string specifying the group variable to label cells. Should be included into the colData slot of sce.}
+\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.}
 
-\item{dim_red}{Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
 
-\item{...}{Additional arguments to pass to \code{\link{ggplot}}}
+\item{...}{Additional arguments to pass to \code{\link{ggplot}}.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
-Plot group label in a reduced dimensional plot like tsne or integrated embeddings.
+Plot group label in a reduced dimensional plot.
 }
 \details{
-Plots a reduced dimension plot (tsne as default) colored by group parameter.
-The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
-Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
+Plots a reduced dimension plot colored by group parameter.
+The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed by \code{runTSNE}.
+ Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50, 500:550)]
+
+visGroup(sce, "batch")
+
 
 }
 \seealso{

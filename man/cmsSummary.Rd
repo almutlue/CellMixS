@@ -7,27 +7,35 @@
 cmsSummary(cms_res, sum_var = NULL, sce = NULL)
 }
 \arguments{
-\item{cms_res}{data frame of cms scores to be summarized. Columns should correspond to cms scores, rows to cells.}
+\item{cms_res}{data frame of cms scores to be summarized.}
 
-\item{sum_var}{variable to group summaries on. Need to correspond to a colData variable}
+\item{sum_var}{variable to group summaries. Need to correspond to one of \code{colData(sce)}.}
 
-\item{sce}{SingleCellExperiment object describing the cells specified in cms_res.}
+\item{sce}{A \code{SingleCellExperiment} object corresponding to 'cms_res'.}
+}
+\value{
+Data frame with mean cms scores (for each group).
 }
 \description{
-Summarizes cms scores, if specified based on groups
+Summarizes cms scores, if specified based on groups.
 }
 \details{
-Returns the mean of cms score to make different conditions/methods/.. comparable.
-In default the mean of each cloumn of cms_res is returned. Groups to summarize can be specified by sum_var and sce.
+Summarises cms scores by mean to make different conditions/methods/.. comparable.
+In default the mean of each cloumn of cms_res is returned.
+Groups to summarize can be specified by sum_var and sce.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50,500:550)]
+cmsSummary(cms_sim30)
+cmsSummary(cms_sim30, sum_var = "batch", sce = sce)
 
 }
 \seealso{
 \code{\link{compareIntegration}}, \code{\link{compareCluster}}
 
-Other cms functions: \code{\link{cmsCell}},
-  \code{\link{cms}}, \code{\link{filterLocMin}},
-  \code{\link{smoothCms}}
+Other cms functions: \code{\link{cms}}
 }
 \concept{cms functions}

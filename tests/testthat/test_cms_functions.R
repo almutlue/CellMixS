@@ -8,7 +8,7 @@ sce <- sim_30[[1]][, c(1:50,500:550)]
 
 test_that("test that output of cms is correct",{
   cms_smooth <- cms(sce, k = 20, group = "batch",
-                    dim_red = "TSNE", assay_name = "counts")
+                    dim_red = "TSNE", assay_name = "counts", n_dim = 2)
   cms_kmin <- cms(sce, k = 20, group = "batch", kmin = 15)
   cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
   cms_default <- cms(sce, k = 20, group = "batch")

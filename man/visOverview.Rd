@@ -9,34 +9,41 @@ visOverview(cms_res, sce, group, dim_red = "TSNE",
   log10_val = FALSE, other_Var = NULL)
 }
 \arguments{
-\item{cms_res}{cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
-Rownames need to correspond to colnames of sce.}
+\item{cms_res}{Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.}
 
-\item{sce}{Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.}
+\item{sce}{A \code{SingleCellExperiment} object with the combined data corresponding to 'cms_res'.}
 
-\item{group}{Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in colData(sce).}
+\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.}
 
-\item{dim_red}{Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
 
-\item{smooth}{A logical value indicating if smoothened cms scores should be plotted.
-If true cms_res needs to contain 2 colums with cms and cms_smoothened results. Default is set by the length of colnames(cms_res)}
+\item{smooth}{Logical. Indicating if smoothened cms scores should be plotted.}
 
-\item{log10_val}{A logical indicating if -log10(cms) should be plotted to visualize differences of small values}
+\item{log10_val}{Logical. Indicating if -log10(cms) should be plotted.}
 
-\item{other_Var}{Character string defining other variables to be plotted asided (e.g. some specified celltype label).
-Need correspond to one of colData(sce).}
+\item{other_Var}{Character string. Name of other variables to be plotted asided.
+Need correspond to one of \code{colData(sce)}.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
-Plot cms, smoothened cms, group label and other Variable defined in colData in a reduced dimensional representation.
+Plot an overview of cms, smoothened cms, group label and any colData variable in a reduced dimensional representation.
 }
 \details{
-Plots reduced dimensions (tsne as default) of cells using the group variable and the cms score as colors.
-Other color label as celltype label or smoothened cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
-Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}}.
+Plots reduced dimensions of cells colored by group variable and cms score.
+If 'red_dim' is not defined in \code{reducedDimNames(sce)} a tsne is calculated using \code{runTSNE}.
+Other color label as celltype label or smoothened cms scores can be plotted aside.
+Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50, 500:550)]
+
+visOverview(cms_sim30, sce, "batch")
+
 
 }
 \seealso{

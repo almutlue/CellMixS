@@ -1,15 +1,15 @@
 library(SingleCellExperiment)
 library(CellMixS)
 load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
 sce <- sim_30[[1]][, c(1:50,500:550)]
-cms_smooth <- cms(sce, k = 30, group = "batch")
 
 ## Tests for visualization fuctions:
 
 ### visHist
 test_that("test that visHist works",{
-  hist <- visHist(cms_smooth)
-  hist_cms <- visHist(data.frame("cms" = cms_smooth[, "cms"]))
+  hist <- visHist(cms_sim30)
+  hist_cms <- visHist(data.frame("cms" = cms_sim30[, "cms"]))
   expect_is(hist, "ggplot")
   expect_is(hist_cms, "ggplot")
 
@@ -18,23 +18,23 @@ test_that("test that visHist works",{
 ### visOverview
 
 test_that("test that visOverview works",{
-  overview <- visOverview(cms_smooth, sce, "batch")
+  overview <- visOverview(cms_sim30, sce, "batch")
   #change embeddings
-  overview_mnn <- visOverview(cms_smooth, sce, "batch", dim_red = "MNN", log10_val = TRUE)
+  overview_mnn <- visOverview(cms_sim30, sce, "batch", dim_red = "MNN", log10_val = TRUE)
   #data frame as input
-  overview_cms <- visOverview(data.frame("cms" = cms_smooth[, "cms"]), sce, "batch")
+  overview_cms <- visOverview(data.frame("cms" = cms_sim30[, "cms"]), sce, "batch")
   #no smoothed results
-  overview_cms2 <- visOverview(cms_smooth, sce, "batch", smooth = FALSE)
+  overview_cms2 <- visOverview(cms_sim30, sce, "batch", smooth = FALSE)
   #calculate new dim_red
   sce_noRedDim <- sce
   reducedDims(sce_noRedDim) <- NULL
-  overview_tsne <- visOverview(cms_smooth, sce_noRedDim, "batch")
+  overview_tsne <- visOverview(cms_sim30, sce_noRedDim, "batch")
 
   expect_is(overview, "gg")
   expect_is(overview_mnn, "gg")
   expect_is(overview_cms, "gg")
   expect_is(overview_cms2, "gg")
-  expect_error(visOverview(cms_smooth, sce, "batch", dim_red = "quatsch"),
+  expect_error(visOverview(cms_sim30, sce, "batch", dim_red = "quatsch"),
                "Ambigous parameter 'dim_red', provide one of:
            * A dim_red method that is listed in reducedDimNames(sce).
            * Default('TSNE') will call runTSNE to calculate a subspace.",
@@ -46,8 +46,8 @@ test_that("test that visOverview works",{
 
 test_that("test that visCMS and visGroup work",{
   #visCMS
-  vis_cms <- visCms(cms_smooth, sce)
-  vis_cms2 <- visCms(cms_smooth, sce, cms_var = "cms_smooth", dim_red = "MNN")
+  vis_cms <- visCms(cms_sim30, sce)
+  vis_cms2 <- visCms(cms_sim30, sce, cms_var = "cms_smooth", dim_red = "MNN")
   #visGroup
   sce_num <- sce
   colData(sce_num)$batch <- as.numeric(colData(sce)$batch)

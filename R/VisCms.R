@@ -5,58 +5,66 @@
 #'
 #' Plot pvalue histograms of cms score distributions
 #'
-#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
+#' @param cms_res Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.
+#' @param ncol Numeric. Number of columns of the pval histogram.
+#'
 #'
 #' @details Plots cms score distribution similar to a pvalue histogram distribution.
-#' Smoothened cms should be close to a normal distribution centered around 0.5 and cms scores should be approx. flat, if no dataset-specific bias are expected.
+#' Without dataset-specific bias, cms scores should be approx. flat distributed.
 #'
 #' @family visualize cms functions
 #'
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#' visHist(cms_sim30)
 #'
 #' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab theme_classic
 #' @importFrom cowplot plot_grid
-visHist <- function(cms_res){
+visHist <- function(cms_res, ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1)){
   p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name, ...){
     ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
             geom_histogram(color="black", fill = col_hist[which(colnames(cms_res) %in% cms_name)]) +
             ggtitle(cms_name) + xlab(cms_name) + theme_classic()
-  }), ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1)))
+  }), ncol = ncol))
   p
 }
 
 
 #' visOverview
 #'
-#' Plot cms, smoothened cms, group label and other Variable defined in colData in a reduced dimensional representation.
+#' Plot an overview of cms, smoothened cms, group label and any colData variable in a reduced dimensional representation.
 #'
-#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
-#' Rownames need to correspond to colnames of sce.
-#' @param sce Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-#' If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.
-#' @param group Character string specifying the name of variable used to define groups (batches). Should be have a corresonding element in colData(sce).
-#' @param dim_red Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-#' If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.
-#' @param smooth A logical value indicating if smoothened cms scores should be plotted.
-#' If true cms_res needs to contain 2 colums with cms and cms_smoothened results. Default is set by the length of colnames(cms_res)
-#' @param log10_val A logical indicating if -log10(cms) should be plotted to visualize differences of small values
-#' @param other_Var Character string defining other variables to be plotted asided (e.g. some specified celltype label).
-#' Need correspond to one of colData(sce).
+#' @param cms_res Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.
+#' @param sce A \code{SingleCellExperiment} object with the combined data corresponding to 'cms_res'.
+#' @param group Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param smooth Logical. Indicating if smoothened cms scores should be plotted.
+#' @param log10_val Logical. Indicating if -log10(cms) should be plotted.
+#' @param other_Var Character string. Name of other variables to be plotted asided.
+#' Need correspond to one of \code{colData(sce)}.
 #'
-#' @details Plots reduced dimensions (tsne as default) of cells using the group variable and the cms score as colors.
-#' Other color label as celltype label or smoothened cms scores can be plotted aside. Generates tsne embeddings, if none have been specified.
-#' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}}.
+#' @details Plots reduced dimensions of cells colored by group variable and cms score.
+#' If 'red_dim' is not defined in \code{reducedDimNames(sce)} a tsne is calculated using \code{runTSNE}.
+#' Other color label as celltype label or smoothened cms scores can be plotted aside.
+#' Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 #'
 #' @family visualize cms functions
 #' @seealso \code{\link{visCms}}, \code{\link{visGroup}}
 #'
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#'
+#' visOverview(cms_sim30, sce, "batch")
+#'
 #'
 #' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point scale_color_manual
 #' @importFrom cowplot plot_grid
@@ -113,10 +121,18 @@ visOverview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(l
       guides(color=guide_legend(override.aes=list(size=0.5))) +
       scale_color_viridis(option = "B") + ggtitle(paste0("cms : ", group))
 
+    if(log10_val == TRUE){
+      t_cms <- t_cms + guides(color=guide_legend(title="-log10(cms)"))
+    }
+
     p <- plot_grid(t_group, t_cms)
 
     if(smooth == TRUE){
       df$cms_smooth <- cms_res[,"cms_smooth"]
+
+      if(log10_val == TRUE){
+        df$cms_smooth <- -log10(df$cms_smooth)
+      }
 
       t <- ggplot(df, aes_string(x="red_Dim1", y="red_Dim2")) +
         xlab(paste0(dim_red,"_1")) + ylab(paste0(dim_red,"_2")) +
@@ -127,6 +143,11 @@ visOverview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(l
       t_smooth <- t + geom_point(size=1, alpha = 0.3, aes_string(color="cms_smooth")) +
         guides(color=guide_legend(override.aes=list(size=0.5))) +
         scale_color_viridis(option = "B") + ggtitle(paste0("smooth cms : ", group))
+
+      if(log10_val == TRUE){
+        t_smooth <- t_smooth + guides(color=guide_legend(title="-log10(cms_smooth)"))
+      }
+
       p <- plot_grid(t_group, t_cms, t_smooth)
 
     }
@@ -168,30 +189,32 @@ visOverview <- function(cms_res, sce, group, dim_red = "TSNE", smooth = ifelse(l
 
 #' visCms
 #'
-#' Plot cms scores in a reduced dimensional plot like tsne.
+#' Plot cms scores in a reduced dimensional plot.
 #'
-#' @param cms_res cms result matrix with one or two columns containing cms scores and/or smoothened cms scores.
-#' Rownames need to correspond to colnames of sce. Colnames are allowed to be set different, but need to be specified in cms_var.
-#' @param sce Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-#' If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.
-#' @param cms_var character string specifying the cms scores to use (usually "cms_smoothened" or "cms").
-#' Needs to correspond to one of the colnames of cms_res. Default is "cms".
-#' @param dim_red Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-#' If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.
-#' @param log10_val A logical indicating if -log10(cms) should be plotted to visualize differences of small values
-#' @param ... Additional arguments to pass to \code{\link{ggplot}}
+#' @param cms_res Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.
+#' @param sce  A \code{SingleCellExperiment} object with the combined data corresponding to 'cms_res'.
+#' @param cms_var Character Name of the cms scores to use (usually "cms_smoothened" or "cms").
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param log10_val Logical. Indicating if -log10(cms) should be plotted.
+#' @param ... Additional arguments to pass to \code{\link{ggplot}}.
 #'
-#' @details Plots a reduced dimension plot (tsne as default) colored by cms scores.
-#' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
-#' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
+#' @details Plots a reduced dimension plot colored by cms scores.
+#' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed using \code{runTSNE}.
+#' Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 #'
 #' @seealso \code{\link{visOverview}}, \code{\link{visGroup}}
 #' @family visualize cms functions
 #'
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#'
+#' visCms(cms_res = cms_sim30, sce = sce)
 #'
 #' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point
 #' @importFrom scater runTSNE
@@ -241,32 +264,40 @@ visCms <- function(cms_res, sce, cms_var = "cms", dim_red = "TSNE", log10_val = 
     guides(color=guide_legend(override.aes=list(size=2), title = cms_var)) +
     scale_color_viridis(option = "B") + ggtitle(cms_var)
 
+  if(log10_val == TRUE){
+    t_cms <- t_cms + guides(color=guide_legend(title=paste0("-log10(", cms_var, ")")))
+  }
+
   t_cms
 }
 
 
 #' visGroup
 #'
-#' Plot group label in a reduced dimensional plot like tsne or integrated embeddings.
+#' Plot group label in a reduced dimensional plot.
 #'
-#' @param sce Combined \code{\link{SingleCellExperiment}} object containing either precalculated reduced dimension embeddings or counts or logcounts of all groups merged.
-#' If precalculated dimension reduction embeddings are used, they need to be within the reducedDimensions slot.
-#' @param group character string specifying the group variable to label cells. Should be included into the colData slot of sce.
-#' @param dim_red Character defining dimension reduction embeddings to plot. Default is TSNE as from \code{\link{runTSNE}}.
-#' If none is provided and no dimension reduction slot named "TSNE" is within \code{\link{reducedDimNames}} tsne embeddings will be calculated by \code{\link{runTSNE}}.
-#' @param ... Additional arguments to pass to \code{\link{ggplot}}
+#' @param sce A \code{SingleCellExperiment} object.
+#' @param group Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param ... Additional arguments to pass to \code{\link{ggplot}}.
 #'
-#' @details Plots a reduced dimension plot (tsne as default) colored by group parameter.
-#' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed.
-#' Embeddings from data integration methods (e.g. mnn.correct) can also been used as long as they are specified in \code{\link{reducedDimNames}} of sce.
+#' @details Plots a reduced dimension plot colored by group parameter.
+#' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed by \code{runTSNE}.
+#'  Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
 #'
 #' @seealso \code{\link{visOverview}}, \code{\link{visCms}}
 #' @family visualize cms functions
 #'
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#'
+#' visGroup(sce, "batch")
+#'
 #'
 #' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point scale_color_manual
 #' @importFrom scater runTSNE

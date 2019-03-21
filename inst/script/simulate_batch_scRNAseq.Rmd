@@ -164,7 +164,9 @@ lapply(batch_list, function(name){
 ```{r save and session}
 data_path <- here::here("inst/extdata")
 sim_30 <- sce_mnn
+cms_sim30 <- cms(sce_mnn[[1]][,c(1:50, 500:550)], k = 30, group = "batch")
 save(sim_30, file = paste0(data_path,"/sim30.rda"))
+save(cms_sim30, file = paste0(data_path,"/cms_sim30.rda"))
 sessionInfo()
 ```
 

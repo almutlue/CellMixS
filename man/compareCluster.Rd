@@ -8,24 +8,36 @@ compareCluster(cms_res, cluster_var, cms_var = "cms", sce = NULL,
   violin = FALSE)
 }
 \arguments{
-\item{cms_res}{data frame of cms scores to be summarized. The cms score should be in the first coulmn. It should either contain a second column with corresponding levels for cluster_var or  sce need to be specified.}
+\item{cms_res}{data frame of cms scores to be summarized. Cms scores should be in the first column.
+Either a second column with corresponding levels of \code{cluster_var} or \code{sce} with levels in \code{colData(sce)} need to be specified.}
 
-\item{cluster_var}{character string specifying the name of the factor level variable to summarize cms scores on.}
+\item{cluster_var}{Character. Name of the factor level variable to summarize cms scores on.}
 
-\item{cms_var}{Character string specifying the name of the cms_res to use. Default is "cms".}
+\item{cms_var}{Character. Name of the cms_res to use. Default is "cms".}
 
-\item{sce}{SingleCellexperiment object should only be specified if cluster_var is not already provided in cms_res. Should contain 'cluster_var' within colData.
-If sce is specified, rownames of cms_res need to correspond to colnames of sce (should contain the same cells).}
+\item{sce}{\code{SingleCellexperiment} object. Should only be specified if \code{cluster_var} is not already provided in \code{cms_res}.}
 
-\item{violin}{A logical, if true (default) violin plots are provided. Otherwise boxplots are generated.}
+\item{violin}{A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
-Creates summary violin plots of cms scores for different groups/cluster.
+Creates summary plots of cms scores for different groups/cluster.
 }
 \details{
-Plots summarized cms scores for a specified list. This function is intended to visualize and compare cms scores among clusters or other dataset variables.
+Plots summarized cms scores for a specified list.
+This function is intended to visualize and compare cms scores among clusters or other dataset variables.
 }
 \examples{
+library(SingleCellExperiment)
+
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+
+sce <- sim_30[[1]][, c(1:50,500:550)]
+colData(sce)$group <- sample(c("A", "B", "C"), ncol(sce), replace = TRUE)
+compareCluster(cms_sim30, "group", cms_var = "cms", sce = sce, violin = TRUE)
 
 }
 \seealso{

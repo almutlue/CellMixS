@@ -7,30 +7,26 @@
 filterLocMin(knn_cell, kmin)
 }
 \arguments{
-\item{knn_cell}{Data frame with distances and group information of cells. Should have one column named "distance" with distances towards the k nearest neighbours and one column named after the group variable.
+\item{knn_cell}{Data frame with one column "distance" and one column named by the group variable.
 Rows correspond to the knn cells and do not need rownames.}
 
-\item{kmin}{Numeric giving the minimum number of k nearest neighbours to use. cells to include.
-If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.}
+\item{kmin}{Numeric. Minimum number of Knn to include.}
 }
 \value{
-
+data.frame with two columns (indices, distance) for filtered knn cells.
 }
 \description{
-Function to filter number of knn to use for cms calculation by overall distance density distribution.
+Function to filter knn by overall distance density distribution.
 }
 \details{
 Internal function to filter cells used for cms testing to come from a continous overall density distribution function (similar to cluster definitions).
-filterLocMin is only applied, if k-min is specified as parameter in \code{\link{cmsCell}} or \code{\link{cms}}.
-}
-\examples{
-
+'filterLocMin' is only applied, if k-min is specified as parameter in \code{\link{cmsCell}} or \code{\link{cms}}.
 }
 \seealso{
-\code{\link{cmsCell}} for cms calculation
+\code{\link{cmsCell}}
 
-Other cms functions: \code{\link{cmsCell}},
-  \code{\link{cmsSummary}}, \code{\link{cms}},
+Other helper functions: \code{\link{cmsCell}},
+  \code{\link{defineSubspace}}, \code{\link{ldfKnn}},
   \code{\link{smoothCms}}
 }
-\concept{cms functions}
+\concept{helper functions}

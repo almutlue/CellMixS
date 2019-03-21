@@ -7,38 +7,34 @@
 smoothCms(knn, cms_raw, cell_names, kmin, k)
 }
 \arguments{
-\item{knn}{List containing distances and batch information of cells. Should have one slot type double named "distance" with distances towards the k nearest neighbours of the cell and one slot type double named after the group variable specified in 'batch'.
-Both slots need to be aligned and the specified cell's name need to correspond to one of the rownames, while the columns represent the ordered knn.}
+\item{knn}{List with three elements. First "indices" with indices of KNN cells.
+Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
 
-\item{cms_raw}{Matrix containing raw cms scores for all cells specified in cell_names and knn. Rownames need to correspond to cellnames and colnames should be "cms".}
+\item{cms_raw}{Matrix with raw cms scores for all cells specified in \code{cell_names} and \code{knn}. Colnames need to be "cms.}
 
-\item{cell_names}{Character vector with cell names corresponding to the rownames of the list elements in the knn object and the cms_raw object.}
+\item{cell_names}{Character vector with cell names corresponding to the rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.}
 
-\item{kmin}{Numeric giving the minimum number of k nearest neighbours to use.
-If k_min is defined the overall distance density distribution of knn will be determined and only cells up to the first local minima that includes more than kmin cells will be used.}
+\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
-\item{k}{Numeric, defining the number of k-nearest neighbours to use for testing the "mixing" within the neighbourhood.}
+\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 }
 \value{
-
+matrix with two columns ("cms_smooth", "cms").
 }
 \description{
 Performs weighted smoothening of cms scores
 }
 \details{
-Internal function to smoothes cms scores. In a complete random setting cms scores are uniform distributed.
-To reduce the resulting random variance and enable visualization of local tendencies and pattern cms scores can be smoothened assuming that within one region mixing is uniform.
+Internal function to smooth cms scores. In a complete random setting cms scores are uniform distributed.
+To reduce the resulting random variance and enable visualization of local pattern cms scores can be smoothened assuming that within one region mixing is uniform.
 Generates smoothened cms scores using weigthed means of cms scores within the k-nearest neighbourhood.
-Reciprocal distances are used as weights. Returns a matrix with "smoothened_cms" and original "cms" values.
-}
-\examples{
-
+Reciprocal distances are used as weights.
 }
 \seealso{
 \code{\link{cmsCell}}, \code{\link{cms}}
 
-Other cms functions: \code{\link{cmsCell}},
-  \code{\link{cmsSummary}}, \code{\link{cms}},
-  \code{\link{filterLocMin}}
+Other helper functions: \code{\link{cmsCell}},
+  \code{\link{defineSubspace}}, \code{\link{filterLocMin}},
+  \code{\link{ldfKnn}}
 }
-\concept{cms functions}
+\concept{helper functions}

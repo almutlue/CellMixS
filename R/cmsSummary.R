@@ -4,22 +4,29 @@
 
 #' cmsSummary
 #'
-#' Summarizes cms scores, if specified based on groups
+#' Summarizes cms scores, if specified based on groups.
 #'
-#' @param cms_res data frame of cms scores to be summarized. Columns should correspond to cms scores, rows to cells.
-#' @param sum_var variable to group summaries on. Need to correspond to a colData variable
-#' @param sce SingleCellExperiment object describing the cells specified in cms_res.
+#' @param cms_res data frame of cms scores to be summarized.
+#' @param sum_var variable to group summaries. Need to correspond to one of \code{colData(sce)}.
+#' @param sce A \code{SingleCellExperiment} object corresponding to 'cms_res'.
 #'
-#' @details Returns the mean of cms score to make different conditions/methods/.. comparable.
-#' In default the mean of each cloumn of cms_res is returned. Groups to summarize can be specified by sum_var and sce.
+#' @details Summarises cms scores by mean to make different conditions/methods/.. comparable.
+#' In default the mean of each cloumn of cms_res is returned.
+#' Groups to summarize can be specified by sum_var and sce.
 #'
 #' @family cms functions
 #' @seealso \code{\link{compareIntegration}}, \code{\link{compareCluster}}
 #'
-#' @return
+#' @return Data frame with mean cms scores (for each group).
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#' sce <- sim_30[[1]][, c(1:50,500:550)]
+#' cmsSummary(cms_sim30)
+#' cmsSummary(cms_sim30, sum_var = "batch", sce = sce)
 #'
 #' @importFrom dplyr as_tibble group_by_ summarize_all funs
 #' @importFrom SingleCellExperiment colData
@@ -53,25 +60,38 @@ cmsSummary <- function(cms_res, sum_var = NULL, sce = NULL){
 
 #' compareIntegration
 #'
-#' Creates a summary boxplot of cms scores (for different integration methods).
+#' Creates a summary plot of cms scores (for different integration methods).
 #'
 #' @param cms_res data frame, matrix or list of cms scores to be summarized.
-#' Each column of the dataframe or each element of the list should correspond to a set of cms score that shall be summarized.
-#' List elements need to have the same length and only one set of cms scores per list element is allowed.
+#' Each column of the dataframe or each element of the list corresponds to a set of cms score that shall be summarized.
+#' List elements need to have the same length and only one set of cms scores per list element.
+#' @param scale Scale param for \code{geom_density_ridges} from \code{ggridges}.
+#' @param violin A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.
 #'
-#' @details Plots summarized cms scores from an input list or dataframe. This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
+#' @details Plots summarized cms scores from an input list or dataframe.
+#' This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
 #'
-#' @seealso \code{\link{compareCluster}}
+#' @seealso \code{\link{compareCluster}}, \code{ggridges}
 #' @family visualize cms functions
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
 #'
-#' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic labs
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#'
+#' sce <- sim_30[[1]][, c(1:50,500:550)]
+#' cms_mnn <- cms(sce, k = 30, group = "batch", dim_red = "MNN")
+#' cms_list <- list("raw"= cms_sim30[,"cms"], "mnn" = cms_mnn[,"cms"])
+#'
+#' compareIntegration(cms_list)
+#'
+#' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic labs geom_violin
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom tidyr gather_
-compareIntegration <- function(cms_res){
+compareIntegration <- function(cms_res, scale = 1, violin = FALSE){
   if(is.list(cms_res)){
     average_table <- do.call(cbind.data.frame, cms_res)
     colnames(average_table) <- names(cms_res)
@@ -89,34 +109,49 @@ compareIntegration <- function(cms_res){
 
 
   #plot
-  summarized_cms <- ggplot(average_long, aes(y=alignment, x=average_metric, fill=alignment)) +
-    geom_density_ridges(scale = 0.6)  +
-    labs(title="Summarized cms",y="alignment", x = "cms") +
-    scale_fill_manual(values= col_hist) + theme_classic()
-
+  if(violin == TRUE){
+    summarized_cms <- ggplot(average_long, aes(x=alignment, y=average_metric, fill=alignment)) +
+      geom_violin()  +
+      labs(title="Summarized metric", x="alignment", y = "cms") +
+      scale_fill_manual(values = col_hist) + theme_classic()
+  }else{
+    summarized_cms <- ggplot(average_long, aes(y=alignment, x=average_metric, fill=alignment)) +
+      geom_density_ridges(scale = scale)  +
+      labs(title="Summarized metric",y="alignment", x = "cms") +
+      scale_fill_manual(values= col_hist) + theme_classic()
+  }
   summarized_cms
 }
 
 
 #' compareCluster
 #'
-#' Creates summary violin plots of cms scores for different groups/cluster.
+#' Creates summary plots of cms scores for different groups/cluster.
 #'
-#' @param cms_res data frame of cms scores to be summarized. The cms score should be in the first coulmn. It should either contain a second column with corresponding levels for cluster_var or  sce need to be specified.
-#' @param cluster_var character string specifying the name of the factor level variable to summarize cms scores on.
-#' @param cms_var Character string specifying the name of the cms_res to use. Default is "cms".
-#' @param sce SingleCellexperiment object should only be specified if cluster_var is not already provided in cms_res. Should contain 'cluster_var' within colData.
-#' If sce is specified, rownames of cms_res need to correspond to colnames of sce (should contain the same cells).
-#' @param violin A logical, if true (default) violin plots are provided. Otherwise boxplots are generated.
+#' @param cms_res data frame of cms scores to be summarized. Cms scores should be in the first column.
+#' Either a second column with corresponding levels of \code{cluster_var} or \code{sce} with levels in \code{colData(sce)} need to be specified.
+#' @param cluster_var Character. Name of the factor level variable to summarize cms scores on.
+#' @param cms_var Character. Name of the cms_res to use. Default is "cms".
+#' @param sce \code{SingleCellexperiment} object. Should only be specified if \code{cluster_var} is not already provided in \code{cms_res}.
+#' @param violin A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.
 #'
-#' @details Plots summarized cms scores for a specified list. This function is intended to visualize and compare cms scores among clusters or other dataset variables.
+#' @details Plots summarized cms scores for a specified list.
+#' This function is intended to visualize and compare cms scores among clusters or other dataset variables.
 #'
 #' @seealso \code{\link{compareIntegration}}
 #' @family visualize cms functions
-#' @return
+#' @return a \code{ggplot} object.
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#'
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+#'
+#' sce <- sim_30[[1]][, c(1:50,500:550)]
+#' colData(sce)$group <- sample(c("A", "B", "C"), ncol(sce), replace = TRUE)
+#' compareCluster(cms_sim30, "group", cms_var = "cms", sce = sce, violin = TRUE)
 #'
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_fill_manual theme_classic labs geom_violin
 #' @importFrom tidyr gather_
@@ -143,7 +178,7 @@ compareCluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, vi
 
   }else{
     summarized_cms <- ggplot(cms_table, aes(y=cluster, x=cms, fill=cluster)) +
-      geom_density_ridges(scale = 0.6)  +
+      geom_density_ridges(scale = 1)  +
       labs(title="Summarized cms", y=cluster_var, x = "cms") +
       scale_fill_manual(values = col_hist) + theme_classic()
   }

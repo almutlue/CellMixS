@@ -4,24 +4,42 @@
 \alias{compareIntegration}
 \title{compareIntegration}
 \usage{
-compareIntegration(cms_res)
+compareIntegration(cms_res, scale = 1, violin = FALSE)
 }
 \arguments{
 \item{cms_res}{data frame, matrix or list of cms scores to be summarized.
-Each column of the dataframe or each element of the list should correspond to a set of cms score that shall be summarized.
-List elements need to have the same length and only one set of cms scores per list element is allowed.}
+Each column of the dataframe or each element of the list corresponds to a set of cms score that shall be summarized.
+List elements need to have the same length and only one set of cms scores per list element.}
+
+\item{scale}{Scale param for \code{geom_density_ridges} from \code{ggridges}.}
+
+\item{violin}{A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.}
+}
+\value{
+a \code{ggplot} object.
 }
 \description{
-Creates a summary boxplot of cms scores (for different integration methods).
+Creates a summary plot of cms scores (for different integration methods).
 }
 \details{
-Plots summarized cms scores from an input list or dataframe. This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
+Plots summarized cms scores from an input list or dataframe.
+This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
 }
 \examples{
+library(SingleCellExperiment)
+
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
+
+sce <- sim_30[[1]][, c(1:50,500:550)]
+cms_mnn <- cms(sce, k = 30, group = "batch", dim_red = "MNN")
+cms_list <- list("raw"= cms_sim30[,"cms"], "mnn" = cms_mnn[,"cms"])
+
+compareIntegration(cms_list)
 
 }
 \seealso{
-\code{\link{compareCluster}}
+\code{\link{compareCluster}}, \code{ggridges}
 
 Other visualize cms functions: \code{\link{compareCluster}},
   \code{\link{visCms}}, \code{\link{visGroup}},
