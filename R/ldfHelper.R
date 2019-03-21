@@ -3,7 +3,7 @@
 
 ### LDF function modified from the DDoutlier package
 
-#' ldfKnn
+#' .ldfKnn
 #'
 #' Calculates the Local Density Factor as implemented in the \code{DDoutlier} package with a predefined KNN neighbourhood.
 #'
@@ -28,7 +28,7 @@
 #' @family helper functions
 #' @seealso \code{\link{ldfSce}}
 #'
-ldfKnn <- function(dataset, knn_object, k=k, h=1, c=1){
+.ldfKnn <- function(dataset, knn_object, k=k, h=1, c=1){
 
   dim <- ncol(dataset)
 
@@ -61,7 +61,7 @@ ldfKnn <- function(dataset, knn_object, k=k, h=1, c=1){
 
 ## Define subspace
 
-#' defineSubspace
+#' .defineSubspace
 #'
 #' Helper function for ldfSce and cms to define or recalculate the subspace for analysis.
 #'
@@ -83,7 +83,7 @@ ldfKnn <- function(dataset, knn_object, k=k, h=1, c=1){
 #' @importFrom scater runPCA
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assays
-defineSubspace <- function(sce, assay_name, dim_red, n_dim){
+.defineSubspace <- function(sce, assay_name, dim_red, n_dim){
 
   # Check assay and dim_red
   if(!assay_name %in% c("logcounts", "counts") & !dim_red %in% c("pca", "PCA", "Pca")){

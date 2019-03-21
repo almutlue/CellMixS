@@ -121,7 +121,7 @@ ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red =
   sce_post <- sce_combined[, colData(sce_combined)[,group] == sce_name]
 
   #determine subspace
-  subspace <- defineSubspace(sce_pre, assay_pre, dim_red, n_dim)
+  subspace <- .defineSubspace(sce_pre, assay_pre, dim_red, n_dim)
 
   #----------------- determine ldf pre-----------------------------------#
   # test size of k has
@@ -139,14 +139,14 @@ ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red =
   }))
 
   rownames(knn[["cell_name"]]) <- rownames(subspace)
-  ldf_pre <- ldfKnn(subspace, knn_object = knn, k = k, c = 0.5)
+  ldf_pre <- .ldfKnn(subspace, knn_object = knn, k = k, c = 0.5)
 
   #---------------------------------------------------------------------------#
 
   #----------------- determine ldf post-----------------------------------#
   # euclidean distances in integrated subspace
   knn_int <- knn
-  subspace_int <- defineSubspace(sce_combined, assay_combined, dim_combined, n_dim)
+  subspace_int <- .defineSubspace(sce_combined, assay_combined, dim_combined, n_dim)
   subspace_int <- subspace_int[rownames(knn_int$indices),]
   # calculate new distances (keeping neighbours)
   knn_int$distance <- do.call(rbind, lapply(rownames(knn_int$indices), function(cell){
@@ -157,7 +157,7 @@ ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red =
 
   rownames(knn_int[["distance"]]) <- rownames(knn_int$indices)
 
-  ldf_post <- ldfKnn(subspace_int, knn_object = knn_int, k = k, c = 0.5)
+  ldf_post <- .ldfKnn(subspace_int, knn_object = knn_int, k = k, c = 0.5)
 
   #----------------------------------------------------------------------------#
   #calculate differences in LDF

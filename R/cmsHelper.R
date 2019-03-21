@@ -1,6 +1,6 @@
 # Helper and internal functions for cms
 
-#' cmsCell
+#' .cmsCell
 #'
 #' Function to calculate a cellspecific mixing score (cms) of groups/batches.
 #'
@@ -27,7 +27,7 @@
 #' @export
 #'
 #' @importFrom kSamples ad.test
-cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
+.cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
   #get knn distances and group assignments
   knn_cell <- cbind(knn[["distance"]][cell,], knn[[group]][cell,])
   knn_cell <- as.data.frame(knn_cell)
@@ -36,7 +36,7 @@ cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
 
   #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
   if(!is.na(kmin)){
-    knn_cell <- filterLocMin(knn_cell, kmin)
+    knn_cell <- .filterLocMin(knn_cell, kmin)
   }
 
   #filter groups with to few cells (cell_min, default 10)
@@ -58,7 +58,7 @@ cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
 }
 
 
-#' filterLocMin
+#' .filterLocMin
 #'
 #' Function to filter knn by overall distance density distribution.
 #'
@@ -75,7 +75,7 @@ cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
 #'
 #'
 #' @importFrom stats density
-filterLocMin <- function(knn_cell, kmin){
+.filterLocMin <- function(knn_cell, kmin){
   distances <- density(knn_cell$distance)$x
   dist_density <- density(knn_cell$distance)$y
   #Find local minima
@@ -92,7 +92,7 @@ filterLocMin <- function(knn_cell, kmin){
   knn_cell
 }
 
-#' smoothCms
+#' .smoothCms
 #'
 #' Performs weighted smoothening of cms scores
 #'
@@ -115,7 +115,7 @@ filterLocMin <- function(knn_cell, kmin){
 #'
 #'
 #' @importFrom stats weighted.mean
-smoothCms <- function(knn, cms_raw, cell_names, kmin, k){
+.smoothCms <- function(knn, cms_raw, cell_names, kmin, k){
 
   # cms assignment of knn cells for each cell
   knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){

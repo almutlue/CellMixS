@@ -59,7 +59,7 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin =
   #---------------------------------------------------------------------------#
 
   #----------------- determine knn matrix -----------------------------------#
-  subspace <- defineSubspace(sce, assay_name, dim_red, n_dim)
+  subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
   #determine knn
   knn <- get.knn(subspace, k=k, algorithm = 'cover_tree')
   rownames(knn[[1]]) <- cell_names  #indices of knn cells per cell
@@ -75,12 +75,12 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin =
 
   #----------------- calculate cms score  -----------------------------------#
 
-  cms_raw <- do.call(rbind, lapply(cell_names, cmsCell, group = group, knn = knn, kmin=kmin, cell_min = cell_min))
+  cms_raw <- do.call(rbind, lapply(cell_names, .cmsCell, group = group, knn = knn, kmin=kmin, cell_min = cell_min))
   rownames(cms_raw) <- cell_names
   colnames(cms_raw) <- "cms"
 
   if(smooth == TRUE){
-    res_cms <- smoothCms(knn, cms_raw, cell_names, kmin, k)
+    res_cms <- .smoothCms(knn, cms_raw, cell_names, kmin, k)
   }else{
     res_cms <- cms_raw
   }
