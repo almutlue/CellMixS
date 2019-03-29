@@ -18,7 +18,7 @@
 #' If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 #' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 #'
-#' @seealso \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{smoothCms}}
+#' @seealso \code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{.smoothCms}}
 #'
 #' @family helper functions
 #'
@@ -67,9 +67,9 @@
 #' @param kmin Numeric. Minimum number of Knn to include.
 #'
 #' @details  Internal function to filter cells used for cms testing to come from a continous overall density distribution function (similar to cluster definitions).
-#' 'filterLocMin' is only applied, if k-min is specified as parameter in \code{\link{cmsCell}} or \code{\link{cms}}.
+#' 'filterLocMin' is only applied, if k-min is specified as parameter in \code{\link{.cmsCell}} or \code{\link{cms}}.
 #'
-#' @seealso \code{\link{cmsCell}}
+#' @seealso \code{\link{.cmsCell}}
 #' @family helper functions
 #' @return data.frame with two columns (indices, distance) for filtered knn cells.
 #'
@@ -109,7 +109,7 @@
 #' Reciprocal distances are used as weights.
 #'
 #' @family helper functions
-#' @seealso \code{\link{cmsCell}}, \code{\link{cms}}
+#' @seealso \code{\link{.cmsCell}}, \code{\link{cms}}
 #'
 #' @return matrix with two columns ("cms_smooth", "cms").
 #'
@@ -128,8 +128,8 @@
   # calculate weigthed mean
   cms_smooth <- do.call(rbind, lapply(cell_names, function(cell_id){
     #add 1 to ensure that distances < 1 are less weighted than the original cell
-    weights <- c(1,(1/(knn[[2]][cell_id,c(1:k_smooth)] + 1)))
-    knn_cms <- c(cms_raw[cell_id,"cms"],knn[["cms"]][cell_id, c(1:k_smooth)])
+    weights <- c(1,(1/(knn[[2]][cell_id,seq_len(k_smooth)] + 1)))
+    knn_cms <- c(cms_raw[cell_id,"cms"],knn[["cms"]][cell_id, seq_len(k_smooth)])
     cms_new <- weighted.mean(knn_cms, weights)
   }))
 

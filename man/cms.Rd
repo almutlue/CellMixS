@@ -52,7 +52,7 @@ cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
 
 }
 \seealso{
-\code{\link{cmsCell}}, \code{\link{smoothCms}}.
+\code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
 
 Other cms functions: \code{\link{cmsSummary}}
 }

@@ -91,6 +91,10 @@
          * If precalculated embeddings shall be used, keep 'assay_name' as default.
          * If a PCA based on 'assay_name' shall be used, keep 'dim_red' as default.")
   }
+  if(!assay_name %in% c("logcounts", "counts") & dim_red %in% c("PCA")){
+    sce <- runPCA(sce, ncomponents = n_dim, exprs_values = assay_name)
+    dim_red <- "PCA"
+  }
   if(is.null(reducedDim(sce, dim_red))){
     if(!assay_name %in% names(assays(sce))){
       stop("Parameter 'assay_name' not found: Please provide a valid value.")
@@ -110,6 +114,6 @@
   if(n_dim > ncol(reducedDim(sce, dim_red))){
     stop("Parameter 'n_dim' is greater than reduced dimensional space: Please provide a valid value.")
   }
-  subspace <- reducedDim(sce, dim_red)[,1:n_dim]
+  subspace <- reducedDim(sce, dim_red)[,seq_len(n_dim)]
 
 }

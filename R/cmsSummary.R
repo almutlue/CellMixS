@@ -110,12 +110,12 @@ compareIntegration <- function(cms_res, scale = 1, violin = FALSE){
 
   #plot
   if(violin == TRUE){
-    summarized_cms <- ggplot(average_long, aes(x=alignment, y=average_metric, fill=alignment)) +
+    summarized_cms <- ggplot(average_long, aes_string(x="alignment", y="average_metric", fill="alignment")) +
       geom_violin()  +
       labs(title="Summarized metric", x="alignment", y = "cms") +
       scale_fill_manual(values = col_hist) + theme_classic()
   }else{
-    summarized_cms <- ggplot(average_long, aes(y=alignment, x=average_metric, fill=alignment)) +
+    summarized_cms <- ggplot(average_long, aes_string(y="alignment", x="average_metric", fill="alignment")) +
       geom_density_ridges(scale = scale)  +
       labs(title="Summarized metric",y="alignment", x = "cms") +
       scale_fill_manual(values= col_hist) + theme_classic()
@@ -163,23 +163,24 @@ compareCluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, vi
     colnames(cms_res_sorted) <- colnames(cms_res)
     rownames(cms_res_sorted) <- colnames(sce)
     cms_table <- data.frame(cms = cms_res_sorted[,cms_var], cluster = as.factor(colData(sce)[,cluster_var]))
+    colnames(cms_table) <- c(cms_var, cluster_var)
   }else{
     cms_table <- cms_res[,c(cms_var, cluster_var)]
-    colnames(cms_table) <- c("cms", "cluster")
-    cms_table$cluster <- as.factor(cms_table$cluster)
+    colnames(cms_table) <- c(cms_var, cluster_var)
+    cms_table[,cluster_var] <- as.factor(cms_table[,cluster_var])
   }
 
   #plot
   if(violin == TRUE){
-    summarized_cms <- ggplot(cms_table, aes(x=cluster, y=cms, fill=cluster)) +
+    summarized_cms <- ggplot(cms_table, aes_string(x=cluster_var, y=cms_var, fill=cluster_var)) +
       geom_violin()  +
-      labs(title="Summarized cms", x=cluster_var, y = "cms") +
+      labs(title="Summarized cms", x=cluster_var, y = cms_var) +
       scale_fill_manual(values = col_hist) + theme_classic()
 
   }else{
-    summarized_cms <- ggplot(cms_table, aes(y=cluster, x=cms, fill=cluster)) +
+    summarized_cms <- ggplot(cms_table, aes_string(y=cluster_var, x=cms_var, fill=cluster_var)) +
       geom_density_ridges(scale = 1)  +
-      labs(title="Summarized cms", y=cluster_var, x = "cms") +
+      labs(title="Summarized cms", y=cluster_var, x = cms_var) +
       scale_fill_manual(values = col_hist) + theme_classic()
   }
   summarized_cms

@@ -60,7 +60,7 @@ ldf_1 <- ldfSce("1", sce_pre_list, sce, k = 10, group = "batch", dim_combined = 
 
 }
 \seealso{
-\code{\link{ldfDiff}}, \code{\link{ldfKnn}}.
+\code{\link{ldfDiff}}, \code{\link{.ldfKnn}}.
 
 Other ldf functions: \code{\link{ldfDiff}}
 }

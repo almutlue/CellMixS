@@ -14,6 +14,7 @@ test_that("test that output of cms is correct",{
   cms_default <- cms(sce, k = 20, group = "batch")
   cms_only <- as.matrix(cms_default[,"cms"])
   colnames(cms_only) <- "cms"
+  sce_df <- as.data.frame(assay(sce))
 
  expect_is(cms_smooth, "matrix")
   expect_equal(ncol(cms_smooth), 2)
@@ -32,6 +33,10 @@ test_that("test that output of cms is correct",{
   expect_warning(cms(sce = sce, k=20, group = "batch",
                    dim_red = "tsne", assay_name = "counts"),
                  "'dim_red' not found: PCA subspace is used to calculate distances.",
+               fixed = TRUE)
+  expect_error(cms(sce = sce_df, k=20, group = "batch",
+                   dim_red = "pca", assay_name = "raw_counts"),
+               "Input error: class('sce') must be 'SingleCellExperiment'.",
                fixed = TRUE)
 })
 

@@ -20,10 +20,10 @@ Function to filter knn by overall distance density distribution.
 }
 \details{
 Internal function to filter cells used for cms testing to come from a continous overall density distribution function (similar to cluster definitions).
-'filterLocMin' is only applied, if k-min is specified as parameter in \code{\link{cmsCell}} or \code{\link{cms}}.
+'filterLocMin' is only applied, if k-min is specified as parameter in \code{\link{.cmsCell}} or \code{\link{cms}}.
 }
 \seealso{
-\code{\link{cmsCell}}
+\code{\link{.cmsCell}}
 
 Other helper functions: \code{\link{.cmsCell}},
   \code{\link{.defineSubspace}}, \code{\link{.ldfKnn}},

@@ -29,7 +29,7 @@
 #'
 #'
 #' @family ldf functions
-#' @seealso \code{\link{ldfSce}}, \code{\link{ldfKnn}}.
+#' @seealso \code{\link{ldfSce}}, \code{\link{.ldfKnn}}.
 #'
 #' @return A data.frame with cells as rows and difference in LDF as column named "diff".
 #'
@@ -92,7 +92,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", 
 #'
 #'
 #' @family ldf functions
-#' @seealso \code{\link{ldfDiff}}, \code{\link{ldfKnn}}.
+#' @seealso \code{\link{ldfDiff}}, \code{\link{.ldfKnn}}.
 #'
 #' @return A data.frame with cells as rows and difference in LDF as column named "diff".
 #'

@@ -31,7 +31,7 @@ Generates smoothened cms scores using weigthed means of cms scores within the k-
 Reciprocal distances are used as weights.
 }
 \seealso{
-\code{\link{cmsCell}}, \code{\link{cms}}
+\code{\link{.cmsCell}}, \code{\link{cms}}
 
 Other helper functions: \code{\link{.cmsCell}},
   \code{\link{.defineSubspace}},

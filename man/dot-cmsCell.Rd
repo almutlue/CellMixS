@@ -33,7 +33,7 @@ If \code{kmin} is specified, the first local minimum of the overall distance dis
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 }
 \seealso{
-\code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{smoothCms}}
+\code{\link{ad.test}} for Anderson-Darling test on k-samples, \code{\link{cms}}, \code{\link{.smoothCms}}
 
 Other helper functions: \code{\link{.defineSubspace}},
   \code{\link{.filterLocMin}}, \code{\link{.ldfKnn}},

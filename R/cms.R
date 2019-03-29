@@ -26,7 +26,7 @@
 #' If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
 #'
 #' @family cms functions
-#' @seealso \code{\link{cmsCell}}, \code{\link{smoothCms}}.
+#' @seealso \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
 #'
 #' @return A matrix with cells as rows and cms (and cms_smooth) as columns.
 #'
@@ -51,9 +51,16 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin =
   if(cell_min < 10){
     stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
   }
+  if(!class(sce) == "SingleCellExperiment"){
+    stop("Input error: class('sce') must be 'SingleCellExperiment'.")
+  }
 
   #check group variable class
-  colData(sce)[,group] <- as.factor(colData(sce)[,group])
+  if(!class(colData(sce)[,group]) %in% "factor"){
+
+    sce[[group]] <- as.factor(colData(sce)[,group])
+  }
+
   cell_names <- colnames(sce)
 
   #---------------------------------------------------------------------------#

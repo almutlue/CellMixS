@@ -100,6 +100,7 @@ create_sce <- function(multibatch){
     colnames(sce) <-  sprintf("cell_%s",seq(1:ncol(sce)))
     sce <- runTSNE(sce, exprs_values = "counts")
     sce <- runPCA(sce, ncomponents = 30, exprs_values = "counts")
+    #sce <- runUMAP(sce, exprs_values = "counts")
     sce
 }
 
