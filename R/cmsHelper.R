@@ -6,7 +6,7 @@
 #'
 #' @param cell Character. Name of the cell to calculate cms for. Needs to be one of \code{rownames(knn)}.
 #' @param group Character. Name of group/batch variable. Needs to be one of \code{names(knn)}.
-#' @param knn List with three elements. First "indices" with indices of KNN cells.
+#' @param knn List with three elements. First "index" with indices of KNN cells.
 #' Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.
 #' @param kmin Numeric. Minimum number of Knn to include. Default is NA (see Details).
 #' @param cell_min Numeric. Minimum number of cells from each group to be included into the AD test.
@@ -32,6 +32,7 @@
   knn_cell <- cbind(knn[["distance"]][cell,], knn[[group]][cell,])
   knn_cell <- as.data.frame(knn_cell)
   colnames(knn_cell) <- c("distance", group)
+  knn_cell[,"distance"] <- as.numeric(as.character(knn_cell[,group]))
   knn_cell[,group] <- as.factor(knn_cell[,group])
 
   #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
@@ -71,7 +72,7 @@
 #'
 #' @seealso \code{\link{.cmsCell}}
 #' @family helper functions
-#' @return data.frame with two columns (indices, distance) for filtered knn cells.
+#' @return data.frame with two columns (index, distance) for filtered knn cells.
 #'
 #'
 #' @importFrom stats density
@@ -96,7 +97,7 @@
 #'
 #' Performs weighted smoothening of cms scores
 #'
-#' @param knn List with three elements. First "indices" with indices of KNN cells.
+#' @param knn List with three elements. First "index" with indices of KNN cells.
 #' Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.
 #' @param cms_raw Matrix with raw cms scores for all cells specified in \code{cell_names} and \code{knn}. Colnames need to be "cms.
 #' @param cell_names Character vector with cell names corresponding to the rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.
@@ -119,7 +120,7 @@
 
   # cms assignment of knn cells for each cell
   knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){
-    cms_raw[knn[["indices"]][cell_id,], "cms"]}))
+    cms_raw[knn[["index"]][cell_id,], "cms"]}))
   rownames(knn[["cms"]]) <- cell_names
 
   # how many cells to smooth over

@@ -89,7 +89,7 @@ load(system.file("extdata/sim30.rda", package = "CellMixS"))
 names(sim_30)
 
 sce50 <- sim_30[["batch50"]]
-class(sce50)
+is(sce50)
 
 table(sce50[["batch"]])
 
@@ -278,7 +278,11 @@ compareIntegration(ldf_res) + labs(title="Summarized ldfDiff",x="method", y = "d
 
 `ldfDiff` shows a clear difference between both methods. While `r BiocStyle::Biocpkg("limma")` is able to preserve the batch internal structure within batches, `fastMNN` clearly changes it. Even if batches are well mixed (see \@ref(di2)), `fastMNN`does not work for batch effect removal on these simulated data.  
 
-  
+# Session info
+```{r session info}
+sessionInfo()
+```
+
   
 # References  
  

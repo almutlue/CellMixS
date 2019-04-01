@@ -33,6 +33,11 @@
 #'
 #' @return A data.frame with cells as rows and difference in LDF as column named "diff".
 #'
+#' @references
+#' Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
+#' Outlier Detection with Kernel Density Functions.
+#' Mach. Learn. Data Min. Pattern Recognit..
+#' Springer Berlin Heidelberg.
 #'
 #' @export
 #'
@@ -96,6 +101,11 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", 
 #'
 #' @return A data.frame with cells as rows and difference in LDF as column named "diff".
 #'
+#' @references
+#' Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
+#' Outlier Detection with Kernel Density Functions.
+#' Mach. Learn. Data Min. Pattern Recognit..
+#' Springer Berlin Heidelberg.
 #'
 #' @export
 #'
@@ -111,7 +121,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", 
 #' @importFrom stats dist
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assays
-#' @importFrom FNN get.knn
+#' @importFrom  BiocNeighbors findKNN
 ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", dim_combined = dim_red, assay_pre = "logcounts", assay_combined = "logcounts", n_dim = 20){
   #sce before integration
   sce_pre <- sce_pre_list[[sce_name]]
@@ -128,14 +138,13 @@ ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red =
   if(k >= nrow(subspace)){
     stop("Parameter 'k' is greater than dataset size: Please provide a valid value.")
   }
-  knn <- get.knn(subspace, k=k, algorithm = 'cover_tree')
-  rownames(knn[[1]]) <- rownames(subspace)  #indices of knn cells per cell
+  knn <- findKNN(subspace, k=k)
+  rownames(knn[[1]]) <- rownames(subspace)  #index of knn cells per cell
   rownames(knn[[2]]) <- rownames(subspace) #euclidean dist of knn cells per cell
-  names(knn) <- c("indices", "distance")
 
-  #assign names to cell indices
+  #assign names to cell index
   knn[["cell_name"]] <- do.call(rbind, lapply(rownames(subspace), function(cell_id){
-    rownames(subspace)[knn[["indices"]][cell_id,]]
+    rownames(subspace)[knn[["index"]][cell_id,]]
   }))
 
   rownames(knn[["cell_name"]]) <- rownames(subspace)
@@ -147,15 +156,15 @@ ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red =
   # euclidean distances in integrated subspace
   knn_int <- knn
   subspace_int <- .defineSubspace(sce_combined, assay_combined, dim_combined, n_dim)
-  subspace_int <- subspace_int[rownames(knn_int$indices),]
+  subspace_int <- subspace_int[rownames(knn_int$index),]
   # calculate new distances (keeping neighbours)
-  knn_int$distance <- do.call(rbind, lapply(rownames(knn_int$indices), function(cell){
+  knn_int$distance <- do.call(rbind, lapply(rownames(knn_int$index), function(cell){
     knn_cells <- knn_int[["cell_name"]][cell,]
     subspace_sub <- subspace_int[c(cell,knn_cells),]
     distance <- as.matrix(dist(subspace_sub))[cell,-1]
   }))
 
-  rownames(knn_int[["distance"]]) <- rownames(knn_int$indices)
+  rownames(knn_int[["distance"]]) <- rownames(knn_int$index)
 
   ldf_post <- .ldfKnn(subspace_int, knn_object = knn_int, k = k, c = 0.5)
 

@@ -7,7 +7,7 @@
 .smoothCms(knn, cms_raw, cell_names, kmin, k)
 }
 \arguments{
-\item{knn}{List with three elements. First "indices" with indices of KNN cells.
+\item{knn}{List with three elements. First "index" with indices of KNN cells.
 Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
 
 \item{cms_raw}{Matrix with raw cms scores for all cells specified in \code{cell_names} and \code{knn}. Colnames need to be "cms.}

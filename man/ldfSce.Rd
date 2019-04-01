@@ -59,6 +59,12 @@ sce_pre_list <- list("1" = sce_batch1)
 ldf_1 <- ldfSce("1", sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 5)
 
 }
+\references{
+Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
+Outlier Detection with Kernel Density Functions.
+Mach. Learn. Data Min. Pattern Recognit..
+Springer Berlin Heidelberg.
+}
 \seealso{
 \code{\link{ldfDiff}}, \code{\link{.ldfKnn}}.
 

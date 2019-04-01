@@ -57,6 +57,12 @@ ldf_diff <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "
 
 
 }
+\references{
+Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
+Outlier Detection with Kernel Density Functions.
+Mach. Learn. Data Min. Pattern Recognit..
+Springer Berlin Heidelberg.
+}
 \seealso{
 \code{\link{ldfSce}}, \code{\link{.ldfKnn}}.
 

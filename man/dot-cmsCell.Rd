@@ -11,7 +11,7 @@
 
 \item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(knn)}.}
 
-\item{knn}{List with three elements. First "indices" with indices of KNN cells.
+\item{knn}{List with three elements. First "index" with indices of KNN cells.
 Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
 
 \item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}

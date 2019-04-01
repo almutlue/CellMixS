@@ -51,6 +51,11 @@ cms_smooth <- cms(sce, k = 20, group = "batch")
 cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
 
 }
+\references{
+Scholz, F. W. and Stephens, M. A. (1987).
+K-Sample Anderson-Darling Tests.
+J. Am. Stat. Assoc.
+}
 \seealso{
 \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
 

@@ -13,7 +13,7 @@ Rows correspond to the knn cells and do not need rownames.}
 \item{kmin}{Numeric. Minimum number of Knn to include.}
 }
 \value{
-data.frame with two columns (indices, distance) for filtered knn cells.
+data.frame with two columns (index, distance) for filtered knn cells.
 }
 \description{
 Function to filter knn by overall distance density distribution.

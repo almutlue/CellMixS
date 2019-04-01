@@ -30,6 +30,11 @@
 #'
 #' @return A matrix with cells as rows and cms (and cms_smooth) as columns.
 #'
+#' @references
+#' Scholz, F. W. and Stephens, M. A. (1987).
+#' K-Sample Anderson-Darling Tests.
+#' J. Am. Stat. Assoc.
+#'
 #'
 #' @export
 #'
@@ -44,7 +49,7 @@
 #' @importFrom scater runPCA
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assays
-#' @importFrom FNN get.knn
+#' @importFrom BiocNeighbors findKNN
 cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin = NA, smooth = TRUE, n_dim = 20, cell_min = 10){
 
   #------------------Check input parameter ---------------------------------#
@@ -68,15 +73,13 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin =
   #----------------- determine knn matrix -----------------------------------#
   subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
   #determine knn
-  knn <- get.knn(subspace, k=k, algorithm = 'cover_tree')
-  rownames(knn[[1]]) <- cell_names  #indices of knn cells per cell
+  knn <- findKNN(subspace, k=k)
+  rownames(knn[[1]]) <- cell_names  #index of knn cells per cell
   rownames(knn[[2]]) <- cell_names  #euclidean dist of knn cells per cell
-  names(knn) <- c("indices", "distance")
 
   # group assignment of knn cells for each cell
-  knn[[group]] <- do.call(rbind, lapply(cell_names, function(cell_id){
-    colData(sce)[knn[["indices"]][cell_id,], group]
-    }))
+  knn[[group]] <- matrix(colData(sce)[as.numeric(knn$index), group], nrow=nrow(knn$index))
+
   rownames(knn[[group]]) <- cell_names
   #---------------------------------------------------------------------------#
 

@@ -6,7 +6,7 @@ Author: Almut Lütge
 Maintainer: Almut Lütge <almut.luetge@uzh.ch>
 Description: Evaluate Cellspecific Mixing Scores (CMS) for different batches/groups in scRNA-seq data. 
 License: GPL (>=2)
-Imports: FNN, ggplot2, scater, gridExtra, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges, stats
+Imports:  BiocNeighbors, ggplot2, scater, gridExtra, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges, stats
 Depends: kSamples, R (>= 3.5)
 biocViews: SingleCell, Transcriptomics, GeneExpression
 BugReports: https://github.com/almutlue/CellMixS/issues
@@ -15,5 +15,3 @@ Encoding: UTF-8
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Suggests: BiocStyle, knitr, rmarkdown, testthat
-
-    
