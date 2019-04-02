@@ -24,38 +24,41 @@
 #'
 #' @return A p.value as resulting from the ad.test.
 #'
-#' @export
-#'
 #' @importFrom kSamples ad.test
+#' @importFrom magrittr set_colnames %>% extract2
+#' @importFrom dplyr mutate mutate_at group_by_at filter summarize
 .cmsCell <- function(cell, group, knn, kmin = NA, cell_min = 10){
-  #get knn distances and group assignments
-  knn_cell <- cbind(knn[["distance"]][cell,], knn[[group]][cell,])
-  knn_cell <- as.data.frame(knn_cell)
-  colnames(knn_cell) <- c("distance", group)
-  knn_cell[,"distance"] <- as.numeric(as.character(knn_cell[,group]))
-  knn_cell[,group] <- as.factor(knn_cell[,group])
+    #get knn distances and group assignments
+    knn_cell <- cbind(knn[["distance"]][cell, ], knn[[group]][cell, ]) %>%
+        as.data.frame %>%
+        set_colnames(c("distance", group)) %>%
+        mutate(distance = as.numeric(as.character(distance))) %>%
+        mutate_at(group, factor)
 
-  #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
-  if(!is.na(kmin)){
-    knn_cell <- .filterLocMin(knn_cell, kmin)
-  }
+    #Filter cells within a distinct different density distribution (only if local_min = TRUE (default))
+    if( !is.na(kmin) ){
+        knn_cell <- .filterLocMin(knn_cell, kmin)
+    }
 
-  #filter groups with to few cells (cell_min, default 10)
-  groups_included <- levels(knn_cell[,group])[which(table(knn_cell[,group]) > cell_min)]
+    #filter groups with to few cells (cell_min, default 10)
+    groups_included <- knn_cell %>% group_by_at(group) %>%
+        summarize("n_group" = n()) %>%
+        filter(n_group > cell_min) %>%
+        extract2(group) %>% levels()
 
-  #do not perform AD test if only one group with enough cells is in neighbourhood
-  if(length(groups_included) <= 1){
-    p <- 0
-  }else{
-    dist_included <- lapply(groups_included, function(group_level){
-      dist <- knn_cell$distance[which(knn_cell[,group] %in% group_level)]
-    })
-    names(dist_included) <- groups_included
-    #perform AD test with remaining cells
-    k_samp <- ad.test(dist_included)
-    p <- mean(k_samp[["ad"]][," asympt. P-value"])
-  }
-  p
+    #do not perform AD test if only one group with enough cells is in neighbourhood
+    if (length(groups_included) <= 1) {
+        p <- 0
+    } else {
+        dist_included <- lapply(groups_included, function(group_level){
+            dist <- knn_cell$distance[which(knn_cell[, group] %in% group_level)]
+        })
+        names(dist_included) <- groups_included
+        #perform AD test with remaining cells
+        k_samp <- ad.test(dist_included)
+        p <- mean(k_samp[["ad"]][, " asympt. P-value"])
+    }
+    p
 }
 
 
@@ -74,23 +77,24 @@
 #' @family helper functions
 #' @return data.frame with two columns (index, distance) for filtered knn cells.
 #'
-#'
 #' @importFrom stats density
 .filterLocMin <- function(knn_cell, kmin){
-  distances <- density(knn_cell$distance)$x
-  dist_density <- density(knn_cell$distance)$y
-  #Find local minima
-  loc_min <- distances[which(diff(sign(diff(dist_density)))== 2)+1]
-  # Find first local minimum (that is larger than a minimal threshold of cells (kmin))
-  all_locmin <- unlist(lapply(loc_min, function(minim){ind <- length(which(knn_cell$distance <= minim))}))
-  loc_th <- suppressWarnings(min(which(all_locmin > kmin)))
-  loc_dist_th <- loc_min[loc_th]
+    distances <- density(knn_cell$distance)$x
+    dist_density <- density(knn_cell$distance)$y
+    #Find local minima
+    loc_min <- distances[which(diff(sign(diff(dist_density)))== 2)+1]
+    # Find first local minimum (that is larger than a minimal threshold of cells (kmin))
+    all_locmin <- unlist(lapply(loc_min, function(minim){
+        ind <- length(which(knn_cell$distance <= minim))
+    }))
+    loc_th <- suppressWarnings(min(which(all_locmin > kmin)))
+    loc_dist_th <- loc_min[loc_th]
 
-  #filter cells before first local minimum (>kmin)
-  if(length(loc_min) > 0 & !is.na(loc_dist_th)){
-    knn_cell <- knn_cell[which(knn_cell$distance <= loc_dist_th),]
-  }
-  knn_cell
+    #filter cells before first local minimum (>kmin)
+    if(length(loc_min) > 0 & !is.na(loc_dist_th)){
+        knn_cell <- knn_cell[which(knn_cell$distance <= loc_dist_th),]
+    }
+    knn_cell
 }
 
 #' .smoothCms
@@ -116,28 +120,31 @@
 #'
 #'
 #' @importFrom stats weighted.mean
+#' @importFrom magrittr %>% set_colnames
+#' @importFrom purrr %>% map
+#' @importFrom dplyr bind_rows
 .smoothCms <- function(knn, cms_raw, cell_names, kmin, k){
 
-  # cms assignment of knn cells for each cell
-  knn[["cms"]] <- do.call(rbind, lapply(cell_names, function(cell_id){
-    cms_raw[knn[["index"]][cell_id,], "cms"]}))
-  rownames(knn[["cms"]]) <- cell_names
+    # cms assignment of knn cells for each cell
+    knn[["cms"]] <- cell_names %>%
+        map(function(cell_id) cms_raw[knn[["index"]][cell_id, ], "cms"]) %>%
+        bind_rows() %>% t()
 
-  # how many cells to smooth over
-  k_smooth <- ifelse(!is.na(kmin), kmin, k)
 
-  # calculate weigthed mean
-  cms_smooth <- do.call(rbind, lapply(cell_names, function(cell_id){
-    #add 1 to ensure that distances < 1 are less weighted than the original cell
-    weights <- c(1,(1/(knn[[2]][cell_id,seq_len(k_smooth)] + 1)))
-    knn_cms <- c(cms_raw[cell_id,"cms"],knn[["cms"]][cell_id, seq_len(k_smooth)])
-    cms_new <- weighted.mean(knn_cms, weights)
-  }))
+    # how many cells to smooth over
+    k_smooth <- ifelse(!is.na(kmin), kmin, k)
 
-  res_cms <- cbind(cms_smooth, cms_raw)
-  rownames(res_cms) <- cell_names
-  colnames(res_cms) <- c("cms_smooth", "cms")
-  res_cms
+    # calculate weigthed mean
+    cms_smooth <- cell_names %>%
+        map(function(cell_id){
+            #add 1 to ensure that distances < 1 are less weighted than the original cell
+            weights <- c(1, (1/(knn[[2]][cell_id, seq_len(k_smooth)] + 1)))
+            knn_cms <- c(cms_raw[cell_id, "cms"], knn[["cms"]][cell_id, seq_len(k_smooth)])
+            cms_new <- weighted.mean(knn_cms, weights)
+        }) %>% bind_rows() %>% t() %>%
+        set_colnames("cms_smooth")
+
+    res_cms <- cbind(cms_smooth, cms_raw)
 }
 
 ## DefineSubspace

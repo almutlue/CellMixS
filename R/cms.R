@@ -8,11 +8,16 @@
 #'
 #' @param sce A \code{SingleCellExperiment} object with the combined data.
 #' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
-#' @param group Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}
-#' @param dim_red Character. Name of embeddings to use as subspace for distance distributions. Default is "PCA".
-#' @param assay_name Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
+#' @param group Character. Name of group/batch variable.
+#' Needs to be one of \code{names(colData(sce))}
+#' @param dim_red Character. Name of embeddings to use as subspace for distance distributions.
+#' Default is "PCA".
+#' @param assay_name Character. Name of the assay to use for PCA.
+#' Only relevant if no existing 'dim_red' is provided.
 #' Must be one of \code{names(assays(sce))}. Default is "logcounts".
-#' @param kmin Numeric. Minimum number of Knn to include. Default is NA (see Details).
+#' @param res_name Character. Appendix of the result score's name (e.g. method used to combine batches).
+#' @param kmin Numeric. Minimum number of Knn to include.
+#' Default is NA (see Details).
 #' @param smooth Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.
 #' @param n_dim Numeric. Number of dimensions to include to define the subspace.
 #' @param cell_min Numeric. Minimum number of cells from each group to be included into the AD test.
@@ -24,6 +29,8 @@
 #' If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 #' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 #' If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
+#' Results will be appended to \code{colData(sce)}.
+#' Names can be specified using \code{res_name}.
 #'
 #' @family cms functions
 #' @seealso \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
@@ -50,51 +57,63 @@
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assays
 #' @importFrom BiocNeighbors findKNN
-cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts", kmin = NA, smooth = TRUE, n_dim = 20, cell_min = 10){
+#' @importFrom magrittr %>% set_rownames set_colnames
+#' @importFrom purrr %>% map
+#' @importFrom listarrays set_dimnames
+#' @importFrom dplyr bind_rows
+cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
+                res_name = NULL, kmin = NA, smooth = TRUE, n_dim = 20,
+                cell_min = 10){
 
-  #------------------Check input parameter ---------------------------------#
-  if(cell_min < 10){
-    stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
-  }
-  if(!class(sce) == "SingleCellExperiment"){
-    stop("Input error: class('sce') must be 'SingleCellExperiment'.")
-  }
+    #------------------Check input parameter ---------------------------------#
+    if(cell_min < 10){
+        stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
+    }
+    if(!is(sce, "SingleCellExperiment")){
+        stop("Input error: class('sce') must be 'SingleCellExperiment'.")
+    }
 
-  #check group variable class
-  if(!class(colData(sce)[,group]) %in% "factor"){
+    #check group variable class
+    if(!is(colData(sce)[,group], "factor")){
+        sce[[group]] <- as.factor(colData(sce)[, group])
+    }
 
-    sce[[group]] <- as.factor(colData(sce)[,group])
-  }
+    cell_names <- colnames(sce)
+    names(cell_names) <- cell_names
 
-  cell_names <- colnames(sce)
+    #---------------------------------------------------------------------------#
 
-  #---------------------------------------------------------------------------#
+    #----------------- determine knn matrix -----------------------------------#
+    subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
+    #determine knn
+    knn <- findKNN(subspace, k=k) %>% map(set_rownames, cell_names)
 
-  #----------------- determine knn matrix -----------------------------------#
-  subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
-  #determine knn
-  knn <- findKNN(subspace, k=k)
-  rownames(knn[[1]]) <- cell_names  #index of knn cells per cell
-  rownames(knn[[2]]) <- cell_names  #euclidean dist of knn cells per cell
+    # group assignment of knn cells for each cell
+    knn[[group]] <- matrix(
+        colData(sce)[as.numeric(as.character(knn$index)), group],
+        nrow = nrow(knn$index)) %>%
+        set_rownames(cell_names)
+    #---------------------------------------------------------------------------#
 
-  # group assignment of knn cells for each cell
-  knn[[group]] <- matrix(colData(sce)[as.numeric(knn$index), group], nrow=nrow(knn$index))
+    #----------------- calculate cms score  -----------------------------------#
 
-  rownames(knn[[group]]) <- cell_names
-  #---------------------------------------------------------------------------#
+    cms_raw <- cell_names %>%
+        map(.cmsCell, group = group, knn = knn, kmin=kmin, cell_min = cell_min) %>%
+        bind_rows() %>% t() %>%
+        set_colnames("cms")
 
-  #----------------- calculate cms score  -----------------------------------#
+    if(isTRUE(smooth)){
+        res_cms <- .smoothCms(knn, cms_raw, cell_names, kmin, k)
+    }else{
+        res_cms <- cms_raw
+    }
 
-  cms_raw <- do.call(rbind, lapply(cell_names, .cmsCell, group = group, knn = knn, kmin=kmin, cell_min = cell_min))
-  rownames(cms_raw) <- cell_names
-  colnames(cms_raw) <- "cms"
-
-  if(smooth == TRUE){
-    res_cms <- .smoothCms(knn, cms_raw, cell_names, kmin, k)
-  }else{
-    res_cms <- cms_raw
-  }
-  res_cms
+    #Add to colData of sce
+    if(!is.null(res_name)){
+        res_cms <- res_cms %>% set_colnames(paste0(colnames(.), "_", res_name))
+    }
+    colData(sce) <- cbind(colData(sce), res_cms)
+    sce
 }
 
 

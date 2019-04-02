@@ -5,7 +5,8 @@
 \title{cms}
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
-  kmin = NA, smooth = TRUE, n_dim = 20, cell_min = 10)
+  res_name = NULL, kmin = NA, smooth = TRUE, n_dim = 20,
+  cell_min = 10)
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
@@ -18,6 +19,8 @@ cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
 
 \item{assay_name}{Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce))}. Default is "logcounts".}
+
+\item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).}
 
 \item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
