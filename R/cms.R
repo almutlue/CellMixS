@@ -35,7 +35,7 @@
 #' @family cms functions
 #' @seealso \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
 #'
-#' @return A matrix with cells as rows and cms (and cms_smooth) as columns.
+#' @return A \code{SingleCellExperiment} with cms (and cms_smooth) within colData.
 #'
 #' @references
 #' Scholz, F. W. and Stephens, M. A. (1987).

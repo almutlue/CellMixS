@@ -5,7 +5,11 @@
 #'
 #' Plot pvalue histograms of cms score distributions
 #'
-#' @param cms_res Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.
+#' @param res_object \code{SingleCellExperiment} object, matrix or data.frame.
+#' The SingleCellExperiment object should contain the result scores (cms) to plot within \code{colData(sce)}.
+#' Matrix or data frame should have result scores in columns and cells in rows.
+#' @param metric_prefix Character. Prefix to specify names of \code{colData(sce)}.
+#' Will only apply if
 #' @param ncol Numeric. Number of columns of the pval histogram.
 #'
 #'
@@ -18,15 +22,40 @@
 #' @export
 #'
 #' @examples
+#' library(SingleCellExperiment)
+#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' sce <- sim_30[[1]][, c(1:50)]
+#'
 #' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
 #' visHist(cms_sim30)
 #'
 #' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab theme_classic
 #' @importFrom cowplot plot_grid
-visHist <- function(cms_res, ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1)){
-  p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name, ...){
+#' @importFrom dplyr as_tibble select starts_with
+#' @importFrom SingleCellExperiment colData
+visHist <- function(res_object, metric_prefix = "cms", ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1)){
+    ## Check input structure and select data to plot
+    if( is(res_object, "SingleCellExperiment") ){
+        #select columns to plot
+        cms_res <- as_tibble(colData(res_object)) %>%
+            select(starts_with(metric_prefix))
+    }else{
+            cms_res <- res_object
+    }
+
+    #Check the presence of results
+    if(ncol(cms_res) == 0){
+        stop("Error: 'res_object' does not contain any metric results.
+             Please continue by one of:
+             * Run `cms` on your SingleCellExperiment object before plotting.
+             * Specify which colData(res_object) column to plot by `metric_name`.
+             * Specify a matrix or dataframe with result scores to plot as `res_object`.")
+    }
+
+    #plot function
+    p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name){
     ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
-            geom_histogram(color="black", fill = col_hist[which(colnames(cms_res) %in% cms_name)]) +
+            geom_histogram(color="black", fill=col_hist[which(colnames(cms_res) %in% cms_name)]) +
             ggtitle(cms_name) + xlab(cms_name) + theme_classic()
   }), ncol = ncol))
   p
