@@ -13,16 +13,20 @@ cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
 
 \item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 
-\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}}
+\item{group}{Character. Name of group/batch variable.
+Needs to be one of \code{names(colData(sce))}}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for distance distributions. Default is "PCA".}
+\item{dim_red}{Character. Name of embeddings to use as subspace for distance distributions.
+Default is "PCA".}
 
-\item{assay_name}{Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
+\item{assay_name}{Character. Name of the assay to use for PCA.
+Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 
 \item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).}
 
-\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
+\item{kmin}{Numeric. Minimum number of Knn to include.
+Default is NA (see Details).}
 
 \item{smooth}{Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.}
 
@@ -32,7 +36,7 @@ Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 Should be > 10 to make the ad.test function working.}
 }
 \value{
-A matrix with cells as rows and cms (and cms_smooth) as columns.
+A \code{SingleCellExperiment} with cms (and cms_smooth) within colData.
 }
 \description{
 Calculates cell-specific mixing scores based on euclidean distances within a subspace of integrated data.
@@ -44,14 +48,16 @@ In default the function uses all distances and group label defined in knn.
 If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
+Results will be appended to \code{colData(sce)}.
+Names can be specified using \code{res_name}.
 }
 \examples{
 library(SingleCellExperiment)
 load(system.file("extdata/sim30.rda", package = "CellMixS"))
 sce <- sim_30[[1]][, c(1:50)]
 
-cms_smooth <- cms(sce, k = 20, group = "batch")
-cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
+sce_cms <- cms(sce, k = 20, group = "batch")
+sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
 
 }
 \references{
@@ -61,7 +67,5 @@ J. Am. Stat. Assoc.
 }
 \seealso{
 \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
-
-Other cms functions: \code{\link{cmsSummary}}
 }
 \concept{cms functions}

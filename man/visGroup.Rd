@@ -4,7 +4,7 @@
 \alias{visGroup}
 \title{visGroup}
 \usage{
-visGroup(sce, group, dim_red = "TSNE", ...)
+visGroup(sce, group, dim_red = "TSNE")
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object.}
@@ -12,8 +12,6 @@ visGroup(sce, group, dim_red = "TSNE", ...)
 \item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
-
-\item{...}{Additional arguments to pass to \code{\link{ggplot}}.}
 }
 \value{
 a \code{ggplot} object.
@@ -36,10 +34,8 @@ visGroup(sce, "batch")
 
 }
 \seealso{
-\code{\link{visOverview}}, \code{\link{visCms}}
+\code{\link{visOverview}}, \code{\link{visMetric}}
 
-Other visualize cms functions: \code{\link{compareCluster}},
-  \code{\link{compareIntegration}}, \code{\link{visCms}},
-  \code{\link{visHist}}, \code{\link{visOverview}}
+Other visualize functions: \code{\link{visCluster}}
 }
-\concept{visualize cms functions}
+\concept{visualize functions}

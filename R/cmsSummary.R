@@ -1,78 +1,23 @@
-# Functions to summarize cms
+# Functions to plot summarized metrics
 
 ### summarize function
 
-#' cmsSummary
+#' visIntegration
 #'
-#' Summarizes cms scores, if specified based on groups.
+#' Creates a summary plot of metric scores (for different integration methods).
 #'
-#' @param cms_res data frame of cms scores to be summarized.
-#' @param sum_var variable to group summaries. Need to correspond to one of \code{colData(sce)}.
-#' @param sce A \code{SingleCellExperiment} object corresponding to 'cms_res'.
-#'
-#' @details Summarises cms scores by mean to make different conditions/methods/.. comparable.
-#' In default the mean of each cloumn of cms_res is returned.
-#' Groups to summarize can be specified by sum_var and sce.
-#'
-#' @family cms functions
-#' @seealso \code{\link{compareIntegration}}, \code{\link{compareCluster}}
-#'
-#' @return Data frame with mean cms scores (for each group).
-#' @export
-#'
-#' @examples
-#' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50,500:550)]
-#' cmsSummary(cms_sim30)
-#' cmsSummary(cms_sim30, sum_var = "batch", sce = sce)
-#'
-#' @importFrom dplyr as_tibble group_by_ summarize_all funs
-#' @importFrom SingleCellExperiment colData
-#' @importFrom magrittr %>%
-cmsSummary <- function(cms_res, sum_var = NULL, sce = NULL){
-  if(is.null(sum_var)){
-    cms_summarized <- as.data.frame(t(colMeans(as.data.frame(cms_res))))
-  }else{
-    if(is.null(sce)){
-      stop("Missing variable: Please provide a 'sce' object.")
-    }
-    if(!sum_var %in% names(colData(sce))){
-      stop("Missing variable: Could not find 'sum_var'.
-           Please specify one of names(colData(sce)).")
-    }
-    #to prevent type conversion if cms has 1 column only
-    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
-    colnames(cms_res_sorted) <- colnames(cms_res)
-    rownames(cms_res_sorted) <- colnames(sce)
-    cms_merged <- cbind.data.frame(cms_res_sorted, colData(sce)[,sum_var])
-    colnames(cms_merged) <- c(colnames(cms_res_sorted), sum_var)
-
-    cms_summarized <- as_tibble(cms_merged) %>% group_by_(sum_var) %>% summarize_all(funs(mean))
-    cms_summarized <- as.data.frame(cms_summarized)
-  }
-  cms_summarized
-}
-
-
-## Plot summarized cms function
-
-#' compareIntegration
-#'
-#' Creates a summary plot of cms scores (for different integration methods).
-#'
-#' @param cms_res data frame, matrix or list of cms scores to be summarized.
-#' Each column of the dataframe or each element of the list corresponds to a set of cms score that shall be summarized.
-#' List elements need to have the same length and only one set of cms scores per list element.
-#' @param scale Scale param for \code{geom_density_ridges} from \code{ggridges}.
+#' @param res_object \code{SingleCellExperiment} object, list, matrix or data.frame.
+#' The SingleCellExperiment object should contain the result scores (cms) to compare within \code{colData(res_object)}.
+#' List, matrix or data frame should have result scores in list elements resp. columns.
+#' @param metric_prefix Character. Prefix to specify names of \code{colData(sce)} to be compared.
+#' Applys only if `res_object` is a \code{SingleCellExperiment} object. Default is 'cms'.
 #' @param violin A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.
 #'
-#' @details Plots summarized cms scores from an input list or dataframe.
+#' @details Plots summarized cms scores from an \code{SingleCellExperiment} object, list or dataframe.
 #' This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
 #'
-#' @seealso \code{\link{compareCluster}}, \code{ggridges}
-#' @family visualize cms functions
+#' @seealso \code{\link{visCluster}}, \code{ggridges}
+#' @family visualize  functions
 #' @return a \code{ggplot} object.
 #' @export
 #'
@@ -80,66 +25,66 @@ cmsSummary <- function(cms_res, sum_var = NULL, sce = NULL){
 #' library(SingleCellExperiment)
 #'
 #' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
 #'
 #' sce <- sim_30[[1]][, c(1:50,500:550)]
-#' cms_mnn <- cms(sce, k = 30, group = "batch", dim_red = "MNN")
-#' cms_list <- list("raw"= cms_sim30[,"cms"], "mnn" = cms_mnn[,"cms"])
+#' sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
+#' sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
+#' cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
 #'
-#' compareIntegration(cms_list)
+#' visIntegration(cms_list)
+#' visIntegration(sce_mnn, metric_prefix = "cms.", violin = TRUE)
 #'
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic labs geom_violin
 #' @importFrom ggridges geom_density_ridges
-#' @importFrom tidyr gather_
-compareIntegration <- function(cms_res, scale = 1, violin = FALSE){
-  if(is.list(cms_res)){
-    average_table <- do.call(cbind.data.frame, cms_res)
-    colnames(average_table) <- names(cms_res)
-  }else{
-    average_table <- as.data.frame(cms_res)
-  }
+#' @importFrom tidyr gather
+#' @importFrom dplyr as_tibble select starts_with
+#' @importFrom magrittr %>%
+visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
+    if( is.list(res_object) ){
+        average_table <- res_object %>% cbind.data.frame()
+    }else if( is(res_object, "SingleCellExperiment") ){
+        average_table <- as_tibble(colData(res_object)) %>%
+            select(starts_with(metric_prefix))
+    }else{
+        average_table <- as_data_frame(res_object)
+    }
+
+    #change to long format
+    #long format
+    gathercols <- colnames(average_table)
+    average_long <- gather(average_table, keycol, valuecol, gathercols, factor_key=TRUE)
 
 
-  #change to long format
-  #long format
-  keycol <- "alignment"
-  valuecol <- "average_metric"
-  gathercols <- colnames(average_table)
-  average_long <- gather_(average_table, keycol, valuecol, gathercols, factor_key=TRUE)
-
-
-  #plot
-  if(violin == TRUE){
-    summarized_cms <- ggplot(average_long, aes_string(x="alignment", y="average_metric", fill="alignment")) +
-      geom_violin()  +
-      labs(title="Summarized metric", x="alignment", y = "cms") +
-      scale_fill_manual(values = col_hist) + theme_classic()
-  }else{
-    summarized_cms <- ggplot(average_long, aes_string(y="alignment", x="average_metric", fill="alignment")) +
-      geom_density_ridges(scale = scale)  +
-      labs(title="Summarized metric",y="alignment", x = "cms") +
-      scale_fill_manual(values= col_hist) + theme_classic()
-  }
-  summarized_cms
+    #plot
+    if( isTRUE(violin) ){
+        summarized_metric <- ggplot(average_long, aes_string(x="keycol", y="valuecol", fill="keycol")) +
+            geom_violin()  +
+            labs(title="Summarized metric", x="integration", y = paste0("average", metric_prefix)) +
+            scale_fill_manual(values = col_hist) + theme_classic()
+    }else{
+        summarized_metric <- ggplot(average_long, aes_string(y="keycol", x="valuecol", fill="keycol")) +
+            geom_density_ridges(scale = 1)  +
+            labs(title="Summarized metric",y="integration", x = paste0("average", metric_prefix)) +
+            scale_fill_manual(values= col_hist) + theme_classic()
+    }
+    summarized_metric
 }
 
 
-#' compareCluster
+#' visCluster
 #'
-#' Creates summary plots of cms scores for different groups/cluster.
+#' Creates summary plots of metric scores for different groups/cluster.
 #'
-#' @param cms_res data frame of cms scores to be summarized. Cms scores should be in the first column.
-#' Either a second column with corresponding levels of \code{cluster_var} or \code{sce} with levels in \code{colData(sce)} need to be specified.
-#' @param cluster_var Character. Name of the factor level variable to summarize cms scores on.
-#' @param cms_var Character. Name of the cms_res to use. Default is "cms".
-#' @param sce \code{SingleCellexperiment} object. Should only be specified if \code{cluster_var} is not already provided in \code{cms_res}.
+#' @param sce_cms A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot within \code{colData(res_object)}.
+#' @param cluster_var Character. Name of the factor level variable to summarize metric scores on.
+#' @param metric_var Character Name of the metric scores to use. Default is "cms".
 #' @param violin A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.
 #'
-#' @details Plots summarized cms scores for a specified list.
-#' This function is intended to visualize and compare cms scores among clusters or other dataset variables.
+#' @details Plots summarized metric scores.
+#' This function is intended to visualize and compare metric scores among clusters or other dataset variables spcified in `cluster_var`.
 #'
-#' @seealso \code{\link{compareIntegration}}
-#' @family visualize cms functions
+#' @seealso \code{\link{visIntegration}}
+#' @family visualize functions
 #' @return a \code{ggplot} object.
 #' @export
 #'
@@ -147,41 +92,34 @@ compareIntegration <- function(cms_res, scale = 1, violin = FALSE){
 #' library(SingleCellExperiment)
 #'
 #' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
-#'
 #' sce <- sim_30[[1]][, c(1:50,500:550)]
-#' colData(sce)$group <- sample(c("A", "B", "C"), ncol(sce), replace = TRUE)
-#' compareCluster(cms_sim30, "group", cms_var = "cms", sce = sce, violin = TRUE)
+#' sce_cms <- cms(sce, "batch", k = 30)
+#'
+#' visCluster(sce_cms, "batch")
 #'
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_fill_manual theme_classic labs geom_violin
-#' @importFrom tidyr gather_
 #' @importFrom SingleCellExperiment colData
 #' @importFrom ggridges geom_density_ridges
-compareCluster <- function(cms_res, cluster_var, cms_var = "cms", sce = NULL, violin = FALSE){
-  if(!is.null(sce)){
-    cms_res_sorted <- as.data.frame(cms_res[colnames(sce),])
-    colnames(cms_res_sorted) <- colnames(cms_res)
-    rownames(cms_res_sorted) <- colnames(sce)
-    cms_table <- data.frame(cms = cms_res_sorted[,cms_var], cluster = as.factor(colData(sce)[,cluster_var]))
-    colnames(cms_table) <- c(cms_var, cluster_var)
-  }else{
-    cms_table <- cms_res[,c(cms_var, cluster_var)]
-    colnames(cms_table) <- c(cms_var, cluster_var)
-    cms_table[,cluster_var] <- as.factor(cms_table[,cluster_var])
-  }
+#' @importFrom magrittr %>%
+#' @importFrom dplyr select mutate_at as_tibble
+visCluster <- function(sce_cms, cluster_var, metric_var = "cms", violin = FALSE){
 
-  #plot
-  if(violin == TRUE){
-    summarized_cms <- ggplot(cms_table, aes_string(x=cluster_var, y=cms_var, fill=cluster_var)) +
-      geom_violin()  +
-      labs(title="Summarized cms", x=cluster_var, y = cms_var) +
-      scale_fill_manual(values = col_hist) + theme_classic()
+    metric_table <- as_tibble(colData(sce_cms)) %>%
+        select(metric_var, cluster_var) %>%
+        mutate_at(cluster_var, as.factor)
 
-  }else{
-    summarized_cms <- ggplot(cms_table, aes_string(y=cluster_var, x=cms_var, fill=cluster_var)) +
-      geom_density_ridges(scale = 1)  +
-      labs(title="Summarized cms", y=cluster_var, x = cms_var) +
-      scale_fill_manual(values = col_hist) + theme_classic()
-  }
-  summarized_cms
+    #plot
+    if(violin == TRUE){
+        summarized_metric <- ggplot(metric_table, aes_string(x=cluster_var, y=metric_var, fill=cluster_var)) +
+            geom_violin() +
+            labs(title=paste0("Summarized ", metric_var), x=cluster_var, y = metric_var) +
+            scale_fill_manual(values = col_hist) + theme_classic()
+
+    }else{
+        summarized_metric <- ggplot(metric_table, aes_string(y=cluster_var, x=metric_var, fill=cluster_var)) +
+            geom_density_ridges(scale = 1)  +
+            labs(title=paste0("Summarized ", metric_var), y=cluster_var, x = metric_var) +
+            scale_fill_manual(values = col_hist) + theme_classic()
+    }
+    summarized_metric
 }

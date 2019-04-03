@@ -179,7 +179,7 @@ Results of `cms` can be visualized cellspecific and alongside any metadata.
 #cms only cms10
 cms10 <- cms_sim30[["batch10"]]
 sce10 <- sim_30[["batch10"]]
-cms_sce10 <- visCms(cms_res = cms10, sce = sce10, cms_var = "cms_smooth")
+cms_sce10 <- visMetric(cms_res = cms10, sce = sce10, cms_var = "cms_smooth")
 
 #group only cms10
 group_sce10 <- visGroup(sce10, group = "batch")
@@ -196,9 +196,9 @@ sce10[["celltype"]] <- sample(c("CD4+", "CD8+", "CD3", "CD19"), ncol(sce10), rep
 visOverview(cms10, sce10, "batch", other_Var = "celltype")
 ```
 
-Systematic differences (e.g. celltype differences) can be further explored using `compareCluster`. Here we do not expect any systematic difference as celltypes were randomly assigned.
+Systematic differences (e.g. celltype differences) can be further explored using `visCluster`. Here we do not expect any systematic difference as celltypes were randomly assigned.
 ```{r compare cluster, fig.small= TRUE}
-compareCluster(cms10, "celltype", sce = sce10)
+visCluster(cms10, "celltype", sce = sce10)
 ```
 
 
@@ -225,13 +225,13 @@ cms_lim <- cms(sce10, k = 80, group = "batch", assay_name = "lim_corrected")
 
 ## Compare data integration methods {#di2}
 
-To compare different methods summary plots from `compareIntegration` and p-value histograms from `visHist` can be used. Local patterns within single methods can be explored as described above.
+To compare different methods summary plots from `visIntegration` and p-value histograms from `visHist` can be used. Local patterns within single methods can be explored as described above.
 ```{r batch correction methods vis}
 #combine results
 cms_res <- data.frame("mnn" = cms_mnn[,"cms"], "limma" = cms_lim[,"cms"], "unaligned" = cms10[,"cms"])
 
 # plot results
-compareIntegration(cms_res, violin = TRUE)
+visIntegration(cms_res, violin = TRUE)
 
 # As pvalue histograms
 visHist(cms_res, ncol = 3)
@@ -262,9 +262,9 @@ ldf_lim <- ldfDiff(sce_pre_list, sce_combined = sce10, group = "batch", k = 75, 
 Results from `ldfDiff` can be visualized in a similar way as results from `cms`.
 ```{r vis ldfDiff}
 #ldfDiff scores in reduced dim representation
-lim_plot <- visCms(ldf_lim, sce10, cms_var = "diff", dim_red = "TSNE") + ggtitle("ldfDiff - limma")
+lim_plot <- visMetric(ldf_lim, sce10, cms_var = "diff", dim_red = "TSNE") + ggtitle("ldfDiff - limma")
 
-mnn_plot <- visCms(ldf_mnn, sce10, cms_var = "diff", dim_red = "MNN") + ggtitle("ldfDiff - mnn")
+mnn_plot <- visMetric(ldf_mnn, sce10, cms_var = "diff", dim_red = "MNN") + ggtitle("ldfDiff - mnn")
 
 plot_grid(lim_plot, mnn_plot, ncol = 2)
 
@@ -272,7 +272,7 @@ plot_grid(lim_plot, mnn_plot, ncol = 2)
 # combine results
 ldf_res <- data.frame("mnn" = ldf_mnn[,"diff"], "limma" = ldf_lim[,"diff"])
 
-compareIntegration(ldf_res) + labs(title="Summarized ldfDiff",x="method", y = "diff")
+visIntegration(ldf_res) + labs(title="Summarized ldfDiff",x="method", y = "diff")
 
 ```
 

@@ -1,4 +1,6 @@
 library(SingleCellExperiment)
+library(CellMixS)
+
 #get simulated scRNA seq data with 3 unbalanced batches
 load(system.file("extdata/sim30.rda", package = "CellMixS"))
 sce <- sim_30[[4]][, c(1:50,500:550)]
@@ -10,42 +12,44 @@ sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)
 ### Include internal functions as ldfKnn and defineSubspace.
 
 test_that("test that output of ldfDiff is correct",{
-  ldf_mnn <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
-                      dim_combined = "MNN", n_dim = 5)
-  sce_noDim <- sce
-  reducedDims(sce_noDim) <-list()
-  ldf_sameDim <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", n_dim = 5)
-  ldf_tsne <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "TSNE", n_dim = 2)
+    sce_ldf_mnn <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
+                           dim_combined = "MNN", n_dim = 5, res_name = "MNN")
+    sce_noDim <- sce
+    reducedDims(sce_noDim) <-list()
+    sce_ldf_sameDim <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", n_dim = 5)
+    sce_ldf_tsne <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "TSNE", n_dim = 2)
 
-  expect_is(ldf_mnn, "data.frame")
-  expect_equal(sum(ldf_sameDim), 0)
-  expect_is(ldf_sameDim, "data.frame")
-  expect_is(ldf_tsne, "data.frame")
-  expect_error(ldfDiff(sce_pre_list, sce, k = 500, group = "batch", n_dim = 5),
-               "Parameter 'k' is greater than dataset size: Please provide a valid value.")
+    expect_is(sce_ldf_mnn, "SingleCellExperiment")
+    expect_equal(sum(sce_ldf_sameDim$diff_ldf), 0)
+    expect_is(sce_ldf_mnn$diff_ldf.MNN, "numeric")
+    expect_is(sce_ldf_tsne, "SingleCellExperiment")
+    expect_error(ldfDiff(sce_pre_list, sce, k = 500, group = "batch", n_dim = 5),
+                 "Parameter 'k' is greater than dataset size: Please provide a valid value.")
 
-  expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
-                       dim_red = "tsne", assay_pre = "raw.counts"),
-               "Ambigious parameter: Please specify parameter for distance calculations.
+    expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
+                         dim_red = "tsne", assay_pre = "raw.counts"),
+                 "Ambigious parameter: Please specify parameter for distance calculations.
          * If precalculated embeddings shall be used, keep 'assay_name' as default.
          * If a PCA based on 'assay_name' shall be used, keep 'dim_red' as default.", fixed = TRUE)
 
-  expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
-                       dim_combined = "tsne", assay_combined = "raw.counts"),
-               "Ambigious parameter: Please specify parameter for distance calculations.
+    expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
+                         dim_combined = "tsne", assay_combined = "raw.counts"),
+                 "Ambigious parameter: Please specify parameter for distance calculations.
          * If precalculated embeddings shall be used, keep 'assay_name' as default.
          * If a PCA based on 'assay_name' shall be used, keep 'dim_red' as default.", fixed = TRUE)
 
-  expect_error(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch"),
-               "Parameter 'assay_name' not found: Please provide a valid value.",
-               fixed = TRUE)
-  expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_red = "TSNE", n_dim = 5),
-               "Parameter 'n_dim' is greater than reduced dimensional space: Please provide a valid value.",
-               fixed = TRUE)
-  expect_warning(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch", assay_pre = "counts",
-                         assay_combined = "counts", n_dim = 5),
-                 "'dim_red' not found: PCA subspace is used to calculate distances.",
+    expect_error(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch"),
+                 "Parameter 'assay_name' not found: Please provide a valid value.",
                  fixed = TRUE)
+    expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_red = "TSNE", n_dim = 5),
+                 "Parameter 'n_dim' is greater than reduced dimensional space: Please provide a valid value.",
+                 fixed = TRUE)
+    expect_warning(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch", assay_pre = "counts",
+                           assay_combined = "counts", n_dim = 5),
+                   "'dim_red' not found: PCA subspace is used to calculate distances.",
+                   fixed = TRUE)
+
 })
+
 
 

@@ -19,6 +19,8 @@
 #' @param assay_combined Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
 #' Must be one of \code{names(assays(sce_combined))}. Default is "logcounts".
 #' @param n_dim Numeric. Number of PCs to include to define subspaces.
+#' @param res_name Character. Appendix of the result score's name (e.g. method used to combine batches).
+#' Used to specify result name for more than one run on the same input.
 #'
 #' @details The ldfDiff function calculates differences in LDF for each element in \code{sce_pre_list} and their corresponding cells in \code{sce_combined} using \code{\link{ldfSce}}.
 #' If 'dim_red' is not defined a PCA will be calculated using \code{runPCA}.
@@ -31,7 +33,7 @@
 #' @family ldf functions
 #' @seealso \code{\link{ldfSce}}, \code{\link{.ldfKnn}}.
 #'
-#' @return A data.frame with cells as rows and difference in LDF as column named "diff".
+#' @return A \code{SingleCellExperiment} with difference in LDF named "diff_ldf" in colData.
 #'
 #' @references
 #' Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
@@ -49,20 +51,36 @@
 #' sce_batch2 <- sce[,colData(sce)$batch == "2"]
 #' sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)
 #'
-#' ldf_diff <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 5)
+#' sce_ldf <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 2)
 #'
-#'
-ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", dim_combined = dim_red, assay_pre = "logcounts", assay_combined = "logcounts", n_dim = 20){
-  diff <- do.call(rbind, lapply(names(sce_pre_list),
-                                ldfSce, sce_pre_list = sce_pre_list,
-                                sce_combined = sce_combined,
-                                group = group,
-                                k = k,
-                                dim_red = dim_red,
-                                dim_combined = dim_combined,
-                                assay_pre = assay_pre,
-                                assay_combined = assay_combined,
-                                n_dim = n_dim))
+#' @importFrom purrr map
+#' @importFrom magrittr %>% set_colnames set_rownames
+#' @importFrom dplyr bind_rows select mutate arrange
+ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
+                    dim_combined = dim_red, assay_pre = "logcounts",
+                    assay_combined = "logcounts", n_dim = 20, res_name = NULL){
+
+    cell_names <- sce_pre_list %>% map(colnames) %>% unlist()
+
+     diff <- names(sce_pre_list) %>% map(ldfSce, sce_pre_list = sce_pre_list,
+                                        sce_combined = sce_combined,
+                                        group = group,
+                                        k = k,
+                                        dim_red = dim_red,
+                                        dim_combined = dim_combined,
+                                        assay_pre = assay_pre,
+                                        assay_combined = assay_combined,
+                                        n_dim = n_dim) %>%
+         bind_rows() %>% mutate(cell_id = cell_names) %>%
+         arrange(match(cell_id, colnames(sce_combined))) %>% select(diff_ldf)
+
+    #Add to colData sce_combined
+    if(!is.null(res_name)){
+        diff <- diff %>% set_colnames(paste0(colnames(.), ".", res_name))
+    }
+
+     colData(sce_combined) <- cbind(colData(sce_combined), diff)
+     sce_combined
 }
 
 
@@ -99,7 +117,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", 
 #' @family ldf functions
 #' @seealso \code{\link{ldfDiff}}, \code{\link{.ldfKnn}}.
 #'
-#' @return A data.frame with cells as rows and difference in LDF as column named "diff".
+#' @return A data.frame with cells as rows and difference in LDF as column named "diff_ldf".
 #'
 #' @references
 #' Latecki, Longin Jan and Lazarevic, Aleksandar and Pokrajac, Dragoljub (2007).
@@ -121,55 +139,59 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", 
 #' @importFrom stats dist
 #' @importFrom SingleCellExperiment reducedDim colData
 #' @importFrom SummarizedExperiment assays
-#' @importFrom  BiocNeighbors findKNN
-ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA", dim_combined = dim_red, assay_pre = "logcounts", assay_combined = "logcounts", n_dim = 20){
-  #sce before integration
-  sce_pre <- sce_pre_list[[sce_name]]
-  cell_names <- colnames(sce_pre)
+#' @importFrom BiocNeighbors findKNN
+#' @importFrom magrittr %>% set_names set_rownames
+#' @importFrom dplyr bind_cols
+#' @importFrom purrr map
+ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75,
+                  dim_red = "PCA", dim_combined = dim_red,
+                  assay_pre = "logcounts", assay_combined = "logcounts",
+                  n_dim = 20){
+    #sce before integration
+    sce_pre <- sce_pre_list[[sce_name]]
+    cell_names <- colnames(sce_pre)
 
-  #sub sce after integration
-  sce_post <- sce_combined[, colData(sce_combined)[,group] == sce_name]
+    #sub sce after integration
+    sce_post <- sce_combined[, colData(sce_combined)[,group] == sce_name]
+    sce_post <- sce_post[, cell_names]
 
-  #determine subspace
-  subspace <- .defineSubspace(sce_pre, assay_pre, dim_red, n_dim)
+    #determine subspace
+    subspace <- .defineSubspace(sce_pre, assay_pre, dim_red, n_dim)
 
-  #----------------- determine ldf pre-----------------------------------#
-  # test size of k has
-  if(k >= nrow(subspace)){
-    stop("Parameter 'k' is greater than dataset size: Please provide a valid value.")
-  }
-  knn <- findKNN(subspace, k=k)
-  rownames(knn[[1]]) <- rownames(subspace)  #index of knn cells per cell
-  rownames(knn[[2]]) <- rownames(subspace) #euclidean dist of knn cells per cell
+    #----------------- determine ldf pre-----------------------------------#
+    # test size of k has
+    if(k >= nrow(subspace)){
+        stop("Parameter 'k' is greater than dataset size: Please provide a valid value.")
+    }
+    knn <- findKNN(subspace, k=k) %>% map(set_rownames, rownames(subspace))
 
-  #assign names to cell index
-  knn[["cell_name"]] <- do.call(rbind, lapply(rownames(subspace), function(cell_id){
-    rownames(subspace)[knn[["index"]][cell_id,]]
-  }))
+    #assign names to cell index
+    knn$cell_name <- rownames(subspace) %>% map(function(cell_id){
+        rownames(subspace)[knn[["index"]][cell_id,]]}) %>%
+        set_names(rownames(subspace)) %>% bind_cols() %>% t()
 
-  rownames(knn[["cell_name"]]) <- rownames(subspace)
-  ldf_pre <- .ldfKnn(subspace, knn_object = knn, k = k, c = 0.5)
+    ldf_pre <- .ldfKnn(subspace, knn_object = knn, k = k, c = 0.5)
 
-  #---------------------------------------------------------------------------#
+    #---------------------------------------------------------------------------#
 
-  #----------------- determine ldf post-----------------------------------#
-  # euclidean distances in integrated subspace
-  knn_int <- knn
-  subspace_int <- .defineSubspace(sce_combined, assay_combined, dim_combined, n_dim)
-  subspace_int <- subspace_int[rownames(knn_int$index),]
-  # calculate new distances (keeping neighbours)
-  knn_int$distance <- do.call(rbind, lapply(rownames(knn_int$index), function(cell){
-    knn_cells <- knn_int[["cell_name"]][cell,]
-    subspace_sub <- subspace_int[c(cell,knn_cells),]
-    distance <- as.matrix(dist(subspace_sub))[cell,-1]
-  }))
+    #----------------- determine ldf post-----------------------------------#
+    # euclidean distances in integrated subspace
+    knn_int <- knn
+    subspace_int <- .defineSubspace(sce_combined, assay_combined, dim_combined, n_dim)
+    subspace_int <- subspace_int[rownames(knn_int$index),]
 
-  rownames(knn_int[["distance"]]) <- rownames(knn_int$index)
+    # calculate new distances (keeping neighbours)
+    knn_int$distance <- rownames(knn_int$index) %>% map(function(cell){
+        knn_cells <- knn_int[["cell_name"]][cell,]
+        subspace_sub <- subspace_int[c(cell,knn_cells),]
+        distance <- as.matrix(dist(subspace_sub))[cell,-1]}) %>%
+        bind_cols() %>% t() %>% set_rownames(rownames(knn_int$index))
 
-  ldf_post <- .ldfKnn(subspace_int, knn_object = knn_int, k = k, c = 0.5)
 
-  #----------------------------------------------------------------------------#
-  #calculate differences in LDF
-  diff <- data.frame("diff" = ldf_post[["LDF"]][,"LDF"] - ldf_pre[["LDF"]][,"LDF"],
-                     row.names = rownames(ldf_pre[["LDF"]]))
-  }
+    ldf_post <- .ldfKnn(subspace_int, knn_object = knn_int, k = k, c = 0.5)
+
+    #----------------------------------------------------------------------------#
+    #calculate differences in LDF
+    diff <- data.frame("diff_ldf" = ldf_post[["LDF"]][,"LDF"] - ldf_pre[["LDF"]][,"LDF"],
+                       row.names = rownames(ldf_pre[["LDF"]]))
+}

@@ -34,7 +34,7 @@ Must be one of \code{names(assays(sce_combined))}. Default is "logcounts".}
 \item{n_dim}{Numeric. Number of PCs to include to define subspaces.}
 }
 \value{
-A data.frame with cells as rows and difference in LDF as column named "diff".
+A data.frame with cells as rows and difference in LDF as column named "diff_ldf".
 }
 \description{
 Determines cell-specific changes in the Local Density Factor before and after data integration for one specific group.

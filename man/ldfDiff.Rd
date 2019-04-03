@@ -6,7 +6,7 @@
 \usage{
 ldfDiff(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
   dim_combined = dim_red, assay_pre = "logcounts",
-  assay_combined = "logcounts", n_dim = 20)
+  assay_combined = "logcounts", n_dim = 20, res_name = NULL)
 }
 \arguments{
 \item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single datasets before integration.
@@ -30,9 +30,12 @@ Must be one of \code{names(assays(sce_pre))}. Default is "logcounts".}
 Must be one of \code{names(assays(sce_combined))}. Default is "logcounts".}
 
 \item{n_dim}{Numeric. Number of PCs to include to define subspaces.}
+
+\item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).
+Used to specify result name for more than one run on the same input.}
 }
 \value{
-A data.frame with cells as rows and difference in LDF as column named "diff".
+A \code{SingleCellExperiment} with difference in LDF named "diff_ldf" in colData.
 }
 \description{
 Determines cell-specific changes in the Local Density Factor before and after data integration.
@@ -53,8 +56,7 @@ sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_batch2 <- sce[,colData(sce)$batch == "2"]
 sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)
 
-ldf_diff <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 5)
-
+sce_ldf <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 2)
 
 }
 \references{

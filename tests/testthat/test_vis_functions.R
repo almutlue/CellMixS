@@ -3,51 +3,66 @@ library(CellMixS)
 load(system.file("extdata/sim30.rda", package = "CellMixS"))
 load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
 sce <- sim_30[[1]][, c(1:50,500:550)]
+sce_cms <- cms(sce, "batch", k = 30)
 
 ## Tests for visualization fuctions:
 
 ### visHist
 test_that("test that visHist works",{
-  hist <- visHist(cms_sim30)
-  hist_cms <- visHist(data.frame("cms" = cms_sim30[, "cms"]))
-  expect_is(hist, "ggplot")
-  expect_is(hist_cms, "ggplot")
+    hist <- visHist(cms_sim30)
+    hist_cms <- visHist(data.frame("cms" = cms_sim30[, "cms"]))
+    hist_sce <- visHist(sce_cms)
+    expect_is(hist, "ggplot")
+    expect_is(hist_cms, "ggplot")
+    expect_is(hist_sce, "ggplot")
+    expect_error(visHist(sce),
+                 "Error: 'res_object' does not contain any metric results.
+             Please continue by one of:
+             * Run `cms` on your SingleCellExperiment object before plotting.
+             * Specify which colData(res_object) column to plot by `metric_prefix`.
+             * Specify a matrix or dataframe with result scores to plot as `res_object`.",
+                 fixed = TRUE)
 
 })
 
 ### visOverview
 
 test_that("test that visOverview works",{
-  overview <- visOverview(cms_sim30, sce, "batch")
-  #change embeddings
-  overview_mnn <- visOverview(cms_sim30, sce, "batch", dim_red = "MNN", log10_val = TRUE)
-  #data frame as input
-  overview_cms <- visOverview(data.frame("cms" = cms_sim30[, "cms"]), sce, "batch")
-  #no smoothed results
-  overview_cms2 <- visOverview(cms_sim30, sce, "batch", smooth = FALSE)
-  #calculate new dim_red
-  sce_noRedDim <- sce
-  reducedDims(sce_noRedDim) <- NULL
-  overview_tsne <- visOverview(cms_sim30, sce_noRedDim, "batch")
+    overview <- visOverview(sce_cms, "batch")
+    #change embeddings
+    overview_mnn <- visOverview(sce_cms, "batch", dim_red = "MNN", log10_val = TRUE)
+    #add other vars (continous and discrete)
+    overview_Vars <- visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
 
-  expect_is(overview, "gg")
-  expect_is(overview_mnn, "gg")
-  expect_is(overview_cms, "gg")
-  expect_is(overview_cms2, "gg")
-  expect_error(visOverview(cms_sim30, sce, "batch", dim_red = "quatsch"),
-               "Ambigous parameter 'dim_red', provide one of:
-           * A dim_red method that is listed in reducedDimNames(sce).
-           * Default('TSNE') will call runTSNE to calculate a subspace.",
+    #calculate new dim_red
+    sce_noRedDim <- sce_cms
+    reducedDims(sce_noRedDim) <- NULL
+    overview_tsne <- visOverview(sce_noRedDim, "batch")
+
+    expect_is(overview, "gg")
+    expect_is(overview_mnn, "gg")
+    expect_is(overview_Vars, "gg")
+    expect_is(overview_tsne, "gg")
+    expect_error(visOverview(sce_cms, "batch", dim_red = "quatsch"),
+                 "Ambigous parameter 'dim_red', provide one of:
+                 * A dim_red method that is listed in reducedDimNames(sce_cms).
+                 * Default('TSNE') will call runTSNE to calculate a subspace.",
+                 fixed = TRUE)
+    expect_error(visOverview(sce, "batch"),
+                 "Error: 'sce_cms' does not contain any metric results.
+             Please continue by one of:
+             * Run `cms` on your SingleCellExperiment object before plotting.
+             * Specify which colData(res_object) column to plot by `metric_prefix`.",
                fixed = TRUE)
 })
 
 
-### visCMS and visGroup
+### visMetric and visGroup
 
-test_that("test that visCMS and visGroup work",{
-  #visCMS
-  vis_cms <- visCms(cms_sim30, sce)
-  vis_cms2 <- visCms(cms_sim30, sce, cms_var = "cms_smooth", dim_red = "MNN")
+test_that("test that visMetric and visGroup work",{
+  #visMetric
+  vis_cms <- visMetric(sce_cms)
+  vis_cms2 <- visMetric(sce_cms, metric_var = "cms_smooth", dim_red = "MNN")
   #visGroup
   sce_num <- sce
   colData(sce_num)$batch <- as.numeric(colData(sce)$batch)

@@ -4,31 +4,44 @@
 \alias{visHist}
 \title{visHist}
 \usage{
-visHist(cms_res, ncol = ifelse(length(colnames(cms_res)) > 1, 2, 1))
+visHist(res_object, metric_prefix = "cms", n_col = 1)
 }
 \arguments{
-\item{cms_res}{Matrix or data.frame. Cms scores to plot should be in columns and cells in rows.}
+\item{res_object}{\code{SingleCellExperiment} object, matrix or data.frame.
+The SingleCellExperiment object should contain the result scores (e.g. cms) to plot in \code{colData(res_object)}.
+Matrix or data frame should have result scores in columns and cells in rows.}
 
-\item{ncol}{Numeric. Number of columns of the pval histogram.}
+\item{metric_prefix}{Character. Prefix to specify names of \code{colData(sce)} to be plotted.
+Applys only if `res_object` is a \code{SingleCellExperiment} object. Default is 'cms'.}
+
+\item{n_col}{Numeric. Number of columns of the pval histogram.}
 }
 \value{
 a \code{ggplot} object.
 }
 \description{
-Plot pvalue histograms of cms score distributions
+Plot pvalue histograms of metric score distributions
 }
 \details{
-Plots cms score distribution similar to a pvalue histogram distribution.
+Plots metric score distribution similar to a pvalue histogram distribution.
 Without dataset-specific bias, cms scores should be approx. flat distributed.
+If `res_object` is a matrix or data.frame, it will create a histogram for each column.
+If `res_object` is a \code{SingleCellExperiment} object,
+ it will create a histogram of all \code{colData(res_object)} that start with `metric_prefix`.
 }
 \examples{
+library(SingleCellExperiment)
+load(system.file("extdata/sim30.rda", package = "CellMixS"))
+sce <- sim_30[[1]][, c(1:50)]
+sce_cms <- cms(sce, "batch", k = 30)
+visHist(sce_cms)
+
 load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
 visHist(cms_sim30)
 
 }
 \seealso{
-Other visualize cms functions: \code{\link{compareCluster}},
-  \code{\link{compareIntegration}}, \code{\link{visCms}},
-  \code{\link{visGroup}}, \code{\link{visOverview}}
+Other visualize metric functions: \code{\link{visMetric}},
+  \code{\link{visOverview}}
 }
-\concept{visualize cms functions}
+\concept{visualize metric functions}

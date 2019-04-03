@@ -50,8 +50,8 @@
 #' load(system.file("extdata/sim30.rda", package = "CellMixS"))
 #' sce <- sim_30[[1]][, c(1:50)]
 #'
-#' cms_smooth <- cms(sce, k = 20, group = "batch")
-#' cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
+#' sce_cms <- cms(sce, k = 20, group = "batch")
+#' sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
 #'
 #' @importFrom scater runPCA
 #' @importFrom SingleCellExperiment reducedDim colData
@@ -110,7 +110,7 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
 
     #Add to colData of sce
     if(!is.null(res_name)){
-        res_cms <- res_cms %>% set_colnames(paste0(colnames(.), "_", res_name))
+        res_cms <- res_cms %>% set_colnames(paste0(colnames(.), ".", res_name))
     }
     colData(sce) <- cbind(colData(sce), res_cms)
     sce
