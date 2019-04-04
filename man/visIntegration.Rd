@@ -29,9 +29,9 @@ This function is intended to visualize and compare different methods and views o
 \examples{
 library(SingleCellExperiment)
 
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 
-sce <- sim_30[[1]][, c(1:50,500:550)]
+sce <- sim_list[[1]][, c(1:50,500:550)]
 sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
 sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
 cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)

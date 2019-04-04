@@ -4,13 +4,13 @@
 \alias{.filterLocMin}
 \title{.filterLocMin}
 \usage{
-.filterLocMin(knn_cell, kmin)
+.filterLocMin(knn_cell, k_min)
 }
 \arguments{
 \item{knn_cell}{Data frame with one column "distance" and one column named by the group variable.
 Rows correspond to the knn cells and do not need rownames.}
 
-\item{kmin}{Numeric. Minimum number of Knn to include.}
+\item{k_min}{Numeric. Minimum number of Knn to include.}
 }
 \value{
 data.frame with two columns (index, distance) for filtered knn cells.

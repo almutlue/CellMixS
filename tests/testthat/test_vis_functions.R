@@ -1,18 +1,15 @@
 library(SingleCellExperiment)
 library(CellMixS)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50,500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50,500:550)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 ## Tests for visualization fuctions:
 
 ### visHist
 test_that("test that visHist works",{
-    hist <- visHist(cms_sim30)
-    hist_cms <- visHist(data.frame("cms" = cms_sim30[, "cms"]))
+    hist_cms <- visHist(data.frame("cms" = sce_cms$cms))
     hist_sce <- visHist(sce_cms)
-    expect_is(hist, "ggplot")
     expect_is(hist_cms, "ggplot")
     expect_is(hist_sce, "ggplot")
     expect_error(visHist(sce),

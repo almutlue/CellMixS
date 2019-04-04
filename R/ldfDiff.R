@@ -45,8 +45,8 @@
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[4]][, c(1:50, 500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[4]][, c(1:50, 500:550)]
 #' sce_batch1 <- sce[,colData(sce)$batch == "1"]
 #' sce_batch2 <- sce[,colData(sce)$batch == "2"]
 #' sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)
@@ -55,7 +55,9 @@
 #'
 #' @importFrom purrr map
 #' @importFrom magrittr %>% set_colnames set_rownames
-#' @importFrom dplyr bind_rows select mutate arrange
+#' @importFrom dplyr bind_rows select mutate arrange .data
+#' @importFrom SingleCellExperiment colData
+#' @importFrom SummarizedExperiment colData<-
 ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
                     dim_combined = dim_red, assay_pre = "logcounts",
                     assay_combined = "logcounts", n_dim = 20, res_name = NULL){
@@ -72,7 +74,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
                                         assay_combined = assay_combined,
                                         n_dim = n_dim) %>%
          bind_rows() %>% mutate(cell_id = cell_names) %>%
-         arrange(match(cell_id, colnames(sce_combined))) %>% select(diff_ldf)
+         arrange(match(.data$cell_id, colnames(sce_combined))) %>% select(.data$diff_ldf)
 
     #Add to colData sce_combined
     if(!is.null(res_name)){
@@ -91,7 +93,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
 #'
 #' @param sce_name Character. Name of the element in \code{sce_pre_list} to calculate LDF differences in.
 #' @param sce_pre_list A list of \code{SingleCellExperiment} objects with single datasets before integration.
-#' Names should correspond to levels in \code{colData(sce_combined)$group} and \code{sce_name}.
+#' Names need to correspond to levels in \code{colData(sce_combined)$group} and \code{sce_name}!!
 #' @param sce_combined A \code{SingleCellExperiment} object with the combined data.
 #' @param group Character. Name of group/batch variable that separates elements of \code{sce_pre_list}.
 #' Needs to be one of \code{names(colData(sce_combined))}.
@@ -129,8 +131,8 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[4]][, c(1:50, 500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[4]][, c(1:50, 500:550)]
 #' sce_batch1 <- sce[,colData(sce)$batch == "1"]
 #' sce_pre_list <- list("1" = sce_batch1)
 #'

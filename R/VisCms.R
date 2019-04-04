@@ -26,18 +26,17 @@
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[1]][, c(1:50)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #' visHist(sce_cms)
 #'
-#' load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
-#' visHist(cms_sim30)
 #'
 #' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab theme_classic
 #' @importFrom cowplot plot_grid
 #' @importFrom dplyr as_tibble select starts_with
 #' @importFrom SingleCellExperiment colData
+#' @importFrom methods is
 visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
     ## Check input structure and select data to plot
     if( is(res_object, "SingleCellExperiment") ){
@@ -95,8 +94,8 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[1]][, c(1:50, 500:550)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #'
 #' visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
@@ -108,7 +107,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
-#' @importFrom purrr map
+#' @importFrom purrr map negate
 #' @importFrom dplyr bind_rows as_tibble select starts_with select_if bind_cols
 #' @importFrom magrittr %>% set_colnames
 visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
@@ -211,7 +210,7 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 
         t_other_var_dis <- as_tibble(colData(sce_cms)[,other_Var]) %>%
             set_colnames(other_Var) %>%
-            select_if(is.factor) %>%
+            select_if(negate(is.numeric)) %>%
             colnames() %>%
             map(t_discr)
 
@@ -252,8 +251,8 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[1]][, c(1:50, 500:550)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #'
 #' visMetric(sce_cms)
@@ -345,8 +344,8 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
 #'
 #' @examples
 #' library(SingleCellExperiment)
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50, 500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[1]][, c(1:50, 500:550)]
 #'
 #' visGroup(sce, "batch")
 #'

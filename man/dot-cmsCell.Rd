@@ -4,7 +4,7 @@
 \alias{.cmsCell}
 \title{.cmsCell}
 \usage{
-.cmsCell(cell, group, knn, kmin = NA, cell_min = 10)
+.cmsCell(cell, group, knn, k_min = NA, cell_min = 10)
 }
 \arguments{
 \item{cell}{Character. Name of the cell to calculate cms for. Needs to be one of \code{rownames(knn)}.}
@@ -14,7 +14,7 @@
 \item{knn}{List with three elements. First "index" with indices of KNN cells.
 Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
 
-\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
+\item{k_min}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
 \item{cell_min}{Numeric. Minimum number of cells from each group to be included into the AD test.
 Should be > 10 to make the ad.test function working.}
@@ -29,7 +29,7 @@ Function to calculate a cellspecific mixing score (cms) of groups/batches.
 The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
 It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
 In default the function uses all distances and group label defined in knn.
-If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
+If \code{k_min} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 }
 \seealso{

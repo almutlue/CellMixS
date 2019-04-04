@@ -24,9 +24,9 @@
 #' @examples
 #' library(SingleCellExperiment)
 #'
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 #'
-#' sce <- sim_30[[1]][, c(1:50,500:550)]
+#' sce <- sim_list[[1]][, c(1:50,500:550)]
 #' sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
 #' sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
 #' cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
@@ -37,8 +37,9 @@
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic labs geom_violin
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom tidyr gather
-#' @importFrom dplyr as_tibble select starts_with
+#' @importFrom dplyr as_tibble select starts_with as_data_frame
 #' @importFrom magrittr %>%
+#' @importFrom methods is
 visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
     if( is.list(res_object) ){
         average_table <- res_object %>% cbind.data.frame()
@@ -52,19 +53,19 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
     #change to long format
     #long format
     gathercols <- colnames(average_table)
-    average_long <- gather(average_table, keycol, valuecol, gathercols, factor_key=TRUE)
+    average_long <- gather(average_table, "keycol", "valuecol", gathercols, factor_key=TRUE)
 
 
     #plot
     if( isTRUE(violin) ){
         summarized_metric <- ggplot(average_long, aes_string(x="keycol", y="valuecol", fill="keycol")) +
             geom_violin()  +
-            labs(title="Summarized metric", x="integration", y = paste0("average", metric_prefix)) +
+            labs(title="Summarized metric", x="integration", y = paste0("average ", metric_prefix)) +
             scale_fill_manual(values = col_hist) + theme_classic()
     }else{
         summarized_metric <- ggplot(average_long, aes_string(y="keycol", x="valuecol", fill="keycol")) +
             geom_density_ridges(scale = 1)  +
-            labs(title="Summarized metric",y="integration", x = paste0("average", metric_prefix)) +
+            labs(title="Summarized metric",y="integration", x = paste0("average ", metric_prefix)) +
             scale_fill_manual(values= col_hist) + theme_classic()
     }
     summarized_metric
@@ -91,8 +92,8 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
 #' @examples
 #' library(SingleCellExperiment)
 #'
-#' load(system.file("extdata/sim30.rda", package = "CellMixS"))
-#' sce <- sim_30[[1]][, c(1:50,500:550)]
+#' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+#' sce <- sim_list[[1]][, c(1:50,500:550)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #'
 #' visCluster(sce_cms, "batch")

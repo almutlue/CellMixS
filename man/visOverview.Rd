@@ -36,8 +36,8 @@ Embeddings from data integration methods (e.g. mnn.correct) can be used as long 
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50, 500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50, 500:550)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))

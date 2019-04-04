@@ -1,8 +1,8 @@
 library(SingleCellExperiment)
 library(CellMixS)
 #get simulated scRNA seq data with 3 unbalanced batches
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50,500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50,500:550)]
 
 ## Tests for cms fuction:
 ### Include internal functions as cmsCell, filterLocMin and cmsSmooth.
@@ -10,7 +10,7 @@ sce <- sim_30[[1]][, c(1:50,500:550)]
 test_that("test that output of cms is correct",{
     sce_cms_smooth <- cms(sce, k = 20, group = "batch",
                       dim_red = "TSNE", assay_name = "counts", n_dim = 2)
-    sce_cms_kmin <- cms(sce, k = 20, group = "batch", kmin = 15, res_name = "kmin")
+    sce_cms_kmin <- cms(sce, k = 20, group = "batch", k_min = 15, res_name = "kmin")
     sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
     sce_cms_default <- cms(sce, k = 20, group = "batch")
     cms_only <- as.matrix(sce_cms_default$cms)

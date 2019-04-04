@@ -26,8 +26,8 @@ The dimesion reduction embedding can be specified, but only tsne embeddings will
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50, 500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50, 500:550)]
 
 visGroup(sce, "batch")
 

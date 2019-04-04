@@ -5,7 +5,7 @@
 \title{cms}
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
-  res_name = NULL, kmin = NA, smooth = TRUE, n_dim = 20,
+  res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
   cell_min = 10)
 }
 \arguments{
@@ -25,7 +25,7 @@ Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 
 \item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).}
 
-\item{kmin}{Numeric. Minimum number of Knn to include.
+\item{k_min}{Numeric. Minimum number of Knn to include.
 Default is NA (see Details).}
 
 \item{smooth}{Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.}
@@ -45,7 +45,7 @@ Calculates cell-specific mixing scores based on euclidean distances within a sub
 The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
 It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
 In default the function uses all distances and group label defined in knn.
-If \code{kmin} is specified, the first local minimum of the overall distance distribution with at least kmin cells is used.
+If \code{k_min} is specified, the first local minimum of the overall distance distribution with at least k_min cells is used.
 This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
 If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
 Results will be appended to \code{colData(sce)}.
@@ -53,8 +53,8 @@ Names can be specified using \code{res_name}.
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50)]
 
 sce_cms <- cms(sce, k = 20, group = "batch")
 sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)

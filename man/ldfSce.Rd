@@ -12,7 +12,7 @@ ldfSce(sce_name, sce_pre_list, sce_combined, group, k = 75,
 \item{sce_name}{Character. Name of the element in \code{sce_pre_list} to calculate LDF differences in.}
 
 \item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single datasets before integration.
-Names should correspond to levels in \code{colData(sce_combined)$group} and \code{sce_name}.}
+Names need to correspond to levels in \code{colData(sce_combined)$group} and \code{sce_name}!!}
 
 \item{sce_combined}{A \code{SingleCellExperiment} object with the combined data.}
 
@@ -51,8 +51,8 @@ The same set of KNN are used to determine LDF before and after integration.
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[4]][, c(1:50, 500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[4]][, c(1:50, 500:550)]
 sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_pre_list <- list("1" = sce_batch1)
 

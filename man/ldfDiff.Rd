@@ -50,8 +50,8 @@ The smaller 'k' the more focus is on detailed structures, while a large k will t
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[4]][, c(1:50, 500:550)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[4]][, c(1:50, 500:550)]
 sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_batch2 <- sce[,colData(sce)$batch == "2"]
 sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)

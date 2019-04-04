@@ -31,13 +31,11 @@ If `res_object` is a \code{SingleCellExperiment} object,
 }
 \examples{
 library(SingleCellExperiment)
-load(system.file("extdata/sim30.rda", package = "CellMixS"))
-sce <- sim_30[[1]][, c(1:50)]
+sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
+sce <- sim_list[[1]][, c(1:50)]
 sce_cms <- cms(sce, "batch", k = 30)
 visHist(sce_cms)
 
-load(system.file("extdata/cms_sim30.rda", package = "CellMixS"))
-visHist(cms_sim30)
 
 }
 \seealso{

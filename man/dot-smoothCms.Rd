@@ -4,7 +4,7 @@
 \alias{.smoothCms}
 \title{.smoothCms}
 \usage{
-.smoothCms(knn, cms_raw, cell_names, kmin, k)
+.smoothCms(knn, cms_raw, cell_names, k_min, k)
 }
 \arguments{
 \item{knn}{List with three elements. First "index" with indices of KNN cells.
@@ -14,7 +14,7 @@ Second "distance" with distances to KNN cells. Third a slot named by \code{group
 
 \item{cell_names}{Character vector with cell names corresponding to the rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.}
 
-\item{kmin}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
+\item{k_min}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
 
 \item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 }

@@ -16,11 +16,11 @@ Aim: Generate a multibatch testset as described in kBet.
 ### Packages
 ```{r libraries}
 suppressPackageStartupMessages({
-  library(scater)
-  library(MASS)
-  library(here)
-  library(CellMixS)
-  library(scran)
+    library(scater)
+    library(MASS)
+    library(here)
+    library(CellMixS)
+    library(scran)
 })
 
 set.seed(1234)
@@ -75,12 +75,12 @@ sim_multibatch_data <- function(n.genes = 1000, n.batch = 3, batch_var = 0.1, ba
 
 
 #generate batch_distributions
-batch_var_list <- c(0.01, 0.1, 0.3, 0.5)
-batch_diff_list <- c(0.3)
+batch_var_list <- c(0, 0.1, 0.3, 0.5)
+batch_diff_list <- c(0.5)
 
 any <- lapply(batch_diff_list, function(diff){
-  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 300, n.batch = 3, batch_diff = diff, n_sample = 500)
-  names(batch_list) <- c("batch1", "batch10", "batch30", "batch50")
+  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 300, n.batch = 3, batch_diff = diff, n_sample = 400)
+  names(batch_list) <- c("batch0", "batch10", "batch30", "batch50")
   batch_list
 })
 
@@ -100,7 +100,7 @@ create_sce <- function(multibatch){
     colnames(sce) <-  sprintf("cell_%s",seq(1:ncol(sce)))
     sce <- runTSNE(sce, exprs_values = "counts")
     sce <- runPCA(sce, ncomponents = 30, exprs_values = "counts")
-    #sce <- runUMAP(sce, exprs_values = "counts")
+    sce <- runUMAP(sce, exprs_values = "counts")
     sce
 }
 
@@ -112,7 +112,7 @@ sce_list <- lapply(c(1:length(any)), function(diff_list){
   batch_sce
 })
 
-names(sce_list) <- c("unbalanced30")
+names(sce_list) <- c("unbalanced50")
 
 
 ```
@@ -124,8 +124,8 @@ names(sce_list) <- c("unbalanced30")
 batch_list <- names(sce_list[[1]])
   
 lapply(batch_list, function(name){
-    sce_name <- sce_list[["unbalanced30"]][[name]]
-    visGroup(sce_name, "batch") + ggtitle(paste0("unbalanced30_", name))
+    sce_name <- sce_list[["unbalanced50"]][[name]]
+    visGroup(sce_name, "batch", dim_red = "UMAP") + ggtitle(paste0("unbalanced50_", name))
 })
   
 ```
@@ -136,7 +136,7 @@ Add a slot with integrated/corrected reduced dimensions using mnn as example for
  
 ```{r mnn}
 add_mnn <- function(batch_name){
-  sce <- sce_list[["unbalanced30"]][[batch_name]]
+  sce <- sce_list[["unbalanced50"]][[batch_name]]
   #split sce by batches
   sce_single <- list()
   colData(sce)$batch <- as.factor(colData(sce)$batch)
@@ -164,10 +164,8 @@ lapply(batch_list, function(name){
 #### Save data and SessionInfo
 ```{r save and session}
 data_path <- here::here("inst/extdata")
-sim_30 <- sce_mnn
-cms_sim30 <- cms(sce_mnn[[1]][,c(1:50, 500:550)], k = 30, group = "batch")
-save(sim_30, file = paste0(data_path,"/sim30.rda"))
-save(cms_sim30, file = paste0(data_path,"/cms_sim30.rda"))
+sim_50 <- sce_mnn
+saveRDS(sim_50, file = paste0(data_path,"/sim50.rds"))
 sessionInfo()
 ```
 
