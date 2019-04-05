@@ -28,11 +28,11 @@ Besides this, several exploratory plotting functions enable evaluation of key in
 
 ### Installation
 
-To run CellMixS, open R and install from github using the following commands: 
+To run CellMixS, open R and install from GitHub using the following commands: 
 
 ```
 library(devtools)
-install_github("immunogenomics/harmony")
+install_github("almutlue/CellMixS")
 ```
 
 ### Getting started
@@ -55,7 +55,7 @@ You can explore batch effects by visulaizing metrics and batches aside.
 ![](/inst/extdata/cms_screenshot1.png)
 
 The histogram of `cms` score can be read like a p.value histogram and is flat for random batch mixing (**batch100**). 
-If a batch related bias is present a high number of low `cms` scores can be seen (***batch0*).
+If a batch related bias is present a high number of low `cms` scores can be seen (**batch0**).
 
 ![](/inst/extdata/visHist_cms.png)
 
