@@ -61,8 +61,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
         ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
             geom_histogram(color="black",
                            fill=col_hist[which(colnames(cms_res) %in% cms_name)],
-                           breaks=seq(0, 1, by=0.05)) +
-            ggtitle(cms_name) + xlab(cms_name) + theme_classic()
+                           breaks=seq(0, 1, by=0.05)) + xlab(cms_name) + theme_classic()
     }), ncol = n_col))
     p
     }

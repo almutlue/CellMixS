@@ -42,7 +42,7 @@ It has two major applications:
   
 For this purpose it introduces two new metrics:  
 
-* **Cellspecific Mixing Score (CMS)**: A test for random group mixing within k-nearest neighbouring cells.     
+* **Cellspecific Mixing Score (CMS)**: A test for batch effects within k-nearest neighbouring cells.     
 * **Local Density Differences (ldfDiff)**: A score describing the change in relative local cell densities by data integration or projection. 
 
 Besides this, several exploratory plotting functions enable evaluation of key integration and mixing features.  
@@ -151,9 +151,11 @@ sim_list[["batch50"]] <- sce50
 
 ## Cms parameter setting
 
-The most important parameter to set to calculate `cms` is `k `, the number of *knn* cells to use in the Anderson-Darling test. The optimal choice depends on the application, as with a small `k` focus is on local mixing, while with a large `k` mixing with regard to more global structures is evaluated. If the overall dataset structure is very heterogeneous with large differences in the number of cells per celltypes, it might be useful to adapt the number of *knn*. This can be done by setting the `k_min` parameter to the minimum number of *knn* cells to include. Before performing the hypothesis test, `cms` will look for local minima in the *overall distance distribution* of it's *knn* cells. Only cells within a distance smaller than the first local minimum are then included. This can e.g. ensure that only cells from the same celltype cluster are included without relying on previous clustering algorithms. 
+The most important parameter to set to calculate `cms` is `k `, the number of *knn* cells to use in the Anderson-Darling test. The optimal choice depends on the application, as with a small `k` focus is on local mixing, while with a large `k` mixing with regard to more global structures is evaluated. If the overall dataset structure is very heterogeneous with large differences in the number of cells per celltypes, it might be useful to adapt the number of *knn*. This can be done by setting the `k_min` parameter to the minimum number of *knn* cells to include. Before performing the hypothesis test, `cms` will look for local minima in the *overall distance distribution* of it's *knn* cells. Only cells within a distance smaller than the first local minimum are then included, but at least `k_min` cells. This can e.g. ensure that only cells from the same celltype cluster are included without relying on previous clustering algorithms. 
+
+For smoothening either `k` or if specified `k_min` cells are included to get a weighted mean of `cms`-scores. Weights are defined by the reciprocal distance towards the respective cell, with 1 as weight of the respective cell itself.
   
-Another important parameter is the subspace to use to calculate cell distances. This can be set using the `dim_red` parameter. By default *PCA* subspace will be used and calculated if not present. Some *data integration methods* provide embeddings of a *common subspace* instead of "corrected counts". `cms` scores can be calculated within these by defining them in `dim_red` (see \@ref(di1))
+Another important parameter is the subspace to use to calculate cell distances. This can be set using the `dim_red` parameter. By default *PCA* subspace will be used and calculated if not present. Some *data integration methods* provide embeddings of a *common subspace* instead of "corrected counts". `cms` scores can be calculated within these by defining them in `dim_red` (see \@ref(di1)). In general all reduced dimensional representations can be specified, but only *PCA* will be computed automatically, while other methods need to be precomputed. 
 
 
 ## Visualize the cell mixing score
@@ -223,7 +225,7 @@ limma_corrected <- removeBatchEffect(counts(sce10), batch = sce10$batch)
 assay(sce10, "lim_corrected") <- limma_corrected 
 
 #run cms
-sce10 <- cms(sce10, k = 80, group = "batch", 
+sce10 <- cms(sce10, k = 70, group = "batch", 
              assay_name = "lim_corrected", res_name = "limma")
 
 names(colData(sce10))
