@@ -15,7 +15,7 @@ output:
     BiocStyle::html_document
 bibliography: cellmixs.bib
 abstract: >
-  A tool set to evaluate and visualize data integration and batch effects in single cell RNA-seq data.  
+  A tool set to evaluate and visualize data integration and batch effects in single-cell RNA-seq data.  
 vignette: >
     %\VignetteIndexEntry{Explore data integration and batch effects}
     %\VignetteEncoding{UTF-8}  
@@ -34,10 +34,10 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-The `r BiocStyle::Githubpkg('almutlue/CellMixS')` package is a toolbox to explore and compare group effects in single cell RNA-seq data. 
+The `r BiocStyle::Githubpkg('almutlue/CellMixS')` package is a toolbox to explore and compare group effects in single-cell RNA-seq data. 
 It has two major applications:  
   
-* Detection of batch effects and biases in single cell RNA-seq data.    
+* Detection of batch effects and biases in single-cell RNA-seq data.    
 * Evaluation and comparison of data integration (e.g. after batch effect correction).  
   
 For this purpose it introduces two new metrics:  
@@ -68,7 +68,7 @@ library(CellMixS)
 ## Load example data
 `r BiocStyle::Githubpkg('almutlue/CellMixS')` uses the `SingleCellExperiment` class from the `r BiocStyle::Biocpkg("SingleCellExperiment")` Bioconductor package as the format for input data. 
 
-The package contains example data named **sim_50**, a list of simulated single cell RNA-seq data with varying batch effect strength and unbalanced batch sizes. 
+The package contains example data named **sim_50**, a list of simulated single-cell RNA-seq data with varying batch effect strength and unbalanced batch sizes. 
 
 Batch effects were introduced by sampling 0%, 10%, 30% or 50% of gene expression values from a distribution with variant mean (e.g. 1% - 50% of genes were affected by a batch effect). 
 
@@ -101,7 +101,7 @@ table(sce50[["batch"]])
 
 ## Visualize batch effect 
 
-Often batch effects can already be detected by eye and simple visualization (e.g. in a normal tSNE or UMAP plot) depending on the strength. `r BiocStyle::Githubpkg('almutlue/CellMixS')` has different plotting functions to visualize group label and mixing scores aside without the need for using different packages. Results are `ggplot` objects and can be further customized using `r BiocStyle::CRANpkg("ggplot2")`. Other packages, such as `r BiocStyle::Biocpkg("scater")`, provide similar plotting functions and could be used as well.
+Often batch effects can already be detected by visual inspection and simple visualization (e.g. in a normal tSNE or UMAP plot) depending on the strength. `r BiocStyle::Githubpkg('almutlue/CellMixS')` has different plotting functions to visualize group label and mixing scores aside without the need for using different packages. Results are `ggplot` objects and can be further customized using `r BiocStyle::CRANpkg("ggplot2")`. Other packages, such as `r BiocStyle::Biocpkg("scater")`, provide similar plotting functions and could be used as well.
 
 ```{r vis batch 50 }
 #visualize batch distribution in sce50
@@ -127,7 +127,7 @@ plot_grid(plotlist = vis_batch, ncol = 3)
 
 ## Cellspecific Mixing scores
 
-Not all batch effects or group differences are obvious using visualization. Also, in single cell experiments celltypes and cells can be affected in different ways by experimental conditions causing batch effects (e.g. some cells are more robust to storing conditions than others).  
+Not all batch effects or group differences are obvious using visualization. Also, in single-cell experiments celltypes and cells can be affected in different ways by experimental conditions causing batch effects (e.g. some cells are more robust to storing conditions than others).  
 
 Furthermore the range of methods for data integration and batch effect removal gives rise to the question of which method performs best on which data, and thereby a need to quantify batch effects.  
 
@@ -153,7 +153,7 @@ sim_list[["batch50"]] <- sce50
 
 The most important parameter to set to calculate `cms` is `k `, the number of *knn* cells to use in the Anderson-Darling test. The optimal choice depends on the application, as with a small `k` focus is on local mixing, while with a large `k` mixing with regard to more global structures is evaluated. If the overall dataset structure is very heterogeneous with large differences in the number of cells per celltypes, it might be useful to adapt the number of *knn*. This can be done by setting the `k_min` parameter to the minimum number of *knn* cells to include. Before performing the hypothesis test, `cms` will look for local minima in the *overall distance distribution* of it's *knn* cells. Only cells within a distance smaller than the first local minimum are then included, but at least `k_min` cells. This can e.g. ensure that only cells from the same celltype cluster are included without relying on previous clustering algorithms. 
 
-For smoothening either `k` or if specified `k_min` cells are included to get a weighted mean of `cms`-scores. Weights are defined by the reciprocal distance towards the respective cell, with 1 as weight of the respective cell itself.
+For smoothing either `k` or if specified `k_min` cells are included to get a weighted mean of `cms`-scores. Weights are defined by the reciprocal distance towards the respective cell, with 1 as weight of the respective cell itself.
   
 Another important parameter is the subspace to use to calculate cell distances. This can be set using the `dim_red` parameter. By default *PCA* subspace will be used and calculated if not present. Some *data integration methods* provide embeddings of a *common subspace* instead of "corrected counts". `cms` scores can be calculated within these by defining them in `dim_red` (see \@ref(di1)). In general all reduced dimensional representations can be specified, but only *PCA* will be computed automatically, while other methods need to be precomputed. 
 
@@ -212,7 +212,7 @@ visCluster(sce10, metric_var = "cms.unaligned",
 
 ## Mixing after data integration {#di1}
 
-To remove batch effects when integrating different single cell RNAseq datasets, a range of methods can be used. The `cms` function can be used to evaluate the effect of these methods, using a cell-specific mixing score. Some of them (e.g. `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package) provide a "common subspace" with integrated embeddings. Other methods like `r BiocStyle::Biocpkg("limma")` give "batch-corrected data" as results. Both work as input for `cms`.
+To remove batch effects when integrating different single-cell RNAseq datasets, a range of methods can be used. The `cms` function can be used to evaluate the effect of these methods, using a cell-specific mixing score. Some of them (e.g. `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package) provide a "common subspace" with integrated embeddings. Other methods like `r BiocStyle::Biocpkg("limma")` give "batch-corrected data" as results. Both work as input for `cms`.
 ```{r batch correction methods}
 #MNN - embeddings are stored in the reducedDims slot of sce
 reducedDimNames(sce10)
