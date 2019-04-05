@@ -163,9 +163,9 @@ lapply(batch_list, function(name){
 
 #### Save data and SessionInfo
 ```{r save and session}
-data_path <- here::here("inst/extdata")
+data_path <- here::here(file.path("inst", "extdata"))
 sim_50 <- sce_mnn
-saveRDS(sim_50, file = paste0(data_path,"/sim50.rds"))
+saveRDS(sim_50, file = file.path(data_path, "sim50.rds"))
 sessionInfo()
 ```
 
