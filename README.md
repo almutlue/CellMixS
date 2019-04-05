@@ -52,6 +52,10 @@ sce_ldf <- ldfDiff(sce_pre_list, sce_combined, group = "batch", k = 70)
 
 You can explore batch effects by visulaizing metrics and batches aside.
 
-![](https://raw.githubusercontent.com/almutlue/CellMixS/blob/master/inst/extdata/cms_screenshot1.png)
-![](https://raw.githubusercontent.com/almutlue/CellMixS/blob/master/inst/extdata/visHist_cms.png)
+![](/inst/extdata/cms_screenshot1.png)
+
+The histogram of `cms` score can be read like a p.value histogram and is flat for random batch mixing (**batch100**). 
+If a batch related bias is present a high number of low `cms` scores can be seen (***batch0*).
+
+![](/inst/extdata/visHist_cms.png)
 
