@@ -48,6 +48,8 @@ As `ldfDiff` compares the dataset structure before and after integration you nee
 ```
 sce_ldf <- ldfDiff(sce_pre_list, sce_combined, group = "batch", k = 70)
 ```
+Please have a look into the vignette for details.
+
 ### Examples
 
 You can explore batch effects by visulaizing metrics and batches aside.
