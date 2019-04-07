@@ -1,22 +1,22 @@
 ## CellMixS
   
-A toolbox to explore group-/batch-specific bias and data integration in scRNA seq datasets.  
+A toolbox to explore group-/batch-specific bias and data integration in single-cell RNA-seq (scRNA-seq) datasets.  
 
 ### Motivation
 
-Data integration and batch effect correction belong to the major challenges in scRNA.  
-A variety of tools and methods have been developed to adress them in different ways.
+Data integration and batch effect correction belong to the major challenges in scRNA-seq.  
+A variety of tools and methods have been developed to address them in different ways.
 To apply those it is key to understand their effect as well as the underlying technical variation in the data.
 Thus new tools and metrics are needed, that help to explore, quantify and compare batch effects in the context of data integration and batch effect removal.  
-Similar as biological trigger and signals batch effects can affect cells in different ways. 
-To explore them with cellspecific metrics can help us to better understand, correct and interpret them.
+Similar to biological triggers and signals, batch effects can affect cells in different ways. 
+To explore them with cell-specific metrics can help us to better understand, correct and interpret them.
 
 ### Description  
 
-Here we provide a toolbox to explore and compare group effects in single cell RNA-seq data. 
+Here we provide a toolbox to explore and compare group effects in single-cell RNA-seq data. 
 It has two major applications:  
   
-* Detection of batch effects and biases in single cell RNA-seq data.    
+* Detection of batch effects and biases in single-cell RNA-seq data.    
 * Evaluation and comparison of data integration (e.g. after batch effect correction).  
   
 For this purpose it introduces two new metrics:  
@@ -37,7 +37,7 @@ install_github("almutlue/CellMixS")
 
 ### Getting started
 The main metrics `cms` and `ldfDiff` use a `SingleCellExperiment` object as input. 
-You need to specify the batch variable as defined in the `colData`, the number of k nearest neighbours to include `k` and optional the reduced dimensions to use `red_dim`.
+You need to specify the batch variable as defined in the `colData`, the number of k-nearest neighbours to include `k` and optional the reduced dimensions to use `red_dim`.
 
 ```
 sce_cms <- cms(sce, k = 70, group = "batch")
@@ -52,7 +52,7 @@ Please have a look into the vignette for details.
 
 ### Examples
 
-You can explore batch effects by visulaizing metrics and batches aside.
+You can explore batch effects by visualizing metrics and batches aside.
 
 ![](/inst/extdata/cms_screenshot1.png)
 
