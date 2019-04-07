@@ -7,13 +7,17 @@
 visCluster(sce_cms, cluster_var, metric_var = "cms", violin = FALSE)
 }
 \arguments{
-\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot within \code{colData(res_object)}.}
+\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
+(e.g. cms) to plot within \code{colData(res_object)}.}
 
-\item{cluster_var}{Character. Name of the factor level variable to summarize metric scores on.}
+\item{cluster_var}{Character. Name of the factor level variable to summarize
+metric scores on.}
 
-\item{metric_var}{Character Name of the metric scores to use. Default is "cms".}
+\item{metric_var}{Character Name of the metric scores to use.
+Default is "cms".}
 
-\item{violin}{A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.}
+\item{violin}{A logical. If true violin plots are plotted, while the default
+(FALSE) will plot ridge plots.}
 }
 \value{
 a \code{ggplot} object.
@@ -23,13 +27,14 @@ Creates summary plots of metric scores for different groups/cluster.
 }
 \details{
 Plots summarized metric scores.
-This function is intended to visualize and compare metric scores among clusters or other dataset variables spcified in `cluster_var`.
+This function is intended to visualize and compare metric scores among
+clusters or other dataset variables spcified in `cluster_var`.
 }
 \examples{
 library(SingleCellExperiment)
 
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50,500:550)]
+sce <- sim_list[[1]][, c(1:50,300:350)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 visCluster(sce_cms, "batch")

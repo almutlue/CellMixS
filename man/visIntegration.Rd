@@ -7,14 +7,17 @@
 visIntegration(res_object, metric_prefix = "cms", violin = FALSE)
 }
 \arguments{
-\item{res_object}{\code{SingleCellExperiment} object, list, matrix or data.frame.
-The SingleCellExperiment object should contain the result scores (cms) to compare within \code{colData(res_object)}.
-List, matrix or data frame should have result scores in list elements resp. columns.}
+\item{res_object}{\code{SingleCellExperiment} object, list, matrix or
+data.frame. The SingleCellExperiment object should contain the result scores
+(cms) to compare within \code{colData(res_object)}. List, matrix or data
+frame should have result scores in list elements resp. columns.}
 
-\item{metric_prefix}{Character. Prefix to specify names of \code{colData(sce)} to be compared.
-Applys only if `res_object` is a \code{SingleCellExperiment} object. Default is 'cms'.}
+\item{metric_prefix}{Character. Prefix to specify names of
+\code{colData(sce)} to be compared. Applys only if `res_object` is a
+\code{SingleCellExperiment} object. Default is 'cms'.}
 
-\item{violin}{A logical. If true violin plots are plotted, while the default (FALSE) will plot ridge plots.}
+\item{violin}{A logical. If true violin plots are plotted,
+while the default (FALSE) will plot ridge plots.}
 }
 \value{
 a \code{ggplot} object.
@@ -23,15 +26,17 @@ a \code{ggplot} object.
 Creates a summary plot of metric scores (for different integration methods).
 }
 \details{
-Plots summarized cms scores from an \code{SingleCellExperiment} object, list or dataframe.
-This function is intended to visualize and compare different methods and views of the same dataset, not to compare different datasets.
+Plots summarized cms scores from an \code{SingleCellExperiment}
+object, list or dataframe. This function is intended to visualize and
+compare different methods and views of the same dataset, not to compare
+different datasets.
 }
 \examples{
 library(SingleCellExperiment)
 
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 
-sce <- sim_list[[1]][, c(1:50,500:550)]
+sce <- sim_list[["batch15"]][, c(1:50,300:350)]
 sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
 sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
 cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)

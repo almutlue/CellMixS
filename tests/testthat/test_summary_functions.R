@@ -1,11 +1,12 @@
 library(SingleCellExperiment)
 library(CellMixS)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50,500:550)]
+sce <- sim_list[["batch15"]][, c(1:50,300:350)]
 sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
 sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
 cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
-cms_df <- data.frame("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
+cms_df <- data.frame("unaligned"= sce_cms$cms.unaligned,
+                     "mnn" = sce_mnn$cms.MNN)
 
 
 
@@ -19,7 +20,8 @@ test_that("test that visIntegration and visCluster work",{
     compare_Int_df <- visIntegration(cms_df, violin = TRUE)
 
     #compare groups
-    colData(sce_cms)$group <- sample(c("A", "B", "C"), ncol(sce), replace = TRUE)
+    colData(sce_cms)$group <- sample(c("A", "B", "C"), ncol(sce),
+                                     replace = TRUE)
     compare_group <- visCluster(sce_cms, "group", metric_var = "cms.unaligned")
     compare_group2 <- visCluster(sce_mnn, "batch", metric_var = "cms.MNN")
 

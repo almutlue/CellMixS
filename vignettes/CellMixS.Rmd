@@ -15,7 +15,8 @@ output:
     BiocStyle::html_document
 bibliography: cellmixs.bib
 abstract: >
-  A tool set to evaluate and visualize data integration and batch effects in single-cell RNA-seq data.  
+  A tool set to evaluate and visualize data integration and batch effects in 
+  single-cell RNA-seq data.  
 vignette: >
     %\VignetteIndexEntry{Explore data integration and batch effects}
     %\VignetteEncoding{UTF-8}  
@@ -34,23 +35,29 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-The `r BiocStyle::Githubpkg('almutlue/CellMixS')` package is a toolbox to explore and compare group effects in single-cell RNA-seq data. 
+The `r BiocStyle::Githubpkg('almutlue/CellMixS')` package is a toolbox to 
+explore and compare group effects in single-cell RNA-seq data. 
 It has two major applications:  
   
 * Detection of batch effects and biases in single-cell RNA-seq data.    
-* Evaluation and comparison of data integration (e.g. after batch effect correction).  
+* Evaluation and comparison of data integration 
+(e.g. after batch effect correction).  
   
 For this purpose it introduces two new metrics:  
 
-* **Cellspecific Mixing Score (CMS)**: A test for batch effects within k-nearest neighbouring cells.     
-* **Local Density Differences (ldfDiff)**: A score describing the change in relative local cell densities by data integration or projection. 
+* **Cellspecific Mixing Score (CMS)**: A test for batch effects within k-nearest 
+neighbouring cells.     
+* **Local Density Differences (ldfDiff)**: A score describing the change in 
+relative local cell densities by data integration or projection. 
 
-Besides this, several exploratory plotting functions enable evaluation of key integration and mixing features.  
+Besides this, several exploratory plotting functions enable evaluation of key 
+integration and mixing features.  
 
 
 # Installation
 
-`r BiocStyle::Githubpkg('almutlue/CellMixS')` can be installed from GitHub using the `r BiocStyle::CRANpkg("devtools")` package from CRAN.
+`r BiocStyle::Githubpkg('almutlue/CellMixS')` can be installed from GitHub using 
+the `r BiocStyle::CRANpkg("devtools")` package from CRAN.
 
 ```{r install, eval=FALSE}
 if (!requireNamespace("BiocManager"))
@@ -66,13 +73,21 @@ library(CellMixS)
 # Getting started
 
 ## Load example data
-`r BiocStyle::Githubpkg('almutlue/CellMixS')` uses the `SingleCellExperiment` class from the `r BiocStyle::Biocpkg("SingleCellExperiment")` Bioconductor package as the format for input data. 
+`r BiocStyle::Githubpkg('almutlue/CellMixS')` uses the `SingleCellExperiment` 
+class from the `r BiocStyle::Biocpkg("SingleCellExperiment")` Bioconductor 
+package as the format for input data. 
 
-The package contains example data named **sim_50**, a list of simulated single-cell RNA-seq data with varying batch effect strength and unbalanced batch sizes. 
+The package contains example data named **sim_50**, a list of simulated 
+single-cell RNA-seq data with varying batch effect strength and unbalanced 
+batch sizes. 
 
-Batch effects were introduced by sampling 0%, 10%, 30% or 50% of gene expression values from a distribution with variant mean (e.g. 1% - 50% of genes were affected by a batch effect). 
+Batch effects were introduced by sampling 0%, 10%, 30% or 50% of gene expression 
+values from a distribution with variant mean (e.g. 1% - 50% of genes were 
+affected by a batch effect). 
 
-All datasets consist of *3 batches*, one with _400 cells_ and the others with half of its size (so  _200 cells_). The simulation is modified after [@Buttner2019] and described in [sim50](https://github.com/almutlue/CellMixS/blob/master/inst/script/simulate_batch_scRNAseq.Rmd).
+All datasets consist of *3 batches*, one with _300 cells_ and the others with 
+half of its size (so  _150 cells_). The simulation is modified after 
+[@Buttner2019] and described in [sim50](https://github.com/almutlue/CellMixS/blob/master/inst/script/simulate_batch_scRNAseq.Rmd).
 
 ```{r warning=FALSE}
 # load required packages
@@ -101,7 +116,12 @@ table(sce50[["batch"]])
 
 ## Visualize batch effect 
 
-Often batch effects can already be detected by visual inspection and simple visualization (e.g. in a normal tSNE or UMAP plot) depending on the strength. `r BiocStyle::Githubpkg('almutlue/CellMixS')` has different plotting functions to visualize group label and mixing scores aside without the need for using different packages. Results are `ggplot` objects and can be further customized using `r BiocStyle::CRANpkg("ggplot2")`. Other packages, such as `r BiocStyle::Biocpkg("scater")`, provide similar plotting functions and could be used as well.
+Often batch effects can already be detected by visual inspection and simple 
+visualization (e.g. in a normal tSNE or UMAP plot) depending on the strength. `r BiocStyle::Githubpkg('almutlue/CellMixS')` has different plotting functions to 
+visualize group label and mixing scores aside without the need for using 
+different packages. Results are `ggplot` objects and can be further customized 
+using `r BiocStyle::CRANpkg("ggplot2")`. Other packages, such as `r BiocStyle::Biocpkg("scater")`, provide similar plotting functions and could be 
+used as well.
 
 ```{r vis batch 50 }
 #visualize batch distribution in sce50
@@ -111,14 +131,14 @@ visGroup(sce50, group = "batch")
 
 ```{r vis batch all, fig.wide=TRUE}
 #visualize batch distribution in other elements of sim_list 
-batch_names <- c("batch0", "batch10", "batch30")
+batch_names <- c("batch0", "batch15")
   
 vis_batch <- lapply(batch_names, function(name){
     sce <- sim_list[[name]]
     visGroup(sce, "batch") + ggtitle(paste0("sim_", name))
 })
 
-plot_grid(plotlist = vis_batch, ncol = 3)
+plot_grid(plotlist = vis_batch, ncol = 2)
 ```
 
 
@@ -127,11 +147,21 @@ plot_grid(plotlist = vis_batch, ncol = 3)
 
 ## Cellspecific Mixing scores
 
-Not all batch effects or group differences are obvious using visualization. Also, in single-cell experiments celltypes and cells can be affected in different ways by experimental conditions causing batch effects (e.g. some cells are more robust to storing conditions than others).  
+Not all batch effects or group differences are obvious using visualization. 
+Also, in single-cell experiments celltypes and cells can be affected in 
+different ways by experimental conditions causing batch effects (e.g. some 
+cells are more robust to storing conditions than others).  
 
-Furthermore the range of methods for data integration and batch effect removal gives rise to the question of which method performs best on which data, and thereby a need to quantify batch effects.  
+Furthermore the range of methods for data integration and batch effect removal 
+gives rise to the question of which method performs best on which data, and 
+thereby a need to quantify batch effects.  
 
-The **cellspecific mixing score** `cms` tests for each cell the hypothesis that batch-specific distance distributions towards it's k-nearest neighbouring (knn) cells are derived from the same unspecified underlying distribution using the Anderson-Darling test [@Scholz1987]. Results from the `cms` function are two scores *cms* and *cms_smooth*, where the latter is the weighted mean within each cell's neighbourhood. The `cms` function takes an `SingleCellExperiment` object (described in `r BiocStyle::Biocpkg("SingleCellExperiment")`) as input and appends to the colData slot. 
+The **cellspecific mixing score** `cms` tests for each cell the hypothesis that batch-specific distance distributions towards it's k-nearest neighbouring (knn) 
+cells are derived from the same unspecified underlying distribution using the Anderson-Darling test [@Scholz1987]. Results from the `cms` function are two 
+scores *cms* and *cms_smooth*, where the latter is the weighted mean within 
+each cell's neighbourhood. The `cms` function takes an `SingleCellExperiment` 
+object (described in `r BiocStyle::Biocpkg("SingleCellExperiment")`) as input 
+and appends to the colData slot. 
 
 ```{r cms}
 #call cell-specific mixing score for sce50
@@ -151,16 +181,39 @@ sim_list[["batch50"]] <- sce50
 
 ## Cms parameter setting
 
-The most important parameter to set to calculate `cms` is `k `, the number of *knn* cells to use in the Anderson-Darling test. The optimal choice depends on the application, as with a small `k` focus is on local mixing, while with a large `k` mixing with regard to more global structures is evaluated. If the overall dataset structure is very heterogeneous with large differences in the number of cells per celltypes, it might be useful to adapt the number of *knn*. This can be done by setting the `k_min` parameter to the minimum number of *knn* cells to include. Before performing the hypothesis test, `cms` will look for local minima in the *overall distance distribution* of it's *knn* cells. Only cells within a distance smaller than the first local minimum are then included, but at least `k_min` cells. This can e.g. ensure that only cells from the same celltype cluster are included without relying on previous clustering algorithms. 
+The most important parameter to set to calculate `cms` is `k `, the number of 
+*knn* cells to use in the Anderson-Darling test. The optimal choice depends on 
+the application, as with a small `k` focus is on local mixing, while with a 
+large `k` mixing with regard to more global structures is evaluated. If the 
+overall dataset structure is very heterogeneous with large differences in the 
+number of cells per celltypes, it might be useful to adapt the number of *knn*. 
+This can be done by setting the `k_min` parameter to the minimum number of *knn* 
+cells to include. Before performing the hypothesis test, `cms` will look for 
+local minima in the *overall distance distribution* of it's *knn* cells. Only 
+cells within a distance smaller than the first local minimum are then included, 
+but at least `k_min` cells. This can e.g. ensure that only cells from the same 
+celltype cluster are included without relying on previous clustering algorithms. 
 
-For smoothing either `k` or if specified `k_min` cells are included to get a weighted mean of `cms`-scores. Weights are defined by the reciprocal distance towards the respective cell, with 1 as weight of the respective cell itself.
+For smoothing either `k` or if specified `k_min` cells are included to get a 
+weighted mean of `cms`-scores. Weights are defined by the reciprocal distance 
+towards the respective cell, with 1 as weight of the respective cell itself.
   
-Another important parameter is the subspace to use to calculate cell distances. This can be set using the `dim_red` parameter. By default *PCA* subspace will be used and calculated if not present. Some *data integration methods* provide embeddings of a *common subspace* instead of "corrected counts". `cms` scores can be calculated within these by defining them in `dim_red` (see \@ref(di1)). In general all reduced dimensional representations can be specified, but only *PCA* will be computed automatically, while other methods need to be precomputed. 
+Another important parameter is the subspace to use to calculate cell distances. 
+This can be set using the `dim_red` parameter. By default *PCA* subspace will be 
+used and calculated if not present. Some *data integration methods* provide 
+embeddings of a *common subspace* instead of "corrected counts". `cms` scores 
+can be calculated within these by defining them in `dim_red` (see \@ref(di1)). 
+In general all reduced dimensional representations can be specified, but only 
+*PCA* will be computed automatically, while other methods need to be 
+precomputed. 
 
 
 ## Visualize the cell mixing score
 
-An overall summary of `cms` can be visualized as histogram. As `cms` score are *p.values* from hypothesis testing, without any batch effect the p.value histogram should be flat. An increased number of very small p-values indicates the presence of a batch-specific bias within data.
+An overall summary of `cms` can be visualized as histogram. As `cms` score are 
+*p.values* from hypothesis testing, without any batch effect the p.value 
+histogram should be flat. An increased number of very small p-values 
+indicates the presence of a batch-specific bias within data.
 
 ```{r hist, fig.wide=TRUE}
 #pval hist of cms50
@@ -174,19 +227,20 @@ cms_mat <- batch_names %>%
   bind_cols() %>% set_colnames(batch_names)
 
 
-visHist(cms_mat, n_col = 4)
+visHist(cms_mat, n_col = 3)
 ```
 
 
-Results of `cms` can be visualized in a cell-specific way and alongside any metadata. 
+Results of `cms` can be visualized in a cell-specific way and alongside any 
+metadata. 
 
 ```{r single plots, fig.wide= TRUE}
 #cms only cms10
-sce10 <- sim_list[["batch10"]]
-metric_plot <- visMetric(sce10, metric_var = "cms_smooth.unaligned")
+sce15 <- sim_list[["batch15"]]
+metric_plot <- visMetric(sce15, metric_var = "cms_smooth.unaligned")
 
 #group only cms10
-group_plot <- visGroup(sce10, group = "batch")
+group_plot <- visGroup(sce15, group = "batch")
 
 plot_grid(metric_plot, group_plot, ncol = 2)
 
@@ -195,15 +249,16 @@ plot_grid(metric_plot, group_plot, ncol = 2)
 
 ```{r overview}
 #add random celltype assignments as new metadata
-sce10[["celltype"]] <- sample(c("CD4+", "CD8+", "CD3", "CD19"), 
-                              ncol(sce10), replace = TRUE)
+sce15[["celltype"]] <- sample(c("CD4+", "CD8+", "CD3", "CD19"), 
+                              ncol(sce15), replace = TRUE)
 
-visOverview(sce10, "batch", other_Var = "celltype")
+visOverview(sce15, "batch", other_Var = "celltype")
 ```
 
-Systematic differences (e.g. celltype differences) can be further explored using `visCluster`. Here we do not expect any systematic difference as celltypes were randomly assigned.
+Systematic differences (e.g. celltype differences) can be further explored using `visCluster`. Here we do not expect any systematic difference as celltypes were 
+randomly assigned.
 ```{r compare cluster, fig.small= TRUE}
-visCluster(sce10, metric_var = "cms.unaligned", 
+visCluster(sce15, metric_var = "cms.unaligned", 
            cluster_var = "celltype")
 ```
 
@@ -212,64 +267,85 @@ visCluster(sce10, metric_var = "cms.unaligned",
 
 ## Mixing after data integration {#di1}
 
-To remove batch effects when integrating different single-cell RNAseq datasets, a range of methods can be used. The `cms` function can be used to evaluate the effect of these methods, using a cell-specific mixing score. Some of them (e.g. `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package) provide a "common subspace" with integrated embeddings. Other methods like `r BiocStyle::Biocpkg("limma")` give "batch-corrected data" as results. Both work as input for `cms`.
+To remove batch effects when integrating different single-cell RNAseq datasets, 
+a range of methods can be used. The `cms` function can be used to evaluate the
+effect of these methods, using a cell-specific mixing score. Some of them 
+(e.g. `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package) provide a 
+"common subspace" with integrated embeddings. Other methods like `r BiocStyle::Biocpkg("limma")` give "batch-corrected data" as results. Both work 
+as input for `cms`.
 ```{r batch correction methods}
 #MNN - embeddings are stored in the reducedDims slot of sce
-reducedDimNames(sce10)
-sce10 <- cms(sce10, k = 70, group = "batch", 
+reducedDimNames(sce15)
+sce15 <- cms(sce15, k = 70, group = "batch", 
              dim_red = "MNN", res_name = "MNN")
 
 # run limma
-limma_corrected <- removeBatchEffect(counts(sce10), batch = sce10$batch)
+limma_corrected <- removeBatchEffect(counts(sce15), batch = sce15$batch)
 #add corrected counts to sce
-assay(sce10, "lim_corrected") <- limma_corrected 
+assay(sce15, "lim_corrected") <- limma_corrected 
 
 #run cms
-sce10 <- cms(sce10, k = 70, group = "batch", 
+sce15 <- cms(sce15, k = 70, group = "batch", 
              assay_name = "lim_corrected", res_name = "limma")
 
-names(colData(sce10))
+names(colData(sce15))
 ```
 
 
 ## Compare data integration methods {#di2}
 
-To compare different methods summary plots from `visIntegration` and p-value histograms from `visHist` can be used. Local patterns within single methods can be explored as described above.
+To compare different methods summary plots from `visIntegration` and p-value 
+histograms from `visHist` can be used. Local patterns within single methods can 
+be explored as described above.
 ```{r batch correction methods vis}
 # plot results
-visIntegration(sce10, metric_prefix = "cms.", violin = TRUE)
+visIntegration(sce15, metric_prefix = "cms.", violin = TRUE)
 
 # As pvalue histograms
-visHist(sce10, metric_prefix = "cms.",  n_col = 3)
+visHist(sce15, metric_prefix = "cms.",  n_col = 3)
 ```
 
-Here both methods `r BiocStyle::Biocpkg("limma")` and `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package show a flat p.value distribution. So cells are equally mixed after batch effect removal.
+Here both methods `r BiocStyle::Biocpkg("limma")` and `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package show a flat p.value distribution. So cells 
+are equally mixed after batch effect removal.
 
 ## Remaining batch-specific structure - ldfDiff
 
-Besides successful batch "mixing" data integration should also preserve the data's internal structure and variability without adding new sources of variability or removing underlying structures. Especially for methods that result in "corrected counts" it is important to understand how much of the dataset internal structures are preserved.  
+Besides successful batch "mixing" data integration should also preserve the 
+data's internal structure and variability without adding new sources of 
+variability or removing underlying structures. Especially for methods that 
+result in "corrected counts" it is important to understand how much of the 
+dataset internal structures are preserved.  
  
-`ldfDiff` calculates the differences between each cell's **local density factor** before and after data integration [@Latecki2007]. The local density factor is a relative measure of the cell density around a cell compared to the densities within it's neighbourhood. Local density factors are calculated on the same set of k cells from the cell's kNN before integration. In an optimal case relative densities (according to the same set of cells) should not change by integration and the `ldfDiff` score should be close to 0. In general the overall distribution of `ldfDiff` should be centered around 0 without long tails.
+`ldfDiff` calculates the differences between each cell's 
+**local density factor** before and after data integration [@Latecki2007]. 
+The local density factor is a relative measure of the cell density around a cell 
+compared to the densities within it's neighbourhood. Local density factors are 
+calculated on the same set of k cells from the cell's kNN before integration. 
+In an optimal case relative densities (according to the same set of cells) 
+should not change by integration and the `ldfDiff` score should be close to 0. 
+In general the overall distribution of `ldfDiff` should be centered around 0 
+without long tails.
 
-```{r ldfDiff}
+```{r ldfDiff, warning=FALSE}
 #Prepare input 
-# list with single SingleCellExperiment objects (Important: List names need to correspond to batch levels! See ?ldfDiff)
-sce_pre_list <- list("1" = sce10[,sce10$batch == "1"], 
-                     "2" = sce10[,sce10$batch == "2"], 
-                     "3" = sce10[,sce10$batch == "3"])
+# list with single SingleCellExperiment objects 
+#(Important: List names need to correspond to batch levels! See ?ldfDiff)
+sce_pre_list <- list("1" = sce15[,sce15$batch == "1"], 
+                     "2" = sce15[,sce15$batch == "2"], 
+                     "3" = sce15[,sce15$batch == "3"])
 
-sce10 <- ldfDiff(sce_pre_list, sce_combined = sce10, 
+sce15 <- ldfDiff(sce_pre_list, sce_combined = sce15, 
                  group = "batch", k = 70, dim_red = "PCA", 
                  dim_combined = "MNN", assay_pre = "counts", 
                  n_dim = 20, res_name = "MNN")
 
-sce10 <- ldfDiff(sce_pre_list, sce_combined = sce10, 
+sce15 <- ldfDiff(sce_pre_list, sce_combined = sce15, 
                  group = "batch", k = 70, dim_red = "PCA", 
                  dim_combined = "PCA", assay_pre = "counts", 
                  assay_combined = "lim_corrected",  
                  n_dim = 20, res_name = "limma")
 
-names(colData(sce10))
+names(colData(sce15))
 ```
 
 
@@ -278,20 +354,23 @@ names(colData(sce10))
 Results from `ldfDiff` can be visualized in a similar way as results from `cms`.
 ```{r vis ldfDiff}
 #ldfDiff scores in reduced dim representation
-lim_plot <- visMetric(sce10, metric_var = "diff_ldf.limma", 
+lim_plot <- visMetric(sce15, metric_var = "diff_ldf.limma", 
                       dim_red = "TSNE") 
 
-mnn_plot <- visMetric(sce10, metric_var = "diff_ldf.MNN", 
+mnn_plot <- visMetric(sce15, metric_var = "diff_ldf.MNN", 
                       dim_red = "MNN") 
 
 plot_grid(lim_plot, mnn_plot, ncol = 2)
 
 #ldfDiff score summarized
-visIntegration(sce10, metric_prefix = "diff_ldf") 
+visIntegration(sce15, metric_prefix = "diff_ldf") 
 
 ```
 
-`ldfDiff` shows a clear difference between both methods. While `r BiocStyle::Biocpkg("limma")` is able to preserve the batch internal structure within batches, `fastMNN` clearly changes it. Even if batches are well mixed (see \@ref(di2)), `fastMNN`does not work for batch effect removal on these simulated data.  
+`ldfDiff` shows a clear difference between both methods. While `r BiocStyle::Biocpkg("limma")` is able to preserve the batch internal structure 
+within batches, `fastMNN` clearly changes it. Even if batches are well mixed 
+(see \@ref(di2)), `fastMNN`does not work for batch effect removal on these 
+simulated data.  
 
 # Session info
 ```{r session info}

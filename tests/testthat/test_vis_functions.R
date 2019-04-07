@@ -1,7 +1,7 @@
 library(SingleCellExperiment)
 library(CellMixS)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50,500:550)]
+sce <- sim_list[["batch15"]][, c(1:50,300:350)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 ## Tests for visualization fuctions:
@@ -16,8 +16,8 @@ test_that("test that visHist works",{
                  "Error: 'res_object' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify which colData(res_object) column to plot by `metric_prefix`.
-             * Specify a matrix or dataframe with result scores to plot as `res_object`.",
+             * Specify colData(res_object) column to plot by `metric_prefix`.
+             * Specify a matrix with results to plot as `res_object`.",
                  fixed = TRUE)
 
 })
@@ -27,9 +27,11 @@ test_that("test that visHist works",{
 test_that("test that visOverview works",{
     overview <- visOverview(sce_cms, "batch")
     #change embeddings
-    overview_mnn <- visOverview(sce_cms, "batch", dim_red = "MNN", log10_val = TRUE)
+    overview_mnn <- visOverview(sce_cms, "batch", dim_red = "MNN",
+                                log10_val = TRUE)
     #add other vars (continous and discrete)
-    overview_Vars <- visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
+    overview_Vars <- visOverview(sce_cms, "batch",
+                                 other_Var = c("batch", "cms"))
 
     #calculate new dim_red
     sce_noRedDim <- sce_cms
@@ -49,7 +51,7 @@ test_that("test that visOverview works",{
                  "Error: 'sce_cms' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify which colData(res_object) column to plot by `metric_prefix`.",
+             * Specify a colData(res_object) column in `metric_prefix`.",
                fixed = TRUE)
 })
 

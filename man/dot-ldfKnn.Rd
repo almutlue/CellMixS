@@ -7,10 +7,11 @@
 .ldfKnn(dataset, knn_object, k = k, h = 1, c = 1)
 }
 \arguments{
-\item{dataset}{Matrix with cell embeddings with cells as rows and reduced dimensions as cloumns.
-Subspace to determine LDF in.}
+\item{dataset}{Matrix with cell embeddings with cells as rows and reduced
+dimensions as cloumns. Subspace to determine LDF in.}
 
-\item{knn_object}{List with k-nearest neighbours (KNN) as provided by \code{get.knn} from the \code{FNN} package.
+\item{knn_object}{List with k-nearest neighbours (KNN) as provided by
+\code{get.knn} from the \code{FNN} package.
 First element named "indices" contains indices of KNN in \code{dataset}.
 Second element named "distance" contains distances of KNN in \code{dataset}.
 Third element named "cell_name" contains rownames of KNN in \code{dataset}.}
@@ -18,21 +19,25 @@ Third element named "cell_name" contains rownames of KNN in \code{dataset}.}
 \item{k}{Numeric. Number of KNN used. Should correspond to \code{knn_object}.}
 
 \item{h}{Numeric. Bandwidth  for  kernel  functions.
-The  greater  the  bandwidth, the smoother kernels and lesser weight are put on outliers. Default is 1}
+The  greater  the  bandwidth, the smoother kernels and lesser weight are put
+on outliers. Default is 1}
 
-\item{c}{Scaling constant for comparison of LDE to neighboring observations. Default is 1.}
+\item{c}{Scaling constant for comparison of LDE to neighboring observations.
+Default is 1.}
 }
 \value{
 List with two elements "LDE" and "LDF".
 }
 \description{
-Calculates the Local Density Factor as implemented in the \code{DDoutlier} package with a predefined KNN neighbourhood.
+Calculates the Local Density Factor as implemented in the \code{DDoutlier}
+package with a predefined KNN neighbourhood.
 }
 \details{
 LDF fuction modified from the \code{DDoutlier} package.
-Calculates a Local Density Estimate (LDE) and Local Density Factor (LDF) with a gaussian kernel.
-Modified to use a predefined KNN neighbourhood.
-For \code{\link{ldfSce}} this is essential to determine LDF after data integration on the same set of cells.
+Calculates a Local Density Estimate (LDE) and Local Density Factor (LDF) with
+ a gaussian kernel. Modified to use a predefined KNN neighbourhood.
+For \code{\link{ldfSce}} this is essential to determine LDF after data
+integration on the same set of cells.
 }
 \seealso{
 \code{\link{ldfSce}}

@@ -8,13 +8,17 @@
 }
 \arguments{
 \item{knn}{List with three elements. First "index" with indices of KNN cells.
-Second "distance" with distances to KNN cells. Third a slot named by \code{group} variable with group level of KNN cells.}
+Second "distance" with distances to KNN cells. Third a slot named by
+\code{group} variable with group level of KNN cells.}
 
-\item{cms_raw}{Matrix with raw cms scores for all cells specified in \code{cell_names} and \code{knn}. Colnames need to be "cms.}
+\item{cms_raw}{Matrix with raw cms scores for all cells specified in
+\code{cell_names} and \code{knn}. Colnames need to be "cms.}
 
-\item{cell_names}{Character vector with cell names corresponding to the rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.}
+\item{cell_names}{Character vector with cell names corresponding to the
+rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.}
 
-\item{k_min}{Numeric. Minimum number of Knn to include. Default is NA (see Details).}
+\item{k_min}{Numeric. Minimum number of Knn to include.
+Default is NA (see Details).}
 
 \item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 }
@@ -25,10 +29,12 @@ matrix with two columns ("cms_smooth", "cms").
 Performs weighted smoothening of cms scores
 }
 \details{
-Internal function to smooth cms scores. In a complete random setting cms scores are uniform distributed.
-To reduce the resulting random variance and enable visualization of local pattern cms scores can be smoothened assuming that within one region mixing is uniform.
-Generates smoothened cms scores using weigthed means of cms scores within the k-nearest neighbourhood.
-Reciprocal distances are used as weights.
+Internal function to smooth cms scores. In a complete random setting
+ cms scores are uniform distributed. To reduce the resulting random variance
+ and enable visualization of local pattern cms scores can be smoothened
+ assuming that within one region mixing is uniform. Generates smoothened cms
+ scores using weigthed means of cms scores within the k-nearest
+ neighbourhood. Reciprocal distances are used as weights.
 }
 \seealso{
 \code{\link{.cmsCell}}, \code{\link{cms}}

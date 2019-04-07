@@ -8,11 +8,14 @@ visMetric(sce_cms, metric_var = "cms", dim_red = "TSNE",
   log10_val = FALSE)
 }
 \arguments{
-\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot within \code{colData(res_object)}.}
+\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
+(e.g. cms) to plot within \code{colData(res_object)}.}
 
-\item{metric_var}{Character Name of the metric scores to use. Default is "cms".}
+\item{metric_var}{Character Name of the metric scores to use.
+Default is "cms".}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting.
+Default is "TSNE".}
 
 \item{log10_val}{Logical. Indicating if -log10(metric) should be plotted.}
 }
@@ -24,13 +27,15 @@ Plot metric scores in a reduced dimensional plot.
 }
 \details{
 Plots a reduced dimension plot colored by metric scores.
-The dimension reduction embedding can be specified, but only tsne embeddings will automatically be computed using \code{runTSNE}.
-Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are present in \code{reducedDimNames(sce)}.
+The dimension reduction embedding can be specified, but only tsne embeddings
+will automatically be computed using \code{runTSNE}. Embeddings from data
+integration methods (e.g. mnn.correct) can be used as long as they are
+present in \code{reducedDimNames(sce)}.
 }
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50, 500:550)]
+sce <- sim_list[[1]][, c(1:50, 300:350)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 visMetric(sce_cms)

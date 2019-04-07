@@ -8,36 +8,42 @@ visOverview(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
   log10_val = FALSE, other_Var = NULL)
 }
 \arguments{
-\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot in \code{colData(sce_cms)}.}
+\item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
+(e.g. cms) to plot in \code{colData(sce_cms)}.}
 
-\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.}
+\item{group}{Character. Name of group/batch variable. Needs to be one of
+\code{names(colData(sce))}.}
 
-\item{metric_prefix}{Character. Prefix to specify names of \code{colData(sce)} to be plotted.
-Default is 'cms'.}
+\item{metric_prefix}{Character. Prefix to specify names of
+\code{colData(sce)} to be plotted. Default is 'cms'.}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting.
+Default is "TSNE".}
 
 \item{log10_val}{Logical. Indicating if -log10(metric) should be plotted.}
 
-\item{other_Var}{Character string. Name(s) of other variables to be plotted asided.
-Need correspond to one of \code{colData(sce)}.}
+\item{other_Var}{Character string. Name(s) of other variables to be plotted
+asided. Need correspond to one of \code{colData(sce)}.}
 }
 \value{
 a \code{ggplot} object.
 }
 \description{
-Plot an overview of metric results, group label and any colData variable in a reduced dimensional representation.
+Plot an overview of metric results, group label and any colData variable in
+a reduced dimensional representation.
 }
 \details{
-Plots reduced dimensions of cells colored by group variable and metric score.
-If 'red_dim' is not defined in \code{reducedDimNames(sce)} a tsne is calculated using \code{runTSNE}.
-Other color label as celltype label or smoothened scores can be plotted aside.
-Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
+Plots reduced dimensions of cells colored by group variable and
+metric score. If 'red_dim' is not defined in \code{reducedDimNames(sce)} a
+tsne is calculated using \code{runTSNE}. Other color label as celltype label
+or smoothened scores can be plotted aside. Embeddings from data integration
+methods (e.g. mnn.correct) can be used if they are specified in
+\code{reducedDimNames(sce)}.
 }
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50, 500:550)]
+sce <- sim_list[[1]][, c(1:50, 300:350)]
 sce_cms <- cms(sce, "batch", k = 30)
 
 visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))

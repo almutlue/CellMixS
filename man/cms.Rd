@@ -16,40 +16,48 @@ cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(colData(sce))}}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for distance distributions.
-Default is "PCA".}
+\item{dim_red}{Character. Name of embeddings to use as subspace for distance
+distributions. Default is "PCA".}
 
 \item{assay_name}{Character. Name of the assay to use for PCA.
 Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 
-\item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).}
+\item{res_name}{Character. Appendix of the result score's name
+(e.g. method used to combine batches).}
 
 \item{k_min}{Numeric. Minimum number of Knn to include.
 Default is NA (see Details).}
 
-\item{smooth}{Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.}
+\item{smooth}{Logical. Indicating if cms results should be smoothened within
+each neighbourhood using the weigthed mean.}
 
 \item{n_dim}{Numeric. Number of dimensions to include to define the subspace.}
 
-\item{cell_min}{Numeric. Minimum number of cells from each group to be included into the AD test.
+\item{cell_min}{Numeric. Minimum number of cells from each group to be
+included into the AD test.
 Should be > 10 to make the ad.test function working.}
 }
 \value{
-A \code{SingleCellExperiment} with cms (and cms_smooth) within colData.
+A \code{SingleCellExperiment} with cms (and cms_smooth) within
+colData.
 }
 \description{
-Calculates cell-specific mixing scores based on euclidean distances within a subspace of integrated data.
+Calculates cell-specific mixing scores based on euclidean distances within a
+subspace of integrated data.
 }
 \details{
-The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
-It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
+The cms function tests the hypothesis, that group-specific distance
+distributions of knn cells have the same underlying unspecified distribution.
+It performs Anderson-Darling tests as implemented in the
+\code{kSamples package}.
 In default the function uses all distances and group label defined in knn.
-If \code{k_min} is specified, the first local minimum of the overall distance distribution with at least k_min cells is used.
-This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
-If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
-Results will be appended to \code{colData(sce)}.
-Names can be specified using \code{res_name}.
+If \code{k_min} is specified, the first local minimum of the overall distance
+distribution with at least k_min cells is used. This can be used to adapt to
+the local structure of the datatset e.g. prevent cells from a
+different cluster to be included. If 'dim_red' is not defined or default cms
+will calculate a PCA using \code{runPCA}. Results will be appended to
+\code{colData(sce)}. Names can be specified using \code{res_name}.
 }
 \examples{
 library(SingleCellExperiment)

@@ -4,38 +4,46 @@
 
 #' cms
 #'
-#' Calculates cell-specific mixing scores based on euclidean distances within a subspace of integrated data.
+#' Calculates cell-specific mixing scores based on euclidean distances within a
+#' subspace of integrated data.
 #'
 #' @param sce A \code{SingleCellExperiment} object with the combined data.
 #' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}
-#' @param dim_red Character. Name of embeddings to use as subspace for distance distributions.
-#' Default is "PCA".
+#' @param dim_red Character. Name of embeddings to use as subspace for distance
+#' distributions. Default is "PCA".
 #' @param assay_name Character. Name of the assay to use for PCA.
 #' Only relevant if no existing 'dim_red' is provided.
 #' Must be one of \code{names(assays(sce))}. Default is "logcounts".
-#' @param res_name Character. Appendix of the result score's name (e.g. method used to combine batches).
+#' @param res_name Character. Appendix of the result score's name
+#' (e.g. method used to combine batches).
 #' @param k_min Numeric. Minimum number of Knn to include.
 #' Default is NA (see Details).
-#' @param smooth Logical. Indicating if cms results should be smoothened within each neighbourhood using the weigthed mean.
+#' @param smooth Logical. Indicating if cms results should be smoothened within
+#' each neighbourhood using the weigthed mean.
 #' @param n_dim Numeric. Number of dimensions to include to define the subspace.
-#' @param cell_min Numeric. Minimum number of cells from each group to be included into the AD test.
+#' @param cell_min Numeric. Minimum number of cells from each group to be
+#' included into the AD test.
 #' Should be > 10 to make the ad.test function working.
 #'
-#' @details The cms function tests the hypothesis, that group-specific distance distributions of knn cells have the same underlying unspecified distribution.
-#' It performs Anderson-Darling tests as implemented in the \code{kSamples package}.
+#' @details The cms function tests the hypothesis, that group-specific distance
+#' distributions of knn cells have the same underlying unspecified distribution.
+#' It performs Anderson-Darling tests as implemented in the
+#' \code{kSamples package}.
 #' In default the function uses all distances and group label defined in knn.
-#' If \code{k_min} is specified, the first local minimum of the overall distance distribution with at least k_min cells is used.
-#' This can be used to adapt to the local structure of the datatset e.g. prevent cells from a distinct different cluster to be included.
-#' If 'dim_red' is not defined or default cms will calculate a PCA using \code{runPCA}.
-#' Results will be appended to \code{colData(sce)}.
-#' Names can be specified using \code{res_name}.
+#' If \code{k_min} is specified, the first local minimum of the overall distance
+#' distribution with at least k_min cells is used. This can be used to adapt to
+#' the local structure of the datatset e.g. prevent cells from a
+#' different cluster to be included. If 'dim_red' is not defined or default cms
+#' will calculate a PCA using \code{runPCA}. Results will be appended to
+#' \code{colData(sce)}. Names can be specified using \code{res_name}.
 #'
 #' @family cms functions
 #' @seealso \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
 #'
-#' @return A \code{SingleCellExperiment} with cms (and cms_smooth) within colData.
+#' @return A \code{SingleCellExperiment} with cms (and cms_smooth) within
+#' colData.
 #'
 #' @references
 #' Scholz, F. W. and Stephens, M. A. (1987).
@@ -83,9 +91,7 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
     cell_names <- colnames(sce)
     names(cell_names) <- cell_names
 
-    #---------------------------------------------------------------------------#
-
-    #----------------- determine knn matrix -----------------------------------#
+    #----------------- determine knn matrix ----------------------------------#
     subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
     #determine knn
     knn <- findKNN(subspace, k=k) %>% map(set_rownames, cell_names)
@@ -95,12 +101,11 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
         colData(sce)[as.numeric(as.character(knn$index)), group],
         nrow = nrow(knn$index)) %>%
         set_rownames(cell_names)
-    #---------------------------------------------------------------------------#
 
-    #----------------- calculate cms score  -----------------------------------#
-
+    #----------------- calculate cms score  ----------------------------------#
     cms_raw <- cell_names %>%
-        map(.cmsCell, group = group, knn = knn, k_min=k_min, cell_min = cell_min) %>%
+        map(.cmsCell, group = group, knn = knn, k_min=k_min,
+            cell_min = cell_min) %>%
         bind_rows() %>% t() %>%
         set_colnames("cms")
 
@@ -117,7 +122,6 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
     colData(sce) <- cbind(colData(sce), res_cms)
     sce
 }
-
 
 ## quiets concerns of R CMD check re: the .'s that appear in pipelines
 if(getRversion() >= "2.15.1") utils::globalVariables(c("."))

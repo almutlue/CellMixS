@@ -9,9 +9,11 @@ visGroup(sce, group, dim_red = "TSNE")
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object.}
 
-\item{group}{Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.}
+\item{group}{Character. Name of group/batch variable.
+Needs to be one of \code{names(colData(sce))}.}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".}
+\item{dim_red}{Character. Name of embeddings to use as subspace for plotting.
+Default is "TSNE".}
 }
 \value{
 a \code{ggplot} object.
@@ -21,13 +23,15 @@ Plot group label in a reduced dimensional plot.
 }
 \details{
 Plots a reduced dimension plot colored by group parameter.
-The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed by \code{runTSNE}.
- Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
+The dimesion reduction embedding can be specified, but only tsne embeddings
+will automatically be computed by \code{runTSNE}. Embeddings from data
+integration methods (e.g. mnn.correct) can be used as long as they are
+specified in \code{reducedDimNames(sce)}.
 }
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50, 500:550)]
+sce <- sim_list[[1]][, c(1:50, 300:350)]
 
 visGroup(sce, "batch")
 

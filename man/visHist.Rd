@@ -8,11 +8,13 @@ visHist(res_object, metric_prefix = "cms", n_col = 1)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, matrix or data.frame.
-The SingleCellExperiment object should contain the result scores (e.g. cms) to plot in \code{colData(res_object)}.
+The SingleCellExperiment object should contain the result scores (e.g. cms)
+to plot in \code{colData(res_object)}.
 Matrix or data frame should have result scores in columns and cells in rows.}
 
-\item{metric_prefix}{Character. Prefix to specify names of \code{colData(sce)} to be plotted.
-Applys only if `res_object` is a \code{SingleCellExperiment} object. Default is 'cms'.}
+\item{metric_prefix}{Character. Prefix to specify names of
+\code{colData(sce)} to be plotted. Applys only if `res_object` is
+a \code{SingleCellExperiment} object. Default is 'cms'.}
 
 \item{n_col}{Numeric. Number of columns of the pval histogram.}
 }
@@ -23,11 +25,12 @@ a \code{ggplot} object.
 Plot pvalue histograms of metric score distributions
 }
 \details{
-Plots metric score distribution similar to a pvalue histogram distribution.
-Without dataset-specific bias, cms scores should be approx. flat distributed.
-If `res_object` is a matrix or data.frame, it will create a histogram for each column.
-If `res_object` is a \code{SingleCellExperiment} object,
- it will create a histogram of all \code{colData(res_object)} that start with `metric_prefix`.
+Plots metric score distribution similar to a pvalue histogram
+distribution. Without dataset-specific bias, cms scores should be approx.
+flat distributed. If `res_object` is a matrix or data.frame,
+it will create a histogram for each column. If `res_object` is a
+\code{SingleCellExperiment} object, it will create a histogram of all
+\code{colData(res_object)} that start with `metric_prefix`.
 }
 \examples{
 library(SingleCellExperiment)

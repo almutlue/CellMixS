@@ -9,54 +9,68 @@ ldfDiff(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
   assay_combined = "logcounts", n_dim = 20, res_name = NULL)
 }
 \arguments{
-\item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single datasets before integration.
-Names should correspond to levels in \code{colData(sce_combined)$group}}
+\item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single
+datasets before integration. Names should correspond to levels in
+\code{colData(sce_combined)$group}}
 
-\item{sce_combined}{A \code{SingleCellExperiment} object with the combined data.}
+\item{sce_combined}{A \code{SingleCellExperiment} object with the combined
+data.}
 
-\item{group}{Character. Name of group/batch variable that separates elements of \code{sce_pre_list}.
+\item{group}{Character. Name of group/batch variable that separates elements
+of \code{sce_pre_list}.
 Needs to be one of \code{names(colData(sce_combined))}.}
 
 \item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace to calculate LDF before integration. Default is "PCA".}
+\item{dim_red}{Character. Name of embeddings to use as subspace to calculate
+LDF before integration. Default is "PCA".}
 
-\item{dim_combined}{Character. Name of embeddings to use as subspace to calculate LDF after integration. Default is \code{dim_red}.}
+\item{dim_combined}{Character. Name of embeddings to use as subspace to
+calculate LDF after integration. Default is \code{dim_red}.}
 
-\item{assay_pre}{Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
+\item{assay_pre}{Character. Name of the assay to use for PCA.
+Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce_pre))}. Default is "logcounts".}
 
-\item{assay_combined}{Character. Name of the assay to use for PCA. Only relevant if no existing 'dim_red' is provided.
+\item{assay_combined}{Character. Name of the assay to use for PCA.
+Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce_combined))}. Default is "logcounts".}
 
 \item{n_dim}{Numeric. Number of PCs to include to define subspaces.}
 
-\item{res_name}{Character. Appendix of the result score's name (e.g. method used to combine batches).
+\item{res_name}{Character. Appendix of the result score's name
+(e.g. method used to combine batches).
 Used to specify result name for more than one run on the same input.}
 }
 \value{
-A \code{SingleCellExperiment} with difference in LDF named "diff_ldf" in colData.
+A \code{SingleCellExperiment} object.
 }
 \description{
-Determines cell-specific changes in the Local Density Factor before and after data integration.
+Determines cell-specific changes in the Local Density Factor before and after
+data integration.
 }
 \details{
-The ldfDiff function calculates differences in LDF for each element in \code{sce_pre_list} and their corresponding cells in \code{sce_combined} using \code{\link{ldfSce}}.
+The ldfDiff function calculates differences in LDF for each element
+in \code{sce_pre_list} and their corresponding cells in \code{sce_combined}
+using \code{\link{ldfSce}}.
 If 'dim_red' is not defined a PCA will be calculated using \code{runPCA}.
-In this case 'assay_pre' need to refer to the data slot that shall define the subspace.
-Similar refer 'dim-combined' and 'assay_combined' to the integrated subspace or to the resp. "corrected" count data slot.
+In this case 'assay_pre' need to refer to the data slot that shall define
+the subspace. Similar refer 'dim-combined' and 'assay_combined' to the
+integrated subspace or to the resp. "corrected" count data slot.
 'k' can be used to define the level of local structure that is tested.
-The smaller 'k' the more focus is on detailed structures, while a large k will tets overall changes.
+The smaller 'k' the more focus is on detailed structures,
+while a large k will tets overall changes.
 }
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[4]][, c(1:50, 500:550)]
+sce <- sim_list[["batch15"]][, c(1:50, 300:350)]
 sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_batch2 <- sce[,colData(sce)$batch == "2"]
 sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)
 
-sce_ldf <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch", dim_combined = "MNN", n_dim = 2)
+sce_ldf <- ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
+dim_combined = "MNN", n_dim = 2)
 
 }
 \references{

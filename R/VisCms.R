@@ -6,18 +6,21 @@
 #' Plot pvalue histograms of metric score distributions
 #'
 #' @param res_object \code{SingleCellExperiment} object, matrix or data.frame.
-#' The SingleCellExperiment object should contain the result scores (e.g. cms) to plot in \code{colData(res_object)}.
+#' The SingleCellExperiment object should contain the result scores (e.g. cms)
+#' to plot in \code{colData(res_object)}.
 #' Matrix or data frame should have result scores in columns and cells in rows.
-#' @param metric_prefix Character. Prefix to specify names of \code{colData(sce)} to be plotted.
-#' Applys only if `res_object` is a \code{SingleCellExperiment} object. Default is 'cms'.
+#' @param metric_prefix Character. Prefix to specify names of
+#' \code{colData(sce)} to be plotted. Applys only if `res_object` is
+#' a \code{SingleCellExperiment} object. Default is 'cms'.
 #' @param n_col Numeric. Number of columns of the pval histogram.
 #'
 #'
-#' @details Plots metric score distribution similar to a pvalue histogram distribution.
-#' Without dataset-specific bias, cms scores should be approx. flat distributed.
-#' If `res_object` is a matrix or data.frame, it will create a histogram for each column.
-#' If `res_object` is a \code{SingleCellExperiment} object,
-#'  it will create a histogram of all \code{colData(res_object)} that start with `metric_prefix`.
+#' @details Plots metric score distribution similar to a pvalue histogram
+#' distribution. Without dataset-specific bias, cms scores should be approx.
+#' flat distributed. If `res_object` is a matrix or data.frame,
+#' it will create a histogram for each column. If `res_object` is a
+#' \code{SingleCellExperiment} object, it will create a histogram of all
+#' \code{colData(res_object)} that start with `metric_prefix`.
 #'
 #' @family visualize metric functions
 #'
@@ -32,7 +35,8 @@
 #' visHist(sce_cms)
 #'
 #'
-#' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab theme_classic
+#' @importFrom ggplot2 ggplot aes_string geom_histogram ggtitle xlab
+#' theme_classic
 #' @importFrom cowplot plot_grid
 #' @importFrom dplyr as_tibble select starts_with
 #' @importFrom SingleCellExperiment colData
@@ -52,16 +56,18 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
         stop("Error: 'res_object' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify which colData(res_object) column to plot by `metric_prefix`.
-             * Specify a matrix or dataframe with result scores to plot as `res_object`.")
+             * Specify colData(res_object) column to plot by `metric_prefix`.
+             * Specify a matrix with results to plot as `res_object`.")
     }
 
     #plot function
     p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name){
         ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
             geom_histogram(color="black",
-                           fill=col_hist[which(colnames(cms_res) %in% cms_name)],
-                           breaks=seq(0, 1, by=0.05)) + xlab(cms_name) + theme_classic()
+                           fill=
+                               col_hist[which(colnames(cms_res) %in% cms_name)],
+                           breaks=seq(0, 1, by=0.05)) + xlab(cms_name) +
+            theme_classic()
     }), ncol = n_col))
     p
     }
@@ -69,21 +75,27 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 
 #' visOverview
 #'
-#' Plot an overview of metric results, group label and any colData variable in a reduced dimensional representation.
+#' Plot an overview of metric results, group label and any colData variable in
+#' a reduced dimensional representation.
 #'
-#' @param sce_cms A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot in \code{colData(sce_cms)}.
-#' @param group Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.
-#' @param metric_prefix Character. Prefix to specify names of \code{colData(sce)} to be plotted.
-#' Default is 'cms'.
-#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param sce_cms A \code{SingleCellExperiment} object with the result scores
+#' (e.g. cms) to plot in \code{colData(sce_cms)}.
+#' @param group Character. Name of group/batch variable. Needs to be one of
+#' \code{names(colData(sce))}.
+#' @param metric_prefix Character. Prefix to specify names of
+#' \code{colData(sce)} to be plotted. Default is 'cms'.
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting.
+#'  Default is "TSNE".
 #' @param log10_val Logical. Indicating if -log10(metric) should be plotted.
-#' @param other_Var Character string. Name(s) of other variables to be plotted asided.
-#' Need correspond to one of \code{colData(sce)}.
+#' @param other_Var Character string. Name(s) of other variables to be plotted
+#' asided. Need correspond to one of \code{colData(sce)}.
 #'
-#' @details Plots reduced dimensions of cells colored by group variable and metric score.
-#' If 'red_dim' is not defined in \code{reducedDimNames(sce)} a tsne is calculated using \code{runTSNE}.
-#' Other color label as celltype label or smoothened scores can be plotted aside.
-#' Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
+#' @details Plots reduced dimensions of cells colored by group variable and
+#' metric score. If 'red_dim' is not defined in \code{reducedDimNames(sce)} a
+#' tsne is calculated using \code{runTSNE}. Other color label as celltype label
+#' or smoothened scores can be plotted aside. Embeddings from data integration
+#' methods (e.g. mnn.correct) can be used if they are specified in
+#' \code{reducedDimNames(sce)}.
 #'
 #' @family visualize metric functions
 #' @seealso \code{\link{visMetric}}, \code{\link{visGroup}}
@@ -94,13 +106,14 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50, 500:550)]
+#' sce <- sim_list[[1]][, c(1:50, 300:350)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #'
 #' visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
 #'
 #'
-#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point scale_color_manual
+#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend
+#' guides element_blank element_line geom_point scale_color_manual
 #' @importFrom cowplot plot_grid
 #' @importFrom scater runTSNE
 #' @importFrom SummarizedExperiment assays
@@ -121,11 +134,10 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
         stop("Error: 'sce_cms' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify which colData(res_object) column to plot by `metric_prefix`.")
+             * Specify a colData(res_object) column in `metric_prefix`.")
     }
 
     cell_names <- colnames(sce_cms)
-
 
     ### ------ Start Check and prepare dim reduction slot --------####
 
@@ -151,7 +163,8 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
     colnames(red_dim) <- c("red_dim1", "red_dim2")
 
     ### ------ Finish Check and prepare dim reduction slot --------####
-    other_var_tib <- as_tibble(colData(sce_cms)[,other_Var]) %>% set_colnames(other_Var)
+    other_var_tib <- as_tibble(colData(sce_cms)[,other_Var]) %>%
+        set_colnames(other_Var)
 
     #data frame to plot
     df <- data.frame(sample_id = cell_names,
@@ -191,7 +204,8 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
             ggtitle(paste0(cms_res_var, " : ", group))
         if( isTRUE(log10_val) & cms_res_var %in% colnames(cms_res)){
             t_cms <- t_cms +
-                guides(color=guide_legend(title=paste0("-log10(",cms_res_var, ")")))
+                guides(color=guide_legend(
+                    title=paste0("-log10(",cms_res_var, ")")))
         }
         t_cms
     }
@@ -233,14 +247,19 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 #'
 #' Plot metric scores in a reduced dimensional plot.
 #'
-#' @param sce_cms A \code{SingleCellExperiment} object with the result scores (e.g. cms) to plot within \code{colData(res_object)}.
-#' @param metric_var Character Name of the metric scores to use. Default is "cms".
-#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param sce_cms A \code{SingleCellExperiment} object with the result scores
+#' (e.g. cms) to plot within \code{colData(res_object)}.
+#' @param metric_var Character Name of the metric scores to use.
+#' Default is "cms".
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting.
+#'  Default is "TSNE".
 #' @param log10_val Logical. Indicating if -log10(metric) should be plotted.
 #'
 #' @details Plots a reduced dimension plot colored by metric scores.
-#' The dimension reduction embedding can be specified, but only tsne embeddings will automatically be computed using \code{runTSNE}.
-#' Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are present in \code{reducedDimNames(sce)}.
+#' The dimension reduction embedding can be specified, but only tsne embeddings
+#' will automatically be computed using \code{runTSNE}. Embeddings from data
+#' integration methods (e.g. mnn.correct) can be used as long as they are
+#' present in \code{reducedDimNames(sce)}.
 #'
 #' @seealso \code{\link{visOverview}}, \code{\link{visGroup}}
 #' @family visualize metric functions
@@ -251,23 +270,22 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50, 500:550)]
+#' sce <- sim_list[[1]][, c(1:50, 300:350)]
 #' sce_cms <- cms(sce, "batch", k = 30)
 #'
 #' visMetric(sce_cms)
 #'
-#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point
+#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend
+#' guides element_blank element_line geom_point
 #' @importFrom scater runTSNE
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr mutate_at
 #' @importFrom magrittr %>%
-visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = FALSE){
-
+visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
+                     log10_val = FALSE){
     cell_names <- colnames(sce_cms)
-
-    ### ------ Start Check and prepare dim reduction slot --------####
 
     if(!dim_red %in% "TSNE"){
         if(!dim_red %in% reducedDimNames(sce_cms)){
@@ -277,9 +295,7 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
         }
         red_dim <- as.data.frame(reducedDim(sce_cms, dim_red))
         }else{
-            #used tsne from scater package (check for availability first)
             if(is.null(reducedDim(sce_cms, "TSNE"))){
-                #use "logcounts" if availabe otherwise "counts"
                 if(names(assays(sce_cms)) %in% "logcounts"){
                     sce_cms <- runTSNE(sce_cms)
                 }else{
@@ -289,8 +305,6 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
             red_dim <- as.data.frame(reducedDim(sce_cms, "TSNE"))
         }
     colnames(red_dim) <- c("red_dim1", "red_dim2")
-
-    ### ------ Finish Check and prepare dim reduction slot --------####
 
     #data frame to plot
     df <- data.frame(sample_id = cell_names,
@@ -302,23 +316,23 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
         mi_log10 <- function(x)(-log10(x))
         df <- df %>% mutate_at("metric", mi_log10)
     }
-
     t <- ggplot(df, aes_string(x="red_Dim1", y="red_Dim2")) +
         xlab(paste0(dim_red,"_1")) + ylab(paste0(dim_red,"_2")) +
         theme_void() +
         theme(aspect.ratio=1, panel.grid.minor=element_blank(),
               panel.grid.major=element_line(color="grey", size=.3))
 
-
-    t_metric <- t + geom_point(size=1, alpha = 0.5, aes_string(color="metric")) +
-        guides(color=guide_legend(override.aes=list(size=2), title = metric_var)) +
+    t_metric <- t +
+        geom_point(size=1, alpha = 0.5, aes_string(color="metric")) +
+        guides(color=
+                   guide_legend(override.aes=list(size=2), title = metric_var)
+               ) +
         scale_color_viridis(option = "B") + ggtitle(metric_var)
 
     if(isTRUE(log10_val)){
         t_metric <- t_metric +
             guides(color=guide_legend(title=paste0("-log10(", metric_var, ")")))
     }
-
     t_metric
     }
 
@@ -328,12 +342,16 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
 #' Plot group label in a reduced dimensional plot.
 #'
 #' @param sce A \code{SingleCellExperiment} object.
-#' @param group Character. Name of group/batch variable. Needs to be one of \code{names(colData(sce))}.
-#' @param dim_red Character. Name of embeddings to use as subspace for plotting. Default is "TSNE".
+#' @param group Character. Name of group/batch variable.
+#' Needs to be one of \code{names(colData(sce))}.
+#' @param dim_red Character. Name of embeddings to use as subspace for plotting.
+#' Default is "TSNE".
 #'
 #' @details Plots a reduced dimension plot colored by group parameter.
-#' The dimesion reduction embedding can be specified, but only tsne embeddings will automatically be computed by \code{runTSNE}.
-#'  Embeddings from data integration methods (e.g. mnn.correct) can be used as long as they are specified in \code{reducedDimNames(sce)}.
+#' The dimesion reduction embedding can be specified, but only tsne embeddings
+#' will automatically be computed by \code{runTSNE}. Embeddings from data
+#' integration methods (e.g. mnn.correct) can be used as long as they are
+#' specified in \code{reducedDimNames(sce)}.
 #'
 #' @seealso \code{\link{visOverview}}, \code{\link{visMetric}}
 #' @family visualize functions
@@ -344,27 +362,25 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = 
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50, 500:550)]
+#' sce <- sim_list[[1]][, c(1:50, 300:350)]
 #'
 #' visGroup(sce, "batch")
 #'
 #'
-#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend guides element_blank element_line geom_point scale_color_manual
+#' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend
+#'  guides element_blank element_line geom_point scale_color_manual
 #' @importFrom scater runTSNE
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
 visGroup <- function(sce, group, dim_red = "TSNE"){
-
     #Generate or specify dim reduction
     cell_names <- colnames(sce)
 
     ### ------ Start Check and prepare dim reduction slot --------####
-
-    #custumized dimreduction
     if(!dim_red %in% "TSNE"){
         if(!dim_red %in% reducedDimNames(sce)){
-            stop("Please provide a dim_red method to be used that is listed in the reducedDim slot of sce")
+            stop("Please provide a dim_red method listed in reducedDims of sce")
         }
         red_dim <- as.data.frame(reducedDim(sce, dim_red))
     }else{
@@ -380,7 +396,6 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
         red_dim <- as.data.frame(reducedDim(sce, "TSNE"))
     }
     colnames(red_dim) <- c("red_dim1", "red_dim2") # ensure  the same colnames
-
     ### ------ Finish Check and prepare dim reduction slot --------####
 
     #data frame to plot
@@ -388,7 +403,6 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
                      group_var = colData(sce)[, group],
                      red_Dim1=red_dim$red_dim1,
                      red_Dim2=red_dim$red_dim2)
-
 
     t <- ggplot(df, aes_string(x="red_Dim1", y="red_Dim2")) +
         xlab(paste0(dim_red,"_1")) + ylab(paste0(dim_red,"_2")) +
@@ -407,7 +421,6 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
     }else{
         t_group <- t_group + scale_color_manual(values = col_group)
     }
-
     t_group
 }
 

@@ -75,12 +75,12 @@ sim_multibatch_data <- function(n.genes = 1000, n.batch = 3, batch_var = 0.1, ba
 
 
 #generate batch_distributions
-batch_var_list <- c(0, 0.1, 0.3, 0.5)
+batch_var_list <- c(0, 0.15, 0.5)
 batch_diff_list <- c(0.5)
 
 any <- lapply(batch_diff_list, function(diff){
-  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 300, n.batch = 3, batch_diff = diff, n_sample = 400)
-  names(batch_list) <- c("batch0", "batch10", "batch30", "batch50")
+  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 100, n.batch = 3, batch_diff = diff, n_sample = 300)
+  names(batch_list) <- c("batch0", "batch15", "batch50")
   batch_list
 })
 
@@ -100,7 +100,7 @@ create_sce <- function(multibatch){
     colnames(sce) <-  sprintf("cell_%s",seq(1:ncol(sce)))
     sce <- runTSNE(sce, exprs_values = "counts")
     sce <- runPCA(sce, ncomponents = 30, exprs_values = "counts")
-    sce <- runUMAP(sce, exprs_values = "counts")
+    #sce <- runUMAP(sce, exprs_values = "counts")
     sce
 }
 
@@ -125,7 +125,7 @@ batch_list <- names(sce_list[[1]])
   
 lapply(batch_list, function(name){
     sce_name <- sce_list[["unbalanced50"]][[name]]
-    visGroup(sce_name, "batch", dim_red = "UMAP") + ggtitle(paste0("unbalanced50_", name))
+    visGroup(sce_name, "batch", dim_red = "TSNE") + ggtitle(paste0("unbalanced50_", name))
 })
   
 ```
@@ -148,23 +148,19 @@ add_mnn <- function(batch_name){
   sce
 }
   
-sce_mnn <- lapply(batch_list, add_mnn)
-names(sce_mnn) <- batch_list
+#sce_mnn <- lapply(batch_list, add_mnn)
+#names(sce_mnn) <- batch_list
+sce_list[["unbalanced50"]][["batch15"]] <- add_mnn("batch15")
 
 ```
 
-#### Visualize integration
-```{r vis mnn}
-lapply(batch_list, function(name){
-    sce <- sce_mnn[[name]]
-    visGroup(sce, "batch", dim_red = "MNN") + ggtitle(name)
-})
-```
 
 #### Save data and SessionInfo
 ```{r save and session}
 data_path <- here::here(file.path("inst", "extdata"))
-sim_50 <- sce_mnn
+sim_50 <- sce_list[["unbalanced50"]]
+sim50[["batch0"]]$batch <- as.factor(sim_50[["batch0"]]$batch)
+sim50[["batch50"]]$batch <- as.factor(sim_50[["batch50"]]$batch)
 saveRDS(sim_50, file = file.path(data_path, "sim50.rds"))
 sessionInfo()
 ```
