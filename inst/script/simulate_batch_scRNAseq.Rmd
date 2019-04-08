@@ -159,8 +159,8 @@ sce_list[["unbalanced50"]][["batch15"]] <- add_mnn("batch15")
 ```{r save and session}
 data_path <- here::here(file.path("inst", "extdata"))
 sim_50 <- sce_list[["unbalanced50"]]
-sim50[["batch0"]]$batch <- as.factor(sim_50[["batch0"]]$batch)
-sim50[["batch50"]]$batch <- as.factor(sim_50[["batch50"]]$batch)
+sim_50[["batch0"]]$batch <- as.factor(sim_50[["batch0"]]$batch)
+sim_50[["batch50"]]$batch <- as.factor(sim_50[["batch50"]]$batch)
 saveRDS(sim_50, file = file.path(data_path, "sim50.rds"))
 sessionInfo()
 ```
