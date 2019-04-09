@@ -64,8 +64,7 @@ library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 sce <- sim_list[[1]][, c(1:50)]
 
-sce_cms <- cms(sce, k = 20, group = "batch")
-sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
+sce_cms <- cms(sce, k = 20, group = "batch", n_dim = 2)
 
 }
 \references{

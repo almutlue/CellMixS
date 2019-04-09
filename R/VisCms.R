@@ -31,7 +31,7 @@
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 #' sce <- sim_list[[1]][, c(1:50)]
-#' sce_cms <- cms(sce, "batch", k = 30)
+#' sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 #' visHist(sce_cms)
 #'
 #'
@@ -106,10 +106,10 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50, 300:350)]
-#' sce_cms <- cms(sce, "batch", k = 30)
+#' sce <- sim_list[[1]][, c(1:30, 300:330)]
+#' sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 #'
-#' visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
+#' visOverview(sce_cms, "batch", other_Var = "batch")
 #'
 #'
 #' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend
@@ -192,7 +192,7 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
             geom_point(size=1, alpha = 0.3, aes_string(color=group_var)) +
             guides(color=guide_legend(override.aes=list(size=1))) +
             scale_color_manual(values = col_group) +
-            ggtitle(group)
+            ggtitle(group_var)
     }
 
     #plot function for continous input
@@ -270,8 +270,8 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50, 300:350)]
-#' sce_cms <- cms(sce, "batch", k = 30)
+#' sce <- sim_list[[1]][, c(1:30, 300:320)]
+#' sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 #'
 #' visMetric(sce_cms)
 #'
@@ -286,7 +286,6 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
                      log10_val = FALSE){
     cell_names <- colnames(sce_cms)
-
     if(!dim_red %in% "TSNE"){
         if(!dim_red %in% reducedDimNames(sce_cms)){
             stop("Ambigous parameter 'dim_red', provide one of:
@@ -305,7 +304,6 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
             red_dim <- as.data.frame(reducedDim(sce_cms, "TSNE"))
         }
     colnames(red_dim) <- c("red_dim1", "red_dim2")
-
     #data frame to plot
     df <- data.frame(sample_id = cell_names,
                      metric = colData(sce_cms)[,metric_var],

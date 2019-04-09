@@ -58,8 +58,7 @@
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 #' sce <- sim_list[[1]][, c(1:50)]
 #'
-#' sce_cms <- cms(sce, k = 20, group = "batch")
-#' sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
+#' sce_cms <- cms(sce, k = 20, group = "batch", n_dim = 2)
 #'
 #' @importFrom scater runPCA
 #' @importFrom SingleCellExperiment reducedDim colData
@@ -74,7 +73,6 @@
 cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
                 res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
                 cell_min = 10){
-
     #------------------Check input parameter ---------------------------------#
     if(cell_min < 10){
         stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")

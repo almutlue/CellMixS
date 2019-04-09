@@ -1,8 +1,8 @@
 library(SingleCellExperiment)
 library(CellMixS)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[["batch15"]][, c(1:50,300:350)]
-sce_cms <- cms(sce, "batch", k = 30)
+sce <- sim_list[["batch20"]][, c(1:30,300:320)]
+sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 
 ## Tests for visualization fuctions:
 

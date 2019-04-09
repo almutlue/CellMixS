@@ -64,7 +64,7 @@ while a large k will tets overall changes.
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[["batch15"]][, c(1:50, 300:350)]
+sce <- sim_list[["batch20"]][, c(1:50, 300:350)]
 sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_batch2 <- sce[,colData(sce)$batch == "2"]
 sce_pre_list <- list("1" = sce_batch1, "2" = sce_batch2)

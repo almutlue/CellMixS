@@ -75,12 +75,12 @@ sim_multibatch_data <- function(n.genes = 1000, n.batch = 3, batch_var = 0.1, ba
 
 
 #generate batch_distributions
-batch_var_list <- c(0, 0.15, 0.5)
+batch_var_list <- c(0, 0.2, 0.5)
 batch_diff_list <- c(0.5)
 
 any <- lapply(batch_diff_list, function(diff){
   batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 100, n.batch = 3, batch_diff = diff, n_sample = 300)
-  names(batch_list) <- c("batch0", "batch15", "batch50")
+  names(batch_list) <- c("batch0", "batch20", "batch50")
   batch_list
 })
 
@@ -150,7 +150,7 @@ add_mnn <- function(batch_name){
   
 #sce_mnn <- lapply(batch_list, add_mnn)
 #names(sce_mnn) <- batch_list
-sce_list[["unbalanced50"]][["batch15"]] <- add_mnn("batch15")
+sce_list[["unbalanced50"]][["batch20"]] <- add_mnn("batch20")
 
 ```
 

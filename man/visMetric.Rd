@@ -35,8 +35,8 @@ present in \code{reducedDimNames(sce)}.
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50, 300:350)]
-sce_cms <- cms(sce, "batch", k = 30)
+sce <- sim_list[[1]][, c(1:30, 300:320)]
+sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 
 visMetric(sce_cms)
 

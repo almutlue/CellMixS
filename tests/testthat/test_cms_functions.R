@@ -2,7 +2,7 @@ library(SingleCellExperiment)
 library(CellMixS)
 #get simulated scRNA seq data with 3 unbalanced batches
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50,300:350)]
+sce <- sim_list[[1]][, c(1:30,300:320)]
 
 ## Tests for cms fuction:
 ### Include internal functions as cmsCell, filterLocMin and cmsSmooth.
@@ -11,19 +11,13 @@ test_that("test that output of cms is correct",{
     sce_cms_smooth <- cms(sce, k = 20, group = "batch",
                       dim_red = "TSNE", assay_name = "counts", n_dim = 2)
     sce_cms_kmin <- cms(sce, k = 20, group = "batch", k_min = 15,
-                        res_name = "kmin")
-    sce_cms_raw <- cms(sce, k = 20, group = "batch", smooth = FALSE)
-    sce_cms_default <- cms(sce, k = 20, group = "batch")
-    cms_only <- as.matrix(sce_cms_default$cms)
+                        res_name = "kmin", n_dim = 2)
     sce_df <- as.data.frame(assay(sce))
 
     expect_is(sce_cms_smooth, "SingleCellExperiment")
     expect_equal(ncol(colData(sce_cms_smooth)) - ncol(colData(sce)), 2)
-    expect_is(sce_cms_raw, "SingleCellExperiment")
-    expect_equal(ncol(colData(sce_cms_raw)) - ncol(colData(sce)), 1)
     expect_is(sce_cms_kmin, "SingleCellExperiment")
     expect_is(sce_cms_kmin$cms_smooth.kmin, "numeric")
-    expect_identical(cms_only, as.matrix(sce_cms_raw$cms))
     expect_error(cms(sce = sce, k=20, group = "batch",
                      dim_red = "TSNE", assay_name = "raw_counts"),
                  "Ambigious parameter: Specify subspace parameter.

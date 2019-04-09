@@ -81,8 +81,8 @@ The package contains example data named **sim_50**, a list of simulated
 single-cell RNA-seq data with varying batch effect strength and unbalanced 
 batch sizes. 
 
-Batch effects were introduced by sampling 0%, 10%, 30% or 50% of gene expression 
-values from a distribution with variant mean (e.g. 1% - 50% of genes were 
+Batch effects were introduced by sampling 0%, 20% or 50% of gene expression 
+values from a distribution with variant mean (e.g. 0% - 50% of genes were 
 affected by a batch effect). 
 
 All datasets consist of *3 batches*, one with _300 cells_ and the others with 
@@ -131,7 +131,7 @@ visGroup(sce50, group = "batch")
 
 ```{r vis batch all, fig.wide=TRUE}
 #visualize batch distribution in other elements of sim_list 
-batch_names <- c("batch0", "batch15")
+batch_names <- c("batch0", "batch20")
   
 vis_batch <- lapply(batch_names, function(name){
     sce <- sim_list[[name]]
@@ -165,13 +165,13 @@ and appends to the colData slot.
 
 ```{r cms}
 #call cell-specific mixing score for sce50
-sce50 <- cms(sce50, k = 70, group = "batch", res_name = "unaligned")
+sce50 <- cms(sce50, k = 20, group = "batch", res_name = "unaligned", n_dim = 3)
 head(colData(sce50))
 
 #call cell-specific mixing score for all
 sim_list <- lapply(batch_names, function(name){
     sce <- sim_list[[name]]
-    sce <- cms(sce, k = 70, group = "batch", res_name = "unaligned")
+    sce <- cms(sce, k = 20, group = "batch", res_name = "unaligned", n_dim = 3)
 }) %>% set_names(batch_names)
 
 #append cms50
@@ -236,11 +236,11 @@ metadata.
 
 ```{r single plots, fig.wide= TRUE}
 #cms only cms10
-sce15 <- sim_list[["batch15"]]
-metric_plot <- visMetric(sce15, metric_var = "cms_smooth.unaligned")
+sce20 <- sim_list[["batch20"]]
+metric_plot <- visMetric(sce20, metric_var = "cms_smooth.unaligned")
 
 #group only cms10
-group_plot <- visGroup(sce15, group = "batch")
+group_plot <- visGroup(sce20, group = "batch")
 
 plot_grid(metric_plot, group_plot, ncol = 2)
 
@@ -249,16 +249,17 @@ plot_grid(metric_plot, group_plot, ncol = 2)
 
 ```{r overview}
 #add random celltype assignments as new metadata
-sce15[["celltype"]] <- sample(c("CD4+", "CD8+", "CD3", "CD19"), 
-                              ncol(sce15), replace = TRUE)
+sce20[["celltype"]] <- rep(c("CD4+", "CD8+", "CD3"), ncol(sce20)/3) %>% 
+    as.factor 
 
-visOverview(sce15, "batch", other_Var = "celltype")
+visOverview(sce20, "batch", other_Var = "celltype")
 ```
 
-Systematic differences (e.g. celltype differences) can be further explored using `visCluster`. Here we do not expect any systematic difference as celltypes were 
+Systematic differences (e.g. celltype differences) can be further explored using
+`visCluster`. Here we do not expect any systematic difference as celltypes were 
 randomly assigned.
 ```{r compare cluster, fig.small= TRUE}
-visCluster(sce15, metric_var = "cms.unaligned", 
+visCluster(sce20, metric_var = "cms.unaligned", 
            cluster_var = "celltype")
 ```
 
@@ -275,38 +276,36 @@ effect of these methods, using a cell-specific mixing score. Some of them
 as input for `cms`.
 ```{r batch correction methods}
 #MNN - embeddings are stored in the reducedDims slot of sce
-reducedDimNames(sce15)
-sce15 <- cms(sce15, k = 70, group = "batch", 
-             dim_red = "MNN", res_name = "MNN")
+reducedDimNames(sce20)
+sce20 <- cms(sce20, k = 20, group = "batch", 
+             dim_red = "MNN", res_name = "MNN", n_dim = 3)
 
 # run limma
-limma_corrected <- removeBatchEffect(counts(sce15), batch = sce15$batch)
+limma_corrected <- removeBatchEffect(counts(sce20), batch = sce20$batch)
 #add corrected counts to sce
-assay(sce15, "lim_corrected") <- limma_corrected 
+assay(sce20, "lim_corrected") <- limma_corrected 
 
 #run cms
-sce15 <- cms(sce15, k = 70, group = "batch", 
-             assay_name = "lim_corrected", res_name = "limma")
+sce20 <- cms(sce20, k = 20, group = "batch", 
+             assay_name = "lim_corrected", res_name = "limma", n_dim = 3)
 
-names(colData(sce15))
+names(colData(sce20))
 ```
 
 
 ## Compare data integration methods {#di2}
 
-To compare different methods summary plots from `visIntegration` and p-value 
-histograms from `visHist` can be used. Local patterns within single methods can 
-be explored as described above.
+To compare different methods summary plots from `visIntegration` 
+(see \@ref(ldf)) and p-value histograms from `visHist` can be used. Local 
+patterns within single methods can be explored as described above.
 ```{r batch correction methods vis}
-# plot results
-visIntegration(sce15, metric_prefix = "cms.", violin = TRUE)
 
 # As pvalue histograms
-visHist(sce15, metric_prefix = "cms.",  n_col = 3)
+visHist(sce20, metric_prefix = "cms.",  n_col = 3)
 ```
 
-Here both methods `r BiocStyle::Biocpkg("limma")` and `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package show a flat p.value distribution. So cells 
-are equally mixed after batch effect removal.
+Here both methods `r BiocStyle::Biocpkg("limma")` and `fastMNN` from the `r BiocStyle::Biocpkg("scran")` package flattened the p.value distribution. 
+So cells are better mixed after batch effect removal.
 
 ## Remaining batch-specific structure - ldfDiff
 
@@ -330,47 +329,44 @@ without long tails.
 #Prepare input 
 # list with single SingleCellExperiment objects 
 #(Important: List names need to correspond to batch levels! See ?ldfDiff)
-sce_pre_list <- list("1" = sce15[,sce15$batch == "1"], 
-                     "2" = sce15[,sce15$batch == "2"], 
-                     "3" = sce15[,sce15$batch == "3"])
+sce_pre_list <- list("1" = sce20[,sce20$batch == "1"], 
+                     "2" = sce20[,sce20$batch == "2"], 
+                     "3" = sce20[,sce20$batch == "3"])
 
-sce15 <- ldfDiff(sce_pre_list, sce_combined = sce15, 
+sce20 <- ldfDiff(sce_pre_list, sce_combined = sce20, 
                  group = "batch", k = 70, dim_red = "PCA", 
                  dim_combined = "MNN", assay_pre = "counts", 
-                 n_dim = 20, res_name = "MNN")
+                 n_dim = 3, res_name = "MNN")
 
-sce15 <- ldfDiff(sce_pre_list, sce_combined = sce15, 
+sce20 <- ldfDiff(sce_pre_list, sce_combined = sce20, 
                  group = "batch", k = 70, dim_red = "PCA", 
                  dim_combined = "PCA", assay_pre = "counts", 
                  assay_combined = "lim_corrected",  
-                 n_dim = 20, res_name = "limma")
+                 n_dim = 3, res_name = "limma")
 
-names(colData(sce15))
+names(colData(sce20))
 ```
 
 
-## Visualize ldfDiff
+## Visualize ldfDiff {#ldf}
 
 Results from `ldfDiff` can be visualized in a similar way as results from `cms`.
 ```{r vis ldfDiff}
-#ldfDiff scores in reduced dim representation
-lim_plot <- visMetric(sce15, metric_var = "diff_ldf.limma", 
-                      dim_red = "TSNE") 
-
-mnn_plot <- visMetric(sce15, metric_var = "diff_ldf.MNN", 
-                      dim_red = "MNN") 
-
-plot_grid(lim_plot, mnn_plot, ncol = 2)
 
 #ldfDiff score summarized
-visIntegration(sce15, metric_prefix = "diff_ldf") 
+visIntegration(sce20, metric_prefix = "diff_ldf") 
 
 ```
 
-`ldfDiff` shows a clear difference between both methods. While `r BiocStyle::Biocpkg("limma")` is able to preserve the batch internal structure 
-within batches, `fastMNN` clearly changes it. Even if batches are well mixed 
-(see \@ref(di2)), `fastMNN`does not work for batch effect removal on these 
-simulated data.  
+`ldfDiff` shows a clear difference between both methods. 
+While `r BiocStyle::Biocpkg("limma")` is able to preserve the batch internal 
+structure within batches, `fastMNN` clearly changes it. 
+Even if batches are well mixed (see \@ref(di2)), `fastMNN`does not work 
+for batch effect removal on these simulated data. 
+Again this is in line with expectations as due to the small number of genes in 
+the example data. One of MNN’s assumptions is that batch effects should be much 
+smaller than biological variation, which does not hold true in this small 
+example dataset. 
 
 # Session info
 ```{r session info}

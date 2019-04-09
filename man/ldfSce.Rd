@@ -66,7 +66,7 @@ The same set of KNN are used to determine LDF before and after integration.
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[["batch15"]][, c(1:50, 300:350)]
+sce <- sim_list[["batch20"]][, c(1:50, 300:350)]
 sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_pre_list <- list("1" = sce_batch1)
 

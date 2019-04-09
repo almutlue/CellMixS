@@ -36,7 +36,7 @@ it will create a histogram for each column. If `res_object` is a
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 sce <- sim_list[[1]][, c(1:50)]
-sce_cms <- cms(sce, "batch", k = 30)
+sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 visHist(sce_cms)
 
 

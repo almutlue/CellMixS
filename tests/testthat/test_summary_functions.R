@@ -1,9 +1,10 @@
 library(SingleCellExperiment)
 library(CellMixS)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[["batch15"]][, c(1:50,300:350)]
-sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
-sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
+sce <- sim_list[["batch20"]][, c(1:30,300:320)]
+sce_cms <- cms(sce,"batch", k = 20, res_name = "unaligned", n_dim = 2)
+sce_mnn <- cms(sce_cms,"batch", k = 20, dim_red = "MNN", res_name = "MNN",
+               n_dim = 2)
 cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
 cms_df <- data.frame("unaligned"= sce_cms$cms.unaligned,
                      "mnn" = sce_mnn$cms.MNN)

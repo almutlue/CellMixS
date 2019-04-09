@@ -43,10 +43,10 @@ methods (e.g. mnn.correct) can be used if they are specified in
 \examples{
 library(SingleCellExperiment)
 sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-sce <- sim_list[[1]][, c(1:50, 300:350)]
-sce_cms <- cms(sce, "batch", k = 30)
+sce <- sim_list[[1]][, c(1:30, 300:330)]
+sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 
-visOverview(sce_cms, "batch", other_Var = c("batch", "cms"))
+visOverview(sce_cms, "batch", other_Var = "batch")
 
 
 }

@@ -31,12 +31,10 @@
 #'
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 #'
-#' sce <- sim_list[["batch15"]][, c(1:50,300:350)]
-#' sce_cms <- cms(sce,"batch", k = 30, res_name = "unaligned")
-#' sce_mnn <- cms(sce_cms,"batch", k = 30, dim_red = "MNN", res_name = "MNN")
-#' cms_list <- list("unaligned"= sce_cms$cms.unaligned, "mnn" = sce_mnn$cms.MNN)
+#' sce <- sim_list[["batch20"]][, c(1:30,300:320)]
+#' sce_mnn <- cms(sce,"batch", k = 20, dim_red = "MNN", res_name = "MNN",
+#' n_dim = 2)
 #'
-#' visIntegration(cms_list)
 #' visIntegration(sce_mnn, metric_prefix = "cms.", violin = TRUE)
 #'
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic
@@ -111,8 +109,8 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
 #' library(SingleCellExperiment)
 #'
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:50,300:350)]
-#' sce_cms <- cms(sce, "batch", k = 30)
+#' sce <- sim_list[[1]][, c(1:30,300:320)]
+#' sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 #'
 #' visCluster(sce_cms, "batch")
 #'
