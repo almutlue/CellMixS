@@ -31,8 +31,9 @@ Besides this, several exploratory plotting functions enable evaluation of key in
 To run CellMixS, open R and install from GitHub using the following commands: 
 
 ```
-library(devtools)
-install_github("almutlue/CellMixS")
+if (!requireNamespace("BiocManager"))
+    install.packages("BiocManager")
+BiocManager::install("CellMixS")
 ```
 
 ### Getting started
