@@ -53,6 +53,11 @@ test_that("test that visOverview works",{
              * Run `cms` on your SingleCellExperiment object before plotting.
              * Specify a colData(res_object) column in `metric_prefix`.",
                fixed = TRUE)
+    expect_error(visOverview(assay(sce), "batch"),
+                 "Error:'sce_cms' must be a 'SingleCellExperiment' object.")
+    expect_error(visOverview(sce, "batch2"),
+                 "Error: 'group' variable must be in 'colData(sce_cms)'",
+                 fixed = TRUE)
 })
 
 
@@ -72,5 +77,15 @@ test_that("test that visMetric and visGroup work",{
   expect_is(vis_cms2, "gg")
   expect_is(vis_group, "gg")
   expect_is(vis_group2, "gg")
+  expect_error(visMetric(assay(sce_cms), "batch"),
+               "Error:'sce_cms' must be a 'SingleCellExperiment' object.")
+  expect_error(visMetric(sce_cms, "cms2"),
+               "Error: 'metric_var' variable must be in 'colData(sce_cms)'",
+               fixed = TRUE)
+  expect_error(visGroup(assay(sce), "batch"),
+               "Error:'sce' must be a 'SingleCellExperiment' object.")
+  expect_error(visGroup(sce, "batch2"),
+               "Error: 'group' variable must be in 'colData(sce)'",
+               fixed = TRUE)
 })
 

@@ -51,7 +51,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
         cms_res <- res_object
     }
 
-    #Check the presence of results
+    #Check input/presence of score
     if(ncol(cms_res) == 0){
         stop("Error: 'res_object' does not contain any metric results.
              Please continue by one of:
@@ -122,9 +122,16 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @importFrom purrr map negate
 #' @importFrom dplyr bind_rows as_tibble select starts_with select_if bind_cols
 #' @importFrom magrittr %>% set_colnames
+#' @importFrom methods is
 visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
                         log10_val = FALSE, other_Var = NULL){
     ## Check input structure and select data to plot
+    if( !is(sce_cms, "SingleCellExperiment") ){
+        stop("Error:'sce_cms' must be a 'SingleCellExperiment' object.")
+    }
+    if( !group %in% names(colData(sce_cms)) ){
+        stop("Error: 'group' variable must be in 'colData(sce_cms)'")
+    }
     #select columns to plot
     cms_res <- as_tibble(colData(sce_cms)) %>%
         select(starts_with(metric_prefix))
@@ -283,8 +290,19 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 #' @importFrom viridis scale_color_viridis
 #' @importFrom dplyr mutate_at
 #' @importFrom magrittr %>%
+#' @importFrom methods is
 visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
                      log10_val = FALSE){
+
+    ## Check input structure
+    if( !is(sce_cms, "SingleCellExperiment") ){
+        stop("Error:'sce_cms' must be a 'SingleCellExperiment' object.")
+    }
+    if( !metric_var %in% names(colData(sce_cms)) ){
+        stop("Error: 'metric_var' variable must be in 'colData(sce_cms)'")
+    }
+
+    ## Check reduced dimensions
     cell_names <- colnames(sce_cms)
     if(!dim_red %in% "TSNE"){
         if(!dim_red %in% reducedDimNames(sce_cms)){
@@ -304,6 +322,7 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
             red_dim <- as.data.frame(reducedDim(sce_cms, "TSNE"))
         }
     colnames(red_dim) <- c("red_dim1", "red_dim2")
+
     #data frame to plot
     df <- data.frame(sample_id = cell_names,
                      metric = colData(sce_cms)[,metric_var],
@@ -322,9 +341,8 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
 
     t_metric <- t +
         geom_point(size=1, alpha = 0.5, aes_string(color="metric")) +
-        guides(color=
-                   guide_legend(override.aes=list(size=2), title = metric_var)
-               ) +
+        guides(color= guide_legend(override.aes=list(size=2),
+                                title = metric_var)) +
         scale_color_viridis(option = "B") + ggtitle(metric_var)
 
     if(isTRUE(log10_val)){
@@ -371,7 +389,17 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
 #' @importFrom SummarizedExperiment assays
 #' @importFrom SingleCellExperiment reducedDimNames reducedDim colData
 #' @importFrom viridis scale_color_viridis
+#' @importFrom methods is
 visGroup <- function(sce, group, dim_red = "TSNE"){
+
+    ## Check input structure
+    if( !is(sce, "SingleCellExperiment") ){
+        stop("Error:'sce' must be a 'SingleCellExperiment' object.")
+    }
+    if( !group %in% names(colData(sce)) ){
+        stop("Error: 'group' variable must be in 'colData(sce)'")
+    }
+
     #Generate or specify dim reduction
     cell_names <- colnames(sce)
 
@@ -382,7 +410,7 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
         }
         red_dim <- as.data.frame(reducedDim(sce, dim_red))
     }else{
-        #used tsne from scater package (check for availability first)
+        #use tsne from scater package (check for availability first)
         if(is.null(reducedDim(sce, "TSNE"))){
             #use "logcounts" if availabe otherwise "counts"
             if(names(assays(sce)) %in% "logcounts"){

@@ -47,17 +47,32 @@ test_that("test that output of ldfDiff is correct",{
     expect_error(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch"),
                  "Parameter 'assay_name' not found: Provide a valid value.",
                  fixed = TRUE)
+
     expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
                          dim_red = "TSNE", n_dim = 5),
                  "Parameter 'n_dim' is greater than reduced dimensional space:
          Please provide a valid value.",
                  fixed = TRUE)
+
     expect_warning(ldfDiff(sce_pre_list, sce_noDim, k = 10, group = "batch",
                            assay_pre = "counts", assay_combined = "counts",
                            n_dim = 5),
                    "'dim_red' not found:
             PCA subspace is used to calculate distances.",
                    fixed = TRUE)
+
+    expect_error(ldfDiff(sce_pre_list, assay(sce) , group = "batch"),
+                 "Error:'sce_combined' must be a 'SingleCellExperiment' object."
+                 )
+
+    expect_error(ldfDiff(sce_pre_list, sce , group = "batch2"),
+                 "Error: 'group' variable must be in 'colData(sce)'",
+                 fixed = TRUE)
+
+    names(sce_pre_list) <- c("test1", "test2")
+    expect_error(ldfDiff(sce_pre_list, sce , group = "batch"),
+                 "Error: Names of 'sce_pre_list' must refer to levels within
+             'colData(sce_combined)[,group]'.", fixed = TRUE)
 
 })
 

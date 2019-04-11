@@ -34,7 +34,11 @@ test_that("test that output of cms is correct",{
             PCA subspace is used to calculate distances.", fixed = TRUE)
     expect_error(cms(sce = sce_df, k=20, group = "batch",
                      dim_red = "pca", assay_name = "raw_counts"),
-                 "Input error: class('sce') must be 'SingleCellExperiment'.",
+                 "Error: 'sce' must be a 'SingleCellExperiment' object.",
+                 fixed = TRUE)
+    expect_error(cms(sce = sce, k=20, group = "batch2",
+                     dim_red = "pca", assay_name = "raw_counts"),
+                 "Error: 'group' variable must be in 'colData(sce)'",
                  fixed = TRUE)
 })
 

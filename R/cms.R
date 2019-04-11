@@ -78,18 +78,18 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
         stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
     }
     if(!is(sce, "SingleCellExperiment")){
-        stop("Input error: class('sce') must be 'SingleCellExperiment'.")
+        stop("Error: 'sce' must be a 'SingleCellExperiment' object.")
     }
-
-    #check group variable class
+    if(!group %in% names(colData(sce))){
+        stop("Error: 'group' variable must be in 'colData(sce)'")
+    }
     if(!is(colData(sce)[,group], "factor")){
         sce[[group]] <- as.factor(colData(sce)[, group])
     }
-
+    #----------------- determine knn matrix ----------------------------------#
     cell_names <- colnames(sce)
     names(cell_names) <- cell_names
 
-    #----------------- determine knn matrix ----------------------------------#
     subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
     #determine knn
     knn <- findKNN(subspace, k=k) %>% map(set_rownames, cell_names)

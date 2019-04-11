@@ -45,6 +45,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom methods is
 visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
+
+    # Prepare data for plotting
     if( is.list(res_object) ){
         average_table <- res_object %>% cbind.data.frame()
     }else if( is(res_object, "SingleCellExperiment") ){
@@ -54,12 +56,14 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
         average_table <- as_data_frame(res_object)
     }
 
+    #Check that data are provided
+    stopifnot(ncol(average_table) > 0)
+
     #change to long format
     #long format
     gathercols <- colnames(average_table)
     average_long <- gather(average_table, "keycol", "valuecol", gathercols,
                            factor_key=TRUE)
-
 
     #plot
     if( isTRUE(violin) ){
@@ -120,8 +124,20 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
 #' @importFrom ggridges geom_density_ridges
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select mutate_at as_tibble
+#' @importFrom methods is
 visCluster <- function(sce_cms, cluster_var, metric_var = "cms",
                        violin = FALSE){
+
+    #Check input
+    if(!is(sce_cms, "SingleCellExperiment")){
+        stop("Error: 'sce_cms' must be a 'SingleCellExperiment' object.")
+    }
+    if(!cluster_var %in% names(colData(sce_cms))){
+        stop("Error: 'cluster_var' variable must be in 'colData(sce_cms)'")
+    }
+    if(!metric_var %in% names(colData(sce_cms))){
+        stop("Error: 'metric_var' variable must be in 'colData(sce_cms)'")
+    }
 
     metric_table <- as_tibble(colData(sce_cms)) %>%
         select(metric_var, cluster_var) %>%

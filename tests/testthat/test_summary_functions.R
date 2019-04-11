@@ -32,5 +32,14 @@ test_that("test that visIntegration and visCluster work",{
     expect_is(compare_Int_df, "gg")
     expect_is(compare_group, "gg")
     expect_is(compare_group2, "gg")
-    expect_error(visCluster(sce_mnn, "batch"))
+    expect_error(visIntegration(sce))
+    expect_error(visCluster(sce_mnn, "batch"),
+                 "Error: 'metric_var' variable must be in 'colData(sce_cms)'",
+                 fixed = TRUE)
+    expect_error(visCluster(sce_mnn, "batch2"),
+                 "Error: 'cluster_var' variable must be in 'colData(sce_cms)'",
+                 fixed = TRUE)
+    expect_error(visCluster(cms_df, "batch"),
+                 "Error: 'sce_cms' must be a 'SingleCellExperiment' object.",
+                 fixed = TRUE)
 })

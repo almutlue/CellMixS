@@ -72,10 +72,24 @@
 #' @importFrom dplyr bind_rows select mutate arrange .data
 #' @importFrom SingleCellExperiment colData
 #' @importFrom SummarizedExperiment colData<-
+#' @importFrom methods is
 ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
                     dim_combined = dim_red, assay_pre = "logcounts",
                     assay_combined = "logcounts", n_dim = 20, res_name = NULL){
 
+    #Check input
+    if( !is(sce_combined, "SingleCellExperiment") ){
+        stop("Error:'sce_combined' must be a 'SingleCellExperiment' object.")
+    }
+    if( !group %in% names(colData(sce_combined)) ){
+        stop("Error: 'group' variable must be in 'colData(sce)'")
+    }
+    if( !all(names(sce_pre_list) %in% levels(colData(sce_combined)[,group])) ){
+        stop("Error: Names of 'sce_pre_list' must refer to levels within
+             'colData(sce_combined)[,group]'.")
+    }
+
+    #Calculate LDF Difference
     cell_names <- sce_pre_list %>% map(colnames) %>% unlist()
 
     diff <- names(sce_pre_list) %>% map(ldfSce, sce_pre_list = sce_pre_list,
@@ -175,10 +189,26 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
 #' @importFrom magrittr %>% set_names set_rownames
 #' @importFrom dplyr bind_cols
 #' @importFrom purrr map
+#' @importFrom methods is
 ldfSce <-function(sce_name, sce_pre_list, sce_combined, group, k = 75,
                   dim_red = "PCA", dim_combined = dim_red,
                   assay_pre = "logcounts", assay_combined = "logcounts",
                   n_dim = 20){
+    #Check input
+    if( !is(sce_combined, "SingleCellExperiment") ){
+        stop("Error:'sce_combined' must be a 'SingleCellExperiment' object.")
+    }
+    if( !group %in% names(colData(sce_combined)) ){
+        stop("Error: 'group' variable must be in 'colData(sce)'")
+    }
+    if( !all(names(sce_pre_list) %in% levels(colData(sce_combined)[,group])) ){
+        stop("Error: Names of 'sce_pre_list' must refer to levels within
+             'colData(sce_combined)[,group]'.")
+    }
+    if( !sce_name %in% names(sce_pre_list) ){
+        stop("Error: Can't find 'sce_name'. Must be one of names(sce_pre_list)")
+    }
+
     #sce before integration
     sce_pre <- sce_pre_list[[sce_name]]
     cell_names <- colnames(sce_pre)
