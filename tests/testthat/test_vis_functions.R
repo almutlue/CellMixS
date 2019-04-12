@@ -31,7 +31,7 @@ test_that("test that visOverview works",{
                                 log10_val = TRUE)
     #add other vars (continous and discrete)
     overview_Vars <- visOverview(sce_cms, "batch",
-                                 other_Var = c("batch", "cms"))
+                                 other_var = c("batch", "cms"))
 
     #calculate new dim_red
     sce_noRedDim <- sce_cms

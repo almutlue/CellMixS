@@ -5,7 +5,7 @@
 \title{visOverview}
 \usage{
 visOverview(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
-  log10_val = FALSE, other_Var = NULL)
+  log10_val = FALSE, other_var = NULL)
 }
 \arguments{
 \item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
@@ -22,7 +22,7 @@ Default is "TSNE".}
 
 \item{log10_val}{Logical. Indicating if -log10(metric) should be plotted.}
 
-\item{other_Var}{Character string. Name(s) of other variables to be plotted
+\item{other_var}{Character string. Name(s) of other variables to be plotted
 asided. Need correspond to one of \code{colData(sce)}.}
 }
 \value{
@@ -46,7 +46,7 @@ sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
 sce <- sim_list[[1]][, c(1:30, 300:330)]
 sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 
-visOverview(sce_cms, "batch", other_Var = "batch")
+visOverview(sce_cms, "batch", other_var = "batch")
 
 
 }

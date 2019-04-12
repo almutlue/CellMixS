@@ -56,13 +56,12 @@ integration and mixing features.
 
 # Installation
 
-`r BiocStyle::Githubpkg('almutlue/CellMixS')` can be installed from GitHub using 
-the `r BiocStyle::CRANpkg("devtools")` package from CRAN.
+`r BiocStyle::Githubpkg('almutlue/CellMixS')` can be installed from Bioconductor as following.
 
 ```{r install, eval=FALSE}
 if (!requireNamespace("BiocManager"))
     install.packages("BiocManager")
-BiocManager::install("CellMixS")
+BiocManager::install("almutlue/CellMixS")
 ```
 
 After installation the package can be loaded into R. 
@@ -252,7 +251,7 @@ plot_grid(metric_plot, group_plot, ncol = 2)
 sce20[["celltype"]] <- rep(c("CD4+", "CD8+", "CD3"), ncol(sce20)/3) %>% 
     as.factor 
 
-visOverview(sce20, "batch", other_Var = "celltype")
+visOverview(sce20, "batch", other_var = "celltype")
 ```
 
 Systematic differences (e.g. celltype differences) can be further explored using

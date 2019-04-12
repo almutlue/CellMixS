@@ -87,7 +87,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @param dim_red Character. Name of embeddings to use as subspace for plotting.
 #'  Default is "TSNE".
 #' @param log10_val Logical. Indicating if -log10(metric) should be plotted.
-#' @param other_Var Character string. Name(s) of other variables to be plotted
+#' @param other_var Character string. Name(s) of other variables to be plotted
 #' asided. Need correspond to one of \code{colData(sce)}.
 #'
 #' @details Plots reduced dimensions of cells colored by group variable and
@@ -109,7 +109,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' sce <- sim_list[[1]][, c(1:30, 300:330)]
 #' sce_cms <- cms(sce, "batch", k = 20, n_dim = 2)
 #'
-#' visOverview(sce_cms, "batch", other_Var = "batch")
+#' visOverview(sce_cms, "batch", other_var = "batch")
 #'
 #'
 #' @importFrom ggplot2 ggplot aes_string ylab xlab theme_void theme guide_legend
@@ -124,7 +124,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom methods is
 visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
-                        log10_val = FALSE, other_Var = NULL){
+                        log10_val = FALSE, other_var = NULL){
     ## Check input structure and select data to plot
     if( !is(sce_cms, "SingleCellExperiment") ){
         stop("Error:'sce_cms' must be a 'SingleCellExperiment' object.")
@@ -170,8 +170,8 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
     colnames(red_dim) <- c("red_dim1", "red_dim2")
 
     ### ------ Finish Check and prepare dim reduction slot --------####
-    other_var_tib <- as_tibble(colData(sce_cms)[,other_Var]) %>%
-        set_colnames(other_Var)
+    other_var_tib <- as_tibble(colData(sce_cms)[,other_var]) %>%
+        set_colnames(other_var)
 
     #data frame to plot
     df <- data.frame(sample_id = cell_names,
@@ -221,15 +221,15 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 
     t_cms_res <- colnames(cms_res) %>% map(t_cont)
 
-    if( !is.null(other_Var) ){
-        t_other_var_cont <- as_tibble(colData(sce_cms)[,other_Var]) %>%
-            set_colnames(other_Var) %>%
+    if( !is.null(other_var) ){
+        t_other_var_cont <- as_tibble(colData(sce_cms)[,other_var]) %>%
+            set_colnames(other_var) %>%
             select_if(is.numeric) %>%
             colnames() %>%
             map(t_cont)
 
-        t_other_var_dis <- as_tibble(colData(sce_cms)[,other_Var]) %>%
-            set_colnames(other_Var) %>%
+        t_other_var_dis <- as_tibble(colData(sce_cms)[,other_var]) %>%
+            set_colnames(other_var) %>%
             select_if(negate(is.numeric)) %>%
             colnames() %>%
             map(t_discr)
