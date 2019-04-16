@@ -52,7 +52,7 @@
     groups_included <- knn_cell %>% group_by_at(group) %>%
         summarize("n_group" = n()) %>%
         filter(.data$n_group > cell_min) %>%
-        extract2(group) %>% levels()
+        extract2(group) %>% droplevels() %>% levels()
 
     #do not perform AD test if only one group with enough cells is in knn.
     if (length(groups_included) <= 1) {
