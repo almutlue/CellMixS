@@ -14,7 +14,7 @@
 #' @param k_min Numeric. Minimum number of Knn to include.
 #' Default is NA (see Details).
 #' @param cell_min Numeric. Minimum number of cells from each group to be
-#' included into the AD test. Should be > 10 to make 'ad.test' working.
+#' included into the AD test. Should be > 4 to make 'ad.test' working.
 #'
 #' @details The cms function tests the hypothesis, that group-specific distance
 #' distributions of knn cells have the same underlying unspecified distribution.
@@ -35,7 +35,7 @@
 #' @importFrom kSamples ad.test
 #' @importFrom magrittr set_colnames %>% extract2
 #' @importFrom dplyr mutate mutate_at group_by_at filter summarize n
-.cmsCell <- function(cell, group, knn, k_min = NA, cell_min = 10){
+.cmsCell <- function(cell, group, knn, k_min = NA, cell_min = 4){
     #get knn distances and group assignments
     knn_cell <- cbind(knn[["distance"]][cell, ], knn[[group]][cell, ]) %>%
         as.data.frame %>%
@@ -48,7 +48,7 @@
         knn_cell <- .filterLocMin(knn_cell, k_min)
     }
 
-    #filter groups with to few cells (cell_min, default 10)
+    #filter groups with to few cells (cell_min, default 4)
     groups_included <- knn_cell %>% group_by_at(group) %>%
         summarize("n_group" = n()) %>%
         filter(.data$n_group > cell_min) %>%

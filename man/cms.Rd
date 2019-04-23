@@ -6,7 +6,7 @@
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
   res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-  cell_min = 10)
+  cell_min = 4)
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
@@ -36,7 +36,7 @@ each neighbourhood using the weigthed mean.}
 
 \item{cell_min}{Numeric. Minimum number of cells from each group to be
 included into the AD test.
-Should be > 10 to make the ad.test function working.}
+Should be > 4 to make the ad.test function working.}
 }
 \value{
 A \code{SingleCellExperiment} with cms (and cms_smooth) within

@@ -4,7 +4,7 @@
 \alias{.cmsCell}
 \title{.cmsCell}
 \usage{
-.cmsCell(cell, group, knn, k_min = NA, cell_min = 10)
+.cmsCell(cell, group, knn, k_min = NA, cell_min = 4)
 }
 \arguments{
 \item{cell}{Character. Name of the cell to calculate cms for.
@@ -21,7 +21,7 @@ Second "distance" with distances to KNN cells. Third a slot named by
 Default is NA (see Details).}
 
 \item{cell_min}{Numeric. Minimum number of cells from each group to be
-included into the AD test. Should be > 10 to make 'ad.test' working.}
+included into the AD test. Should be > 4 to make 'ad.test' working.}
 }
 \value{
 A p.value as resulting from the ad.test.

@@ -25,7 +25,7 @@
 #' @param n_dim Numeric. Number of dimensions to include to define the subspace.
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test.
-#' Should be > 10 to make the ad.test function working.
+#' Should be > 4 to make the ad.test function working.
 #'
 #' @details The cms function tests the hypothesis, that group-specific distance
 #' distributions of knn cells have the same underlying unspecified distribution.
@@ -72,10 +72,10 @@
 #' @importFrom SummarizedExperiment colData<-
 cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
                 res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-                cell_min = 10){
+                cell_min = 4){
     #------------------Check input parameter ---------------------------------#
-    if(cell_min < 10){
-        stop("Error: 'cell_min' is < 10. Must be > 10 to estimate cms.")
+    if(cell_min < 4){
+        stop("Error: 'cell_min' is < 4. Must be > 4 to estimate cms.")
     }
     if(!is(sce, "SingleCellExperiment")){
         stop("Error: 'sce' must be a 'SingleCellExperiment' object.")
