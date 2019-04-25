@@ -6,7 +6,7 @@
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
   res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-  cell_min = 4)
+  cell_min = 4, BPPARAM = SerialParam())
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
@@ -37,6 +37,9 @@ each neighbourhood using the weigthed mean.}
 \item{cell_min}{Numeric. Minimum number of cells from each group to be
 included into the AD test.
 Should be > 4 to make the ad.test function working.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether
+cms scores shall be calculated in parallel.}
 }
 \value{
 A \code{SingleCellExperiment} with cms (and cms_smooth) within
@@ -58,6 +61,8 @@ the local structure of the datatset e.g. prevent cells from a
 different cluster to be included. If 'dim_red' is not defined or default cms
 will calculate a PCA using \code{runPCA}. Results will be appended to
 \code{colData(sce)}. Names can be specified using \code{res_name}.
+If multiple cores are available cms scores can be calculated in parallel
+(does not work on Windows). Parallelization can be specified using BPPARAM.
 }
 \examples{
 library(SingleCellExperiment)

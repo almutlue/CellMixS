@@ -26,6 +26,8 @@
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test.
 #' Should be > 4 to make the ad.test function working.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether
+#' cms scores shall be calculated in parallel.
 #'
 #' @details The cms function tests the hypothesis, that group-specific distance
 #' distributions of knn cells have the same underlying unspecified distribution.
@@ -38,6 +40,8 @@
 #' different cluster to be included. If 'dim_red' is not defined or default cms
 #' will calculate a PCA using \code{runPCA}. Results will be appended to
 #' \code{colData(sce)}. Names can be specified using \code{res_name}.
+#' If multiple cores are available cms scores can be calculated in parallel
+#' (does not work on Windows). Parallelization can be specified using BPPARAM.
 #'
 #' @family cms functions
 #' @seealso \code{\link{.cmsCell}}, \code{\link{.smoothCms}}.
@@ -70,9 +74,10 @@
 #' @importFrom dplyr bind_rows .data
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment colData<-
+#' @importFrom BiocParallel bplapply SerialParam
 cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
                 res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-                cell_min = 4){
+                cell_min = 4, BPPARAM=SerialParam()){
     #------------------Check input parameter ---------------------------------#
     if(cell_min < 4){
         stop("Error: 'cell_min' is < 4. Must be > 4 to estimate cms.")
@@ -101,9 +106,8 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
         set_rownames(cell_names)
 
     #----------------- calculate cms score  ----------------------------------#
-    cms_raw <- cell_names %>%
-        map(.cmsCell, group = group, knn = knn, k_min=k_min,
-            cell_min = cell_min) %>%
+    cms_raw <- bplapply(cell_names,.cmsCell, group = group, knn = knn,
+                        k_min=k_min, cell_min = cell_min, BPPARAM = BPPARAM) %>%
         bind_rows() %>% t() %>%
         set_colnames("cms")
 
