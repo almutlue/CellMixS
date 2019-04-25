@@ -1,6 +1,10 @@
 ## CellMixS
   
-A toolbox to explore group-/batch-specific bias and data integration in single-cell RNA-seq (scRNA-seq) datasets.  
+A toolbox to explore group-/batch-specific bias and data integration in single-cell RNA-seq (scRNA-seq) datasets. 
+
+[![platforms](http://bioconductor.org/shields/availability/3.9/CellMixS.svg)](https://bioconductor.org/packages/devel/bioc/html/CellMixS.html#archives)&nbsp;
+[![posts](http://bioconductor.org/shields/posts/CellMixS.svg)](https://support.bioconductor.org/t/cellmixs)&nbsp;
+[![build](http://bioconductor.org/shields/build/release/bioc/CellMixS.svg)](http://bioconductor.org/checkResults/release/bioc-LATEST/CellMixS)
 
 ### Motivation
 
@@ -35,6 +39,10 @@ if (!requireNamespace("BiocManager"))
     install.packages("BiocManager")
 BiocManager::install("almutlue/CellMixS")
 ```
+**Bioconductor version**
+  - A stable release version is available at [Bioconductor](https://bioconductor.org/packages/devel/bioc/html/CellMixS.html).
+  - For detailed examples and usage instructions, see [vignette](https://bioconductor.org/packages/devel/bioc/vignettes/CellMixS/inst/doc/CellMixS.html).
+
 
 ### Getting started
 The main metrics `cms` and `ldfDiff` use a `SingleCellExperiment` object as input. 
