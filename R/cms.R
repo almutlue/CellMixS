@@ -77,7 +77,7 @@
 #' @importFrom BiocParallel bplapply SerialParam
 cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
                 res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-                cell_min = 4, BPPARAM=SerialParam()){
+                cell_min = 10, BPPARAM=SerialParam()){
     #------------------Check input parameter ---------------------------------#
     if(cell_min < 4){
         stop("Error: 'cell_min' is < 4. Must be > 4 to estimate cms.")

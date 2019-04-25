@@ -164,13 +164,15 @@ and appends to the colData slot.
 
 ```{r cms}
 #call cell-specific mixing score for sce50
-sce50 <- cms(sce50, k = 30, group = "batch", res_name = "unaligned", n_dim = 3)
+sce50 <- cms(sce50, k = 30, group = "batch", res_name = "unaligned", n_dim = 3, 
+             cell_min = 4)
 head(colData(sce50))
 
 #call cell-specific mixing score for all
 sim_list <- lapply(batch_names, function(name){
     sce <- sim_list[[name]]
-    sce <- cms(sce, k = 30, group = "batch", res_name = "unaligned", n_dim = 3)
+    sce <- cms(sce, k = 30, group = "batch", res_name = "unaligned", n_dim = 3, 
+               cell_min = 4)
 }) %>% set_names(batch_names)
 
 #append cms50
@@ -277,7 +279,7 @@ as input for `cms`.
 #MNN - embeddings are stored in the reducedDims slot of sce
 reducedDimNames(sce20)
 sce20 <- cms(sce20, k = 30, group = "batch", 
-             dim_red = "MNN", res_name = "MNN", n_dim = 3)
+             dim_red = "MNN", res_name = "MNN", n_dim = 3, cell_min = 4)
 
 # run limma
 limma_corrected <- removeBatchEffect(counts(sce20), batch = sce20$batch)
@@ -286,7 +288,8 @@ assay(sce20, "lim_corrected") <- limma_corrected
 
 #run cms
 sce20 <- cms(sce20, k = 30, group = "batch", 
-             assay_name = "lim_corrected", res_name = "limma", n_dim = 3)
+             assay_name = "lim_corrected", res_name = "limma", n_dim = 3, 
+             cell_min = 4)
 
 names(colData(sce20))
 ```

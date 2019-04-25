@@ -6,7 +6,7 @@
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
   res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-  cell_min = 4, BPPARAM = SerialParam())
+  cell_min = 10, BPPARAM = SerialParam())
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
