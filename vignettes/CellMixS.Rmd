@@ -161,9 +161,12 @@ scores *cms* and *cms_smooth*, where the latter is the weighted mean within
 each cell's neighbourhood. The `cms` function takes an `SingleCellExperiment` 
 object (described in `r BiocStyle::Biocpkg("SingleCellExperiment")`) as input 
 and appends to the colData slot. 
+# parameter
 
 ```{r cms}
 #call cell-specific mixing score for sce50
+# Note cell_min is set to 4 due to the low number of cells and small k.
+# Usually default params are recommended!! 
 sce50 <- cms(sce50, k = 30, group = "batch", res_name = "unaligned", n_dim = 3, 
              cell_min = 4)
 head(colData(sce50))
