@@ -61,7 +61,7 @@ integration and mixing features.
 ```{r install, eval=FALSE}
 if (!requireNamespace("BiocManager"))
     install.packages("BiocManager")
-BiocManager::install("almutlue/CellMixS")
+BiocManager::install("CellMixS")
 ```
 
 After installation the package can be loaded into R. 
@@ -158,10 +158,17 @@ thereby a need to quantify batch effects.
 The **cellspecific mixing score** `cms` tests for each cell the hypothesis that batch-specific distance distributions towards it's k-nearest neighbouring (knn) 
 cells are derived from the same unspecified underlying distribution using the Anderson-Darling test [@Scholz1987]. Results from the `cms` function are two 
 scores *cms* and *cms_smooth*, where the latter is the weighted mean within 
-each cell's neighbourhood. The `cms` function takes an `SingleCellExperiment` 
+each cell's neighbourhood. They can be interpreted as the probability that 
+batches within this cell's neighbourhood are equally mixed. A high `cms` score 
+refers to good mixing, while a low score indicates batch-specific bias. 
+The test considers differences in the number of cells from each batch. 
+This facilitates the `cms` score to differentiate between unbalanced batches 
+(e.g. one celltype being more abundant in a specific batch) and a biased 
+distribution of cells. The `cms` function takes an `SingleCellExperiment` 
 object (described in `r BiocStyle::Biocpkg("SingleCellExperiment")`) as input 
 and appends to the colData slot. 
-# parameter
+
+# Parameter
 
 ```{r cms}
 #call cell-specific mixing score for sce50
