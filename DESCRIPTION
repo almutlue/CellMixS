@@ -1,7 +1,11 @@
 Package: CellMixS
 Type: Package
 Title: Evaluate Cellspecific Mixing 
+<<<<<<< HEAD
 Version: 1.0.0
+=======
+Version: 1.0.1
+>>>>>>> f716660... bug fix: add library ggplot2 to vignette
 Author: Almut Lütge
 Maintainer: Almut Lütge <almut.luetge@uzh.ch>
 Description: Evaluate Cellspecific Mixing Scores (CMS) for different batches/groups in scRNA-seq data. 
