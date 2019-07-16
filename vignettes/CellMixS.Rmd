@@ -97,6 +97,7 @@ suppressPackageStartupMessages({
     library(magrittr)
     library(dplyr)
     library(purrr)
+    library(ggplot2)
 })
 ```
 
