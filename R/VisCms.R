@@ -157,7 +157,7 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
         red_dim <- as.data.frame(reducedDim(sce_cms, dim_red))
         }else{
             #used tsne from scater package (check for availability first)
-            if(is.null(reducedDim(sce_cms, "TSNE"))){
+            if(  !"TSNE" %in% reducedDimNames(sce_cms) ){
                 #use "logcounts" if availabe otherwise "counts"
                 if(names(assays(sce_cms)) %in% "logcounts"){
                     sce_cms <- runTSNE(sce_cms)

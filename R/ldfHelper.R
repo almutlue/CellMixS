@@ -107,7 +107,7 @@
     sce <- runPCA(sce, ncomponents = n_dim, exprs_values = assay_name)
     dim_red <- "PCA"
   }
-  if(is.null(reducedDim(sce, dim_red))){
+  if(!dim_red %in% reducedDimNames(sce)){
     if(!assay_name %in% names(assays(sce))){
       stop("Parameter 'assay_name' not found: Provide a valid value.")
     }
