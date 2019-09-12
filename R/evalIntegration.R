@@ -50,14 +50,14 @@
 #' In general there are metrics evaluationg the *mixing* of datasets.
 #' So metrics that show whether there still is a bias for different datasets
 #' after integration. Furthermore there are metrics to evaluate how well the
-#' dataset intenal structure has been retained. So metrics that show whether
+#' dataset internal structure has been retained. So metrics that show whether
 #' there has been (potentially biological) signal removed or noise added by
 #' integration.
 #'
 #' @section Metrics:
 #' Here we provide the following metrics:
 #' \describe{
-#'   \item{cms}{Cellspecific Mixing Score. Metric, that tests the hypothesis,
+#'   \item{cms}{Cellspecific Mixing Score. Metric that tests the hypothesis
 #'   that group-specific distance distributions of knn cells have the same
 #'   underlying unspecified distribution. The score can be interpreted as the
 #'   probability of having unbiased data according to the batch variable

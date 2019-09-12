@@ -20,7 +20,7 @@
 #' variable within each cell's k-nearest neighbourhood.
 #' For balanced batches the shannon entropy close to 1 indicates high randomness
 #' and mixing. For unbalanced batches entropy should be interpreted with
-#' caution, but could work as a relative meassure in a comparative setting.
+#' caution, but could work as a relative measure in a comparative setting.
 #'
 #'
 #' @return A \code{SingleCellExperiment} with the entropy score within colData.
@@ -80,6 +80,8 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
         entropy <- as.data.frame(entropy) %>% set_colnames(res_name)
     }
 
+    stopifnot(all(rownames(entropy) == colnames(sce)))
+    
     colData(sce) <- cbind(colData(sce), entropy)
     sce
 }
