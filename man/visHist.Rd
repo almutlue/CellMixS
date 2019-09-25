@@ -4,7 +4,7 @@
 \alias{visHist}
 \title{visHist}
 \usage{
-visHist(res_object, metric_prefix = "cms", n_col = 1)
+visHist(res_object, metric = "cms", prefix = TRUE, n_col = 1)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, matrix or data.frame.
@@ -12,9 +12,13 @@ The SingleCellExperiment object should contain the result scores (e.g. cms)
 to plot in \code{colData(res_object)}.
 Matrix or data frame should have result scores in columns and cells in rows.}
 
-\item{metric_prefix}{Character. Prefix to specify names of
-\code{colData(sce)} to be plotted. Applys only if `res_object` is
-a \code{SingleCellExperiment} object. Default is 'cms'.}
+\item{metric}{Character vector. Specify names of \code{colData(sce)} to be
+plotted. Applys only if `res_object` is a \code{SingleCellExperiment} object.
+Default is 'cms'. If prefix is TRUE all columns starting with `metric` will
+be plotted.}
+
+\item{prefix}{Boolean. Is `metric` used to specify column's prefix(true) or
+complete column names (False).}
 
 \item{n_col}{Numeric. Number of columns of the pval histogram.}
 }
@@ -30,7 +34,7 @@ distribution. Without dataset-specific bias, cms scores should be approx.
 flat distributed. If `res_object` is a matrix or data.frame,
 it will create a histogram for each column. If `res_object` is a
 \code{SingleCellExperiment} object, it will create a histogram of all
-\code{colData(res_object)} that start with `metric_prefix`.
+\code{colData(res_object)} that start with or are specified in `metric`.
 }
 \examples{
 library(SingleCellExperiment)

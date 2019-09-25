@@ -21,6 +21,7 @@ suppressPackageStartupMessages({
     library(here)
     library(CellMixS)
     library(scran)
+    library(batchelor)
 })
 
 set.seed(1234)
@@ -79,7 +80,7 @@ batch_var_list <- c(0, 0.2, 0.5)
 batch_diff_list <- c(0.5)
 
 any <- lapply(batch_diff_list, function(diff){
-  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 100, n.batch = 3, batch_diff = diff, n_sample = 300)
+  batch_list <- lapply(batch_var_list, sim_multibatch_data, n.genes = 100, n.batch = 3, batch_diff = diff, n_sample = 250)
   names(batch_list) <- c("batch0", "batch20", "batch50")
   batch_list
 })
@@ -143,8 +144,8 @@ add_mnn <- function(batch_name){
   for(i in levels(colData(sce)$batch)){
     sce_single[[i]] <- sce[, which(colData(sce)$batch %in% i)]
   }
-  mnn_res <- fastMNN(sce_single[[1]], sce_single[[2]], sce_single[[3]], assay.type="counts")
-  reducedDim(sce, "MNN") <- mnn_res$corrected
+  mnn_res <- batchelor::fastMNN(sce_single[[1]], sce_single[[2]], sce_single[[3]], assay.type="counts")
+  reducedDim(sce, "MNN") <- reducedDims(mnn_res)[["corrected"]]
   sce
 }
   

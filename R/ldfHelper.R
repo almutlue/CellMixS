@@ -129,5 +129,4 @@
          Please provide a valid value.")
   }
   subspace <- reducedDim(sce, dim_red)[,seq_len(n_dim)]
-
 }

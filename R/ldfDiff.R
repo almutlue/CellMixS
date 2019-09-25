@@ -88,6 +88,10 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
         stop("Error: Names of 'sce_pre_list' must refer to levels within
              'colData(sce_combined)[,group]'.")
     }
+    if( k >= ncol(sce_combined) ){
+        warning("'k' exceeds number of cells. Is set to max (all cells).")
+        k <- ncol(sce_combined) - 1
+    }
 
     #Calculate LDF Difference
     cell_names <- sce_pre_list %>% map(colnames) %>% unlist()

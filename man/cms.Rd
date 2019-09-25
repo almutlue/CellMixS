@@ -6,7 +6,8 @@
 \usage{
 cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
   res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-  cell_min = 10, BPPARAM = SerialParam())
+  cell_min = 10, batch_min = NULL, unbalanced = FALSE,
+  BPPARAM = SerialParam())
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
@@ -35,8 +36,15 @@ each neighbourhood using the weigthed mean.}
 \item{n_dim}{Numeric. Number of dimensions to include to define the subspace.}
 
 \item{cell_min}{Numeric. Minimum number of cells from each group to be
-included into the AD test.
-Should be > 4 to make the ad.test function working.}
+included into the AD test.}
+
+\item{batch_min}{Numeric. Minimum number of cells per batch to include in to
+the AD test. If set neighbours will be included until batch_min cells from
+each batch are present.}
+
+\item{unbalanced}{Boolean. If True neighbourhoods with only one batch present
+will be set to NA. This way they are not included into any summaries or
+smoothening.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether
 cms scores shall be calculated in parallel.}
@@ -55,12 +63,16 @@ distributions of knn cells have the same underlying unspecified distribution.
 It performs Anderson-Darling tests as implemented in the
 \code{kSamples package}.
 In default the function uses all distances and group label defined in knn.
-If \code{k_min} is specified, the first local minimum of the overall distance
+Alternative a density based neighbourhood can be defined by specifying
+\code{k_min}. In this case the first local minimum of the overall distance
 distribution with at least k_min cells is used. This can be used to adapt to
 the local structure of the datatset e.g. prevent cells from a
-different cluster to be included. If 'dim_red' is not defined or default cms
-will calculate a PCA using \code{runPCA}. Results will be appended to
-\code{colData(sce)}. Names can be specified using \code{res_name}.
+different cluster to be included. Third the neighbourhood can be defined by
+batch occurences. \code{batch_min} specifies the minimal number of cells from
+ each batch that should be included to define the neighbourhood.
+ If 'dim_red' is not defined or default cms will calculate a PCA using
+ \code{runPCA}. Results will be appended to \code{colData(sce)}.
+ Names can be specified using \code{res_name}.
 If multiple cores are available cms scores can be calculated in parallel
 (does not work on Windows). Parallelization can be specified using BPPARAM.
 }

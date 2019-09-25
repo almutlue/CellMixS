@@ -4,7 +4,8 @@
 \alias{.cmsCell}
 \title{.cmsCell}
 \usage{
-.cmsCell(cell, group, knn, k_min = NA, cell_min = 4)
+.cmsCell(cell, group, knn, k_min = NA, batch_min = NULL,
+  cell_min = 4, unbalanced = FALSE, sce)
 }
 \arguments{
 \item{cell}{Character. Name of the cell to calculate cms for.
@@ -20,8 +21,18 @@ Second "distance" with distances to KNN cells. Third a slot named by
 \item{k_min}{Numeric. Minimum number of Knn to include.
 Default is NA (see Details).}
 
+\item{batch_min}{Numeric. Minimum number of cells per batch to include in to
+the AD test. If set neighbours will be included until batch_min cells from
+each batch are present.}
+
 \item{cell_min}{Numeric. Minimum number of cells from each group to be
 included into the AD test. Should be > 4 to make 'ad.test' working.}
+
+\item{unbalanced}{Boolean. If True neighbourhoods with only one batch present
+will be set to NA. This way they are not included into any summaries or
+smoothening.}
+
+\item{sce}{A \code{SingleCellExperiment} object with the combined data.}
 }
 \value{
 A p.value as resulting from the ad.test.
@@ -44,7 +55,7 @@ different cluster to be included.
 \code{\link{ad.test}}, \code{\link{cms}}, \code{\link{.smoothCms}}
 
 Other helper functions: \code{\link{.defineSubspace}},
-  \code{\link{.filterLocMin}}, \code{\link{.ldfKnn}},
-  \code{\link{.smoothCms}}
+  \code{\link{.filterKnn}}, \code{\link{.filterLocMin}},
+  \code{\link{.ldfKnn}}, \code{\link{.smoothCms}}
 }
 \concept{helper functions}

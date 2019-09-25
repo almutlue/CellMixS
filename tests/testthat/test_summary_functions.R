@@ -17,7 +17,8 @@ cms_df <- data.frame("unaligned"= sce_cms$cms.unaligned,
 test_that("test that visIntegration and visCluster work",{
     #visIntegration
     compare_Int_list <- visIntegration(cms_list)
-    compare_Int_sce<- visIntegration(sce_mnn, metric_prefix = "cms.")
+    compare_Int_sce<- visIntegration(sce_mnn, metric = "cms.",
+                                     metric_name = "cms")
     compare_Int_df <- visIntegration(cms_df, violin = TRUE)
 
     #compare groups

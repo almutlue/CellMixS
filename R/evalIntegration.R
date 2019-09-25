@@ -6,8 +6,9 @@
 #' metrics. Metrics to evaluate mixing and preservance of the local/individual
 #' structure are provided.
 #'
-#' @param metric Character. Name of the metric to apply. Must be one of 'cms',
-#' 'ldfDiff', 'lisi', 'mixing_metric', 'local_structure', 'entropy'.
+#' @param metrics Character vector. Name of the metrics to apply. Must be one to
+#' all of 'cms', 'ldfDiff', 'lisi', 'mixing_metric', 'local_structure',
+#' 'entropy'.
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}.
@@ -17,15 +18,25 @@
 #' Only relevant if no existing 'dim_red' is provided.
 #' Must be one of \code{names(assays(sce))}. Default is "logcounts".
 #' @param n_dim Numeric. Number of dimensions to include to define the subspace.
-#' @param res_name Character. Appendix of the result score's name
+#' @param res_name Character vector. Appendix of the result score's name
 #' (e.g. method used to combine batches).
+#' Needs to have the same length as metrics or NULL.
 #' @param k  Numeric. Number of k-nearest neighbours (Knn) to use.
 #' @param k_min Numeric. Minimum number of Knn to include
 #' (see \code{\link{cms}}). Relevant for metrics: 'cms'.
 #' @param smooth Logical. Indicating if cms results should be smoothened within
-#' each neighbourhood using the weigthed mean. Relevant for metrics: 'cms'.
+#' each neighbourhood using the weigthed mean. Relevant for metric: 'cms'.
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test. Should be > 4. Relevant for metric: 'cms'.
+#' @param batch_min Numeric. Minimum number of cells per batch to include in to
+#' the AD test. If set neighbours will be included until batch_min cells from
+#' each batch are present. Relevant for metrics: 'cms'.
+#' @param unbalanced Boolean. If True neighbourhoods with only one batch present
+#' will be set to NA. This way they are not included into any summaries or
+#' smoothening. Relevant for metrics: 'cms'.
+#' @param weight Boolean. If True batch probabilities to calculate the isi
+#' score are weighted by the mean distance of their cells towards the cell
+#' of interest. Relevant for metrics: 'isi'.
 #' @param k_pos Numeric. Position of cell to be used as reference within mixing
 #' metric. See \code{\link[Seurat]{MixingMetric}} for details.
 #' Relevant for metric: 'mixing_metric'
@@ -62,11 +73,13 @@
 #'   underlying unspecified distribution. The score can be interpreted as the
 #'   probability of having unbiased data according to the batch variable
 #'   (see \code{\link{cms}}).}
-#'   \item{lisi}{Local Inverse Simpson Index. Metric, that uses perplexity based
-#'   neighborhood construction to give weights to each cell's neighbourhood and
-#'   the Inverse Simpson’s Index to calculate the diversification within this
+#'   \item{isi}{Inverse Simpson Index. Metric, that uses the Inverse Simpson’s
+#'   Index to calculate the diversification within a specified
 #'   neighbourhood as the probability of sampling a cell from the same batch
 #'   twice. For 2 batches a score close to 2 indicates high randomness/mixing
+#'   The inverse Simpson index has been proposed as a diversity score for batch
+#'   mixing in single cell RNAseq by Korunsky et al.. They provide a
+#'   distance-based neighborhood weightening in their Lisi package
 #'   (See \code{\link[lisi]{compute_lisi}}).}
 #'   \item{mixing_metric}{Mixing Metric. Metric using the median position of the
 #'    kth cell from each batch within it's knn as a score. The lower the better
@@ -75,7 +88,7 @@
 #'    the batch/group variable within each cell's k-nearest neigbours.
 #'    In a balanced batch the entropy is closer to 1 the higher the variables
 #'    randomness. For unbalanced batches entropy should only be used as a
-#'    relative metric in a comparatibve setting (See \code{\link{entropy}}.)
+#'    relative metric in a comparatibve setting (See \code{\link{entropy}}.)}
 #'    \item{ldfDiff}{Local density Factor differences. Metric, that determines
 #'    cell-specific changes in the Local Density Factor before and after data
 #'    integration. A metric/difference close to 0 indicates no distortion of
@@ -103,37 +116,33 @@
 #' @examples
 #' library(SingleCellExperiment)
 #' sim_list <- readRDS(system.file("extdata/sim50.rds", package = "CellMixS"))
-#' sce <- sim_list[[1]][, c(1:15, 400:420, 16:30)]
+#' sce <- sim_list[[1]][, c(1:15, 300:320, 16:30)]
 #' sce_batch1 <- sce[,colData(sce)$batch == "1"]
 #' sce_batch2 <- sce[,colData(sce)$batch == "2"]
 #' pre <- list("1" = sce_batch1, "2" = sce_batch2)
 #'
-#' sce <- evalIntegration("cms", sce, "batch", k = 20)
-#' sce <- evalIntegration("lisi", sce, "batch", k = 20)
-#' sce <- evalIntegration("mixing_metric", sce, "batch", k = 20)
-#' sce <- evalIntegration("entropy", sce, "batch", k = 20)
+#' sce <- evalIntegration(metrics = c("cms", "mixing_metric", "isi", "entropy"), sce, "batch", k = 20)
 #' sce <- evalIntegration("ldfDiff", sce, "batch", k = 20, sce_pre_list = pre)
-#' sce <- evalIntegration("local_structure", sce, "batch", k = 10, n_dim = 2, n_dim_orig = 2)
 #'
 #' @importFrom scater runPCA
 #' @importFrom SingleCellExperiment reducedDims colData counts reducedDims<-
 #' @importFrom Seurat as.Seurat LocalStruct MixingMetric
-#' @importFrom lisi compute_lisi
 #' @importFrom magrittr %>% set_names
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment colData<- assays assay assay<-
-evalIntegration <- function(metric, sce, group, dim_red = "PCA",
+evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                             assay_name = "logcounts", n_dim = 10,
                             res_name = NULL, k = NULL, k_min = NULL,
-                            smooth = NULL, cell_min = NULL, k_pos = NULL,
+                            smooth = NULL, cell_min = NULL, batch_min = NULL,
+                            unbalanced = FALSE, weight  = TRUE, k_pos = NULL,
                             sce_pre_list = NULL, dim_combined = NULL,
                             assay_pre = NULL, n_dim_orig = NULL,
                             BPPARAM=SerialParam()){
     #------------------- Check input parameter----------------------
-    metric_params <- c("cms", "ldfDiff", "lisi", "mixing_metric",
+    metric_params <- c("cms", "ldfDiff", "isi", "mixing_metric",
                        "local_structure", "entropy")
-    if( !metric %in% metric_params ){
-        stop("Error: 'metric' is unknown. Please define one of 'cms', 'lisi',
+    if( !all(metrics %in% metric_params) ){
+        stop("Error: 'metrics' is unknown. Please define one of 'cms', 'isi',
              'ldfDiff', 'mixing_metric', 'local_structure', 'entropy'")
     }
     if( !is(sce, "SingleCellExperiment" )){
@@ -146,15 +155,18 @@ evalIntegration <- function(metric, sce, group, dim_red = "PCA",
         sce[[group]] <- as.factor(colData(sce)[, group])
     }
 
+    #------------------overall parameter settings ------------------------
+    if( !is.null(res_name) ){
+        if( length(res_name) != length(metrics) ){
+            stop("Error: Define 'res_name' for all metrics to calculate'")
+        }
+        names(res_name) <- metrics
+    }
+    default <- ifelse(is.null(k), TRUE, FALSE)
+
     #------------------ run metrics -------------------------------
     #------------------ mixing-metrics ----------------------------
-    if( metric %in% "cms" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_pos) | !is.null(sce_pre_list) | !is.null(dim_combined) |
-            !is.null(assay_pre) | !is.null(n_dim_orig) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'cms'")
-        }
+    if( "cms" %in% metrics ){
         #Set default parameter
         if( is.null(k_min) ){
             k_min <- NA
@@ -165,72 +177,41 @@ evalIntegration <- function(metric, sce, group, dim_red = "PCA",
         if( is.null(smooth) ){
             smooth <- TRUE
         }
+        if( is.null(res_name) ){
+            res_name[["cms"]] <- NULL
+        }
         #Check parameter
         if( is.null(k) ){
             stop("Please specify 'k', the number of nearest neigbours to check
                  for equal mixing, e.g. median of cells/celltype.")
         }
-        if( k >= ncol(sce) ){
-            warning("'k' exceeds number of cells. Is set to max (all cells).")
-            k <- ncol(sce) - 1
-        }
-        if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
-            warning("'n_dim' exceeds number of provided reduced dimensions.
-                    Is set to max (all dims).")
-            n_dim <- ncol(reducedDims(sce)[[dim_red]])
-        }
         #run cms
         sce <- cms(sce, k = k, group = group, dim_red = dim_red,
-                   assay_name = assay_name, res_name = res_name, k_min = k_min,
-                   smooth = smooth, n_dim = n_dim, cell_min = cell_min,
-                   BPPARAM = BPPARAM)
+                   assay_name = assay_name, res_name = res_name[["cms"]],
+                   k_min = k_min, batch_min = batch_min,
+                   unbalanced = unbalanced, smooth = smooth, n_dim = n_dim,
+                   cell_min = cell_min, BPPARAM = BPPARAM)
         }
 
-    if( metric %in% "lisi" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_min) | !is.null(smooth) |
-            !is.null(cell_min)| !is.null(k_pos) |
-            !is.null(sce_pre_list) | !is.null(dim_combined) |
-            !is.null(assay_pre) | !is.null(n_dim_orig) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'Lisi'")
-        }
+    if( "isi" %in% metrics ){
         #Set default parameter
         if( is.null(k) ){
-            k <- 30 * 3   #uses 3 * perplexity as knn (see below)
+            stop("Please specify 'k', the number of nearest neigbours to check
+                 for equal mixing, e.g. median of cells/celltype.")
         }
-        #Check parameter
-        if( k >= ncol(sce) ){
-            warning("'k' exceeds number of cells. Is set to max (all cells).")
-            k <- ncol(sce) - 1
-        }
-        if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
-            warning("'n_dim' exceeds number of provided reduced dimensions.
-                    Is set to max (all dims).")
-            n_dim <- ncol(reducedDims(sce)[[dim_red]])
-        }
-        #run lisi
-        subspace <- .defineSubspace(sce, assay_name, dim_red, n_dim)
-        lisi_res <- compute_lisi(subspace[,seq_len(n_dim)], colData(sce), group,
-                                 perplexity = k/3)
-        if( !is.null(res_name) ) {
-            colData(sce)[,paste0("lisi.", res_name)] <- lisi_res
-        }else{
-            colData(sce)[,paste0("lisi", res_name)] <- lisi_res
-        }
+        if( is.null(res_name) ){
+            res_name[["isi"]] <- NULL
         }
 
-    if( metric %in% "mixing_metric" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_min) | !is.null(smooth) |
-            !is.null(cell_min) | !is.null(sce_pre_list) |
-            !is.null(dim_combined) | !is.null(assay_pre) |
-            !is.null(n_dim_orig) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'mixing_metric'")
-        }
+        #run isi
+        sce <- isi(sce, k = k, group = group, dim_red = dim_red,
+                   assay_name = assay_name, weight = weight,
+                   res_name = res_name[["isi"]], n_dim = n_dim)
+    }
+
+    if( "mixing_metric" %in% metrics ){
         #Set default parameter
-        if( is.null(k) ){
+        if( is.null(k) | default ){
             k <- 300
         }
         if( is.null(k_pos) ){
@@ -263,52 +244,33 @@ evalIntegration <- function(metric, sce, group, dim_red = "PCA",
                                  dims = seq_len(n_dim),
                                  k = k_pos, max.k = k)
         if( !is.null(res_name) ){
-            colData(sce)[,paste0("mm.", res_name)] <- mix_dist
+            colData(sce)[,paste0("mm.", res_name[["mixing_metric"]])] <- mix_dist
         }else{
-            colData(sce)[,paste0("mm", res_name)] <- mix_dist
+            colData(sce)[,"mm"] <- mix_dist
         }
     }
 
-    if( metric %in% "entropy" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_min) | !is.null(smooth) |
-            !is.null(cell_min)| !is.null(k_pos) |
-            !is.null(sce_pre_list) | !is.null(dim_combined) |
-            !is.null(assay_pre) | !is.null(n_dim_orig) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'entropy'")
-        }
+    if( "entropy" %in% metrics ){
         #Check parameter
-        if( is.null(k) ){
+        if( is.null(k) | default ){
             stop("Please specify 'k', the number of nearest neigbours to check
                  for equal mixing, e.g. median of cells/celltype.")
         }
-        if( k >= ncol(sce) ){
-            warning("'k' exceeds number of cells. Is set to max (all cells).")
-            k <- ncol(sce) - 1
-        }
-        if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
-            warning("'n_dim' exceeds number of provided reduced dimensions.
-                    Is set to max (all dims).")
-            n_dim <- ncol(reducedDims(sce)[[dim_red]])
+        if( is.null(res_name) ){
+            res_name[["entropy"]] <- NULL
         }
         #run entropy
         sce <- entropy(sce, group = group, k = k, dim_red = dim_red,
                        assay_name = assay_name, n_dim = n_dim,
-                       res_name = res_name)
+                       res_name = res_name[["entropy"]])
     }
 
     #------------------ structure metrics ----------------------------
-    if( metric %in% "ldfDiff" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_pos) | !is.null(smooth) | !is.null(cell_min) |
-            !is.null(k_min) | !is.null(n_dim_orig) | !is.null(n_dim_orig) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'ldfDiff'")
-        }
+    if( "ldfDiff" %in% metrics ){
         #Set default parameter
-        if( is.null(k) ){
-            k <- 75
+        if( is.null(k) | default ){
+            stop("Please specify 'k', the number of nearest neigbours to check
+                 for structual changes")
         }
         if( is.null(dim_combined) ){
             dim_combined <- dim_red
@@ -319,28 +281,19 @@ evalIntegration <- function(metric, sce, group, dim_red = "PCA",
         if( is.null(assay_pre) ){
             assay_pre <- "logcounts"
         }
-        #Check parameter
-        if( k >= ncol(sce) ){
-            warning("'k' exceeds number of cells. Is set to max (all cells).")
-            k <- ncol(sce) - 1
+        if( is.null(res_name) ){
+            res_name[["ldfDiff"]] <- NULL
         }
         #run ldfDiff
         sce <- ldfDiff(sce_pre_list = sce_pre_list, sce_combined = sce, group,
                        k = k, dim_red = dim_red, dim_combined = dim_combined,
                        assay_pre = assay_pre, assay_combined = assay_name,
-                       n_dim = n_dim, res_name = res_name)
+                       n_dim = n_dim, res_name = res_name[["ldfDiff"]])
         }
 
-    if( metric %in% "local_structure" ){
-        #Ensure valid parameter settings
-        if( !is.null(k_min) | !is.null(smooth) | !is.null(cell_min) |
-            !is.null(sce_pre_list) | !is.null(dim_combined) |
-            !is.null(assay_pre) | !is.null(k_pos) ){
-            stop("Error: Not valid parameter, please only specify parameter
-                 valid for metric 'mixing_metric'")
-        }
+    if( "local_structure" %in% metrics ){
         #Set default parameter
-        if( is.null(k) ){
+        if( is.null(k) | default ){
             k <- 100
         }
         if( is.null(n_dim_orig) ){
@@ -379,9 +332,10 @@ evalIntegration <- function(metric, sce, group, dim_red = "PCA",
         local_s_sce <- local_s_batch[colnames(sce)]
 
         if( !is.null(res_name) ){
-            colData(sce)[,paste0("localStruct.", res_name)] <- local_s_sce
+            colData(sce)[,paste0("localStruct.", res_name[["local_structure"]])] <-
+                local_s_sce
         }else{
-            colData(sce)[,paste0("localStruct", res_name)] <- local_s_sce
+            colData(sce)[,"localStruct"] <- local_s_sce
         }
     }
 

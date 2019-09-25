@@ -29,7 +29,7 @@ is specified as parameter in \code{\link{.cmsCell}} or \code{\link{cms}}.
 \code{\link{.cmsCell}}
 
 Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.defineSubspace}}, \code{\link{.ldfKnn}},
-  \code{\link{.smoothCms}}
+  \code{\link{.defineSubspace}}, \code{\link{.filterKnn}},
+  \code{\link{.ldfKnn}}, \code{\link{.smoothCms}}
 }
 \concept{helper functions}
