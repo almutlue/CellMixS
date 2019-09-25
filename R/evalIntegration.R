@@ -79,8 +79,7 @@
 #'   twice. For 2 batches a score close to 2 indicates high randomness/mixing
 #'   The inverse Simpson index has been proposed as a diversity score for batch
 #'   mixing in single cell RNAseq by Korunsky et al.. They provide a
-#'   distance-based neighborhood weightening in their Lisi package
-#'   (See \code{\link[lisi]{compute_lisi}}).}
+#'   distance-based neighborhood weightening in their Lisi package.}
 #'   \item{mixing_metric}{Mixing Metric. Metric using the median position of the
 #'    kth cell from each batch within it's knn as a score. The lower the better
 #'    mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
