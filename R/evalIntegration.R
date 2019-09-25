@@ -7,7 +7,7 @@
 #' structure are provided.
 #'
 #' @param metrics Character vector. Name of the metrics to apply. Must be one to
-#' all of 'cms', 'ldfDiff', 'lisi', 'mixing_metric', 'local_structure',
+#' all of 'cms', 'ldfDiff', 'isi', 'mixing_metric', 'local_structure',
 #' 'entropy'.
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.

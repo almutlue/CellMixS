@@ -43,8 +43,7 @@ The Simpson index describes the probability that two entities are taken at
 random from the dataset and it's inverse represent the effective number of
 batches in a neighbourhood. The inverse Simpson index has been proposed as a
 diversity score for batch mixing in single cell RNAseq by Korunsky et al..
-They provide a distance-based neighborhood weightening in their Lisi package
-(See \code{\link[lisi]{compute_lisi}}).
+They provide a distance-based neighborhood weightening in their Lisi package.
 This will be made available here as soon as it is published on CRAN or
 BioConductor. If the option weight is enabled a simplified way of weightening
  probabilities distance based is run.
