@@ -45,7 +45,7 @@
 #' @importFrom SingleCellExperiment colData
 #' @importFrom methods is
 visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1){
-        ## Check input structure and select data to plot
+    ## Check input structure and select data to plot
     if( is(res_object, "SingleCellExperiment") ){
         #select columns to plot
         if( prefix ){
@@ -72,8 +72,7 @@ visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1){
     p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name){
         ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
             geom_histogram(color="black",
-                           fill=
-                               col_hist[which(colnames(cms_res) %in% cms_name)],
+                           fill=col_hist[which(colnames(cms_res) %in% cms_name)],
                            breaks=seq(0, 1, by=0.05)) + xlab(cms_name) +
             theme_classic()
     }), ncol = n_col))

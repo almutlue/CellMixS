@@ -29,12 +29,12 @@
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test. Should be > 4. Relevant for metric: 'cms'.
 #' @param batch_min Numeric. Minimum number of cells per batch to include in to
-#' the AD test. If set neighbours will be included until batch_min cells from
+#' the AD test. If set, neighbours will be included until batch_min cells from
 #' each batch are present. Relevant for metrics: 'cms'.
-#' @param unbalanced Boolean. If True neighbourhoods with only one batch present
+#' @param unbalanced Boolean. If TRUE, neighbourhoods with only one batch present
 #' will be set to NA. This way they are not included into any summaries or
 #' smoothening. Relevant for metrics: 'cms'.
-#' @param weight Boolean. If True batch probabilities to calculate the isi
+#' @param weight Boolean. If TRUE, batch probabilities to calculate the isi
 #' score are weighted by the mean distance of their cells towards the cell
 #' of interest. Relevant for metrics: 'isi'.
 #' @param k_pos Numeric. Position of cell to be used as reference within mixing
@@ -57,11 +57,11 @@
 #' cms scores shall be calculated in parallel. Relevant for metric: 'cms'.
 #'
 #' @details evalIntegration is a wrapper function for different metrics to
-#' understand results of integrated single scell data sets.
-#' In general there are metrics evaluationg the *mixing* of datasets.
-#' So metrics that show whether there still is a bias for different datasets
+#' understand results of integrated single cell data sets.
+#' In general there are metrics evaluationg the *mixing* of datasets, that is,
+#' metrics that show whether there still is a bias for different datasets
 #' after integration. Furthermore there are metrics to evaluate how well the
-#' dataset internal structure has been retained. So metrics that show whether
+#' dataset internal structure has been retained, that is, metrics that show whether
 #' there has been (potentially biological) signal removed or noise added by
 #' integration.
 #'
@@ -73,26 +73,26 @@
 #'   underlying unspecified distribution. The score can be interpreted as the
 #'   probability of having unbiased data according to the batch variable
 #'   (see \code{\link{cms}}).}
-#'   \item{isi}{Inverse Simpson Index. Metric, that uses the Inverse Simpson’s
+#'   \item{isi}{Inverse Simpson Index. Metric that uses the Inverse Simpson’s
 #'   Index to calculate the diversification within a specified
 #'   neighbourhood as the probability of sampling a cell from the same batch
 #'   twice. For 2 batches a score close to 2 indicates high randomness/mixing
 #'   The inverse Simpson index has been proposed as a diversity score for batch
-#'   mixing in single cell RNAseq by Korunsky et al.. They provide a
+#'   mixing in single cell RNAseq by Korunsky et al. They provide a
 #'   distance-based neighborhood weightening in their Lisi package.}
 #'   \item{mixing_metric}{Mixing Metric. Metric using the median position of the
-#'    kth cell from each batch within it's knn as a score. The lower the better
+#'    kth cell from each batch within its knn as a score. The lower the better
 #'    mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
 #'    \item{entropy}{Shannon entropy. Metric calculating the Shannon entropy of
 #'    the batch/group variable within each cell's k-nearest neigbours.
-#'    In a balanced batch the entropy is closer to 1 the higher the variables
+#'    For balanced batches the entropy is closer to 1 the higher the variables
 #'    randomness. For unbalanced batches entropy should only be used as a
-#'    relative metric in a comparatibve setting (See \code{\link{entropy}}.)}
-#'    \item{ldfDiff}{Local density Factor differences. Metric, that determines
+#'    relative metric in a comparative setting (See \code{\link{entropy}}.)}
+#'    \item{ldfDiff}{Local density factor differences. Metric that determines
 #'    cell-specific changes in the Local Density Factor before and after data
 #'    integration. A metric/difference close to 0 indicates no distortion of
 #'    the previous structure (see \code{\link{ldfDiff}}).}
-#'    \item{local_structure}{local structure. Metric that compares the
+#'    \item{local_structure}{Local structure. Metric that compares the
 #'    intersection of knn from the same batch before and after integration
 #'    returning the average between all groups. The higher the more neighbours
 #'    were reproduced after integration (See \code{\link[Seurat]{LocalStruct}}.
@@ -141,7 +141,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
     metric_params <- c("cms", "ldfDiff", "isi", "mixing_metric",
                        "local_structure", "entropy")
     if( !all(metrics %in% metric_params) ){
-        stop("Error: 'metrics' is unknown. Please define one of 'cms', 'isi',
+        stop("Error: 'metrics' is unknown. Please define one or more of 'cms', 'isi',
              'ldfDiff', 'mixing_metric', 'local_structure', 'entropy'")
     }
     if( !is(sce, "SingleCellExperiment" )){
@@ -150,7 +150,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
     if( !group %in% names(colData(sce)) ){
         stop("Error: 'group' variable must be in 'colData(sce)'")
     }
-    if(!is(colData(sce)[,group], "factor")){
+    if( !is(colData(sce)[, group], "factor") ){
         sce[[group]] <- as.factor(colData(sce)[, group])
     }
 
@@ -226,10 +226,10 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                     Is set to max (all dims).")
             n_dim <- ncol(reducedDims(sce)[[dim_red]])
         }
-        #run mixing metric
+        #Run mixing metric
         reducedDims(sce)[[dim_red]] <- .defineSubspace(sce, assay_name, dim_red,
                                                        n_dim)
-        # make sure it can be converted into seurat
+        #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
             assay(sce, "logcounts") <- log2(counts(sce) + 1)
         }
@@ -243,9 +243,9 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                  dims = seq_len(n_dim),
                                  k = k_pos, max.k = k)
         if( !is.null(res_name) ){
-            colData(sce)[,paste0("mm.", res_name[["mixing_metric"]])] <- mix_dist
+            colData(sce)[, paste0("mm.", res_name[["mixing_metric"]])] <- mix_dist
         }else{
-            colData(sce)[,"mm"] <- mix_dist
+            colData(sce)[, "mm"] <- mix_dist
         }
     }
 
@@ -299,20 +299,20 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
             n_dim_orig <- 10
         }
         #Check parameter
-        if( k > min(table(droplevels(colData(sce)[,group]))) ){
+        if( k > min(table(droplevels(colData(sce)[, group]))) ){
             warning("'k' exceeds number of cells/batch.
                     Is set to min(cells/batch).")
-            k <- min(table(droplevels(colData(sce)[,group])))
+            k <- min(table(droplevels(colData(sce)[, group])))
         }
         if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
             warning("'n_dim' exceeds number of provided reduced dimensions.
                     Is set to max (all dims).")
             n_dim <- ncol(reducedDims(sce)[[dim_red]])
         }
-        #run localStructure
+        #Run localStructure
         reducedDims(sce)[[dim_red]] <- .defineSubspace(sce, assay_name, dim_red,
                                                        n_dim)
-        # make sure it can be converted into seurat
+        #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
             assay(sce, "logcounts") <- log2(counts(sce) + 1)
         }
