@@ -12,7 +12,7 @@
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}.
-#' @param dim_red Character. Name of embeddings to use as subspace for distance
+#' @param dim_red Character. Name of embedding to use as subspace for distance
 #' distributions. Default is "PCA".
 #' @param assay_name Character. Name of the assay to use for PCA.
 #' Only relevant if no existing 'dim_red' is provided.
