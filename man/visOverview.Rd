@@ -4,8 +4,9 @@
 \alias{visOverview}
 \title{visOverview}
 \usage{
-visOverview(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
-  log10_val = FALSE, other_var = NULL)
+visOverview(sce_cms, group, metric = "cms", prefix = TRUE,
+  dim_red = "TSNE", log10_val = FALSE, other_var = NULL,
+  metric_prefix = NULL)
 }
 \arguments{
 \item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
@@ -14,8 +15,13 @@ visOverview(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
 \item{group}{Character. Name of group/batch variable. Needs to be one of
 \code{names(colData(sce))}.}
 
-\item{metric_prefix}{Character. Prefix to specify names of
-\code{colData(sce)} to be plotted. Default is 'cms'.}
+\item{metric}{Character vector. Specify names of \code{colData(sce)} to be
+plotted. Applys only if `res_object` is a \code{SingleCellExperiment} object.
+Default is 'cms'. If prefix is TRUE all columns starting with `metric` will
+be plotted.}
+
+\item{prefix}{Boolean. Is `metric` used to specify column's prefix(true) or
+complete column names (False).}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace for plotting.
 Default is "TSNE".}
@@ -24,6 +30,9 @@ Default is "TSNE".}
 
 \item{other_var}{Character string. Name(s) of other variables to be plotted
 asided. Need correspond to one of \code{colData(sce)}.}
+
+\item{metric_prefix}{Former parameter to define prefix of the metric to be
+plotted. Will stop and ask for the new syntax.}
 }
 \value{
 a \code{ggplot} object.

@@ -8,13 +8,20 @@
 #' Needs to be one of \code{rownames(knn)}.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(knn)}.
-#' @param knn List with three elements. First "index" with indices of KNN cells.
-#' Second "distance" with distances to KNN cells. Third a slot named by
-#' \code{group} variable with group level of KNN cells.
-#' @param k_min Numeric. Minimum number of Knn to include.
+#' @param knn List with three elements. First "index" with indices of knn cells.
+#' Second "distance" with distances to knn cells. Third a slot named by
+#' \code{group} variable with group level of knn cells.
+#' @param k_min Numeric. Minimum number of knn to include.
 #' Default is NA (see Details).
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test. Should be > 4 to make 'ad.test' working.
+#' @param batch_min Numeric. Minimum number of cells per batch to include in to
+#' the AD test. If set neighbours will be included until batch_min cells from
+#' each batch are present.
+#' @param unbalanced Boolean. If True neighbourhoods with only one batch present
+#' will be set to NA. This way they are not included into any summaries or
+#' smoothening.
+#' @param sce A \code{SingleCellExperiment} object with the combined data.
 #'
 #' @details The cms function tests the hypothesis, that group-specific distance
 #' distributions of knn cells have the same underlying unspecified distribution.
@@ -35,7 +42,8 @@
 #' @importFrom kSamples ad.test
 #' @importFrom magrittr set_colnames %>% extract2
 #' @importFrom dplyr mutate mutate_at group_by_at filter summarize n
-.cmsCell <- function(cell, group, knn, k_min = NA, cell_min = 4){
+.cmsCell <- function(cell, group, knn, k_min = NA, batch_min = NULL,
+                     cell_min = 4, unbalanced = FALSE, sce){
     #get knn distances and group assignments
     knn_cell <- cbind(knn[["distance"]][cell, ], knn[[group]][cell, ]) %>%
         as.data.frame %>%
@@ -48,6 +56,10 @@
         knn_cell <- .filterLocMin(knn_cell, k_min)
     }
 
+    if( !is.null(batch_min) ){
+        knn_cell <- .filterKnn(knn_cell, batch_min, group = group, sce = sce)
+    }
+
     #filter groups with to few cells (cell_min, default 4)
     groups_included <- knn_cell %>% group_by_at(group) %>%
         summarize("n_group" = n()) %>%
@@ -55,9 +67,9 @@
         extract2(group) %>% droplevels() %>% levels()
 
     #do not perform AD test if only one group with enough cells is in knn.
-    if (length(groups_included) <= 1) {
-        p <- 0
-    } else {
+    if( length(groups_included) <= 1 ){
+        p <- ifelse(unbalanced, NA, 0)
+    }else{
         dist_included <- lapply(groups_included, function(group_level){
             dist <- knn_cell$distance[which(knn_cell[, group] %in% group_level)]
         })
@@ -108,20 +120,55 @@
     knn_cell
 }
 
+#' .filterKnn
+#'
+#' @param knn_cell Data frame with one column "distance" and one column named
+#' by the group variable. Rows correspond to the knn cells and do not need
+#' rownames.
+#' @param batch_min Numeric. Minimum number of cells per batch to include.
+#' @param group Character. Name of group/batch variable.
+#' Needs to be one of \code{names(knn)}.
+#' @param sce A \code{SingleCellExperiment} object with the combined data.
+#'
+#' @seealso \code{\link{.cmsCell}}
+#' @family helper functions
+#' @return data.frame with two columns (index, distance) for filtered knn cells.
+#'
+.filterKnn <- function(knn_cell, batch_min, group, sce){
+    # Make sure at least batch_min cells are within knn
+    b_ids <- levels(colData(sce)[, group])
+    batch_k <- rep(batch_min, length(b_ids)) %>% set_names(b_ids)
+    min_indices <- which(table(knn_cell[,group]) >= batch_min)
+    max_indices <- which(table(knn_cell[,group]) < batch_min)
+    if( length(max_indices) > 0 ){
+        max_cell <- table(knn_cell[,group])[[max_indices]]
+        batch_k[max_indices] <- max_cell
+        warning(paste0("There are less than 'batch_min' cells of each batch in
+                a reasonable sized neighbourhood. ", max_cell," number of cells
+                       are used"))
+    }
+    #Find maximum of ith cells within knn
+    batch_ind <- lapply(b_ids, function(batch){
+        k_ind <- which(knn_cell[,group] %in% batch)[batch_k[batch]]
+    }) %>% unlist()
+
+    knn_cell <- knn_cell[seq_len(max(batch_ind, na.rm = TRUE)),]
+}
+
 #' .smoothCms
 #'
 #' Performs weighted smoothening of cms scores
 #'
-#' @param knn List with three elements. First "index" with indices of KNN cells.
-#' Second "distance" with distances to KNN cells. Third a slot named by
-#' \code{group} variable with group level of KNN cells.
+#' @param knn List with three elements. First "index" with indices of knn cells.
+#' Second "distance" with distances to knn cells. Third a slot named by
+#' \code{group} variable with group level of knn cells.
 #' @param cms_raw Matrix with raw cms scores for all cells specified in
 #' \code{cell_names} and \code{knn}. Colnames need to be "cms.
 #' @param cell_names Character vector with cell names corresponding to the
 #' rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.
-#' @param k_min Numeric. Minimum number of Knn to include.
+#' @param k_min Numeric. Minimum number of knn to include.
 #' Default is NA (see Details).
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #'
 #' @details Internal function to smooth cms scores. In a complete random setting
 #'  cms scores are uniform distributed. To reduce the resulting random variance
@@ -158,11 +205,13 @@
             weights <- c(1, (1/(knn[[2]][cell_id, seq_len(k_smooth)] + 1)))
             knn_cms <- c(cms_raw[cell_id, "cms"],
                          knn[["cms"]][cell_id, seq_len(k_smooth)])
-            cms_new <- weighted.mean(knn_cms, weights)
+            cms_new <- weighted.mean(knn_cms, weights, na.rm = TRUE)
         }) %>% bind_rows() %>% t() %>%
         set_colnames("cms_smooth")
-
     res_cms <- cbind(cms_smooth, cms_raw)
+    na_cells <- which(is.na(res_cms[,"cms"]))
+    res_cms[na_cells, "cms_smooth"] <- NA
+    res_cms
 }
 
 ## DefineSubspace

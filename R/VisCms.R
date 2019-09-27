@@ -9,10 +9,15 @@
 #' The SingleCellExperiment object should contain the result scores (e.g. cms)
 #' to plot in \code{colData(res_object)}.
 #' Matrix or data frame should have result scores in columns and cells in rows.
-#' @param metric_prefix Character. Prefix to specify names of
-#' \code{colData(sce)} to be plotted. Applys only if `res_object` is
-#' a \code{SingleCellExperiment} object. Default is 'cms'.
+#' @param metric Character vector. Specify names of \code{colData(sce)} to be
+#' plotted. Applys only if `res_object` is a \code{SingleCellExperiment} object.
+#' Default is 'cms'. If prefix is TRUE all columns starting with `metric` will
+#' be plotted.
+#' @param prefix Boolean. Is `metric` used to specify column's prefix(true) or
+#' complete column names (False).
 #' @param n_col Numeric. Number of columns of the pval histogram.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #'
 #' @details Plots metric score distribution similar to a pvalue histogram
@@ -20,7 +25,7 @@
 #' flat distributed. If `res_object` is a matrix or data.frame,
 #' it will create a histogram for each column. If `res_object` is a
 #' \code{SingleCellExperiment} object, it will create a histogram of all
-#' \code{colData(res_object)} that start with `metric_prefix`.
+#' \code{colData(res_object)} that start with or are specified in `metric`.
 #'
 #' @family visualize metric functions
 #'
@@ -41,22 +46,32 @@
 #' @importFrom dplyr as_tibble select starts_with
 #' @importFrom SingleCellExperiment colData
 #' @importFrom methods is
-visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
+visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1,
+                    metric_prefix = NULL){
     ## Check input structure and select data to plot
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
     if( is(res_object, "SingleCellExperiment") ){
         #select columns to plot
-        cms_res <- as_tibble(colData(res_object)) %>%
-            select(starts_with(metric_prefix))
+        if( prefix ){
+            cms_res <- as_tibble(colData(res_object)) %>%
+                select(starts_with(metric))
+        }else{
+            cms_res <- as_tibble(colData(res_object)) %>%
+                select(metric)
+            }
     }else{
         cms_res <- res_object
     }
 
     #Check input/presence of score
-    if(ncol(cms_res) == 0){
+    if( ncol(cms_res) == 0 ){
         stop("Error: 'res_object' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify colData(res_object) column to plot by `metric_prefix`.
+             * Specify colData(res_object) column to plot by `metric`.
              * Specify a matrix with results to plot as `res_object`.")
     }
 
@@ -64,8 +79,7 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
     p <- do.call(plot_grid, c(lapply(colnames(cms_res), function(cms_name){
         ggplot(as.data.frame(cms_res), aes_string(x=cms_name)) +
             geom_histogram(color="black",
-                           fill=
-                               col_hist[which(colnames(cms_res) %in% cms_name)],
+                           fill=col_hist[which(colnames(cms_res) %in% cms_name)],
                            breaks=seq(0, 1, by=0.05)) + xlab(cms_name) +
             theme_classic()
     }), ncol = n_col))
@@ -82,13 +96,19 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' (e.g. cms) to plot in \code{colData(sce_cms)}.
 #' @param group Character. Name of group/batch variable. Needs to be one of
 #' \code{names(colData(sce))}.
-#' @param metric_prefix Character. Prefix to specify names of
-#' \code{colData(sce)} to be plotted. Default is 'cms'.
+#' @param metric Character vector. Specify names of \code{colData(sce)} to be
+#' plotted. Applys only if `res_object` is a \code{SingleCellExperiment} object.
+#' Default is 'cms'. If prefix is TRUE all columns starting with `metric` will
+#' be plotted.
+#' @param prefix Boolean. Is `metric` used to specify column's prefix(true) or
+#' complete column names (False).
 #' @param dim_red Character. Name of embeddings to use as subspace for plotting.
 #'  Default is "TSNE".
 #' @param log10_val Logical. Indicating if -log10(metric) should be plotted.
 #' @param other_var Character string. Name(s) of other variables to be plotted
 #' asided. Need correspond to one of \code{colData(sce)}.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #' @details Plots reduced dimensions of cells colored by group variable and
 #' metric score. If 'red_dim' is not defined in \code{reducedDimNames(sce)} a
@@ -123,9 +143,14 @@ visHist <- function(res_object, metric_prefix = "cms", n_col = 1){
 #' @importFrom dplyr bind_rows as_tibble select starts_with select_if bind_cols
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom methods is
-visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
-                        log10_val = FALSE, other_var = NULL){
+visOverview <- function(sce_cms, group, metric = "cms", prefix = TRUE,
+                        dim_red = "TSNE", log10_val = FALSE, other_var = NULL,
+                        metric_prefix = NULL){
     ## Check input structure and select data to plot
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
     if( !is(sce_cms, "SingleCellExperiment") ){
         stop("Error:'sce_cms' must be a 'SingleCellExperiment' object.")
     }
@@ -133,23 +158,28 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
         stop("Error: 'group' variable must be in 'colData(sce_cms)'")
     }
     #select columns to plot
-    cms_res <- as_tibble(colData(sce_cms)) %>%
-        select(starts_with(metric_prefix))
+    if( prefix ){
+        cms_res <- as_tibble(colData(sce_cms)) %>%
+            select(starts_with(metric))
+    }else{
+        cms_res <- as_tibble(colData(sce_cms)) %>%
+            select(metric)
+    }
 
     #Check the presence of results
-    if(ncol(cms_res) == 0){
+    if( ncol(cms_res) == 0 ){
         stop("Error: 'sce_cms' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify a colData(res_object) column in `metric_prefix`.")
+             * Specify a colData(res_object) column in `metric`.")
     }
 
     cell_names <- colnames(sce_cms)
 
     ### ------ Start Check and prepare dim reduction slot --------####
 
-    if(!dim_red %in% "TSNE"){
-        if(!dim_red %in% reducedDimNames(sce_cms)){
+    if( !dim_red %in% "TSNE" ){
+        if( !dim_red %in% reducedDimNames(sce_cms) ){
             stop("Ambigous parameter 'dim_red', provide one of:
                  * A dim_red method that is listed in reducedDimNames(sce_cms).
                  * Default('TSNE') will call runTSNE to calculate a subspace.")
@@ -157,9 +187,9 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
         red_dim <- as.data.frame(reducedDim(sce_cms, dim_red))
         }else{
             #used tsne from scater package (check for availability first)
-            if(  !"TSNE" %in% reducedDimNames(sce_cms) ){
+            if( !"TSNE" %in% reducedDimNames(sce_cms) ){
                 #use "logcounts" if availabe otherwise "counts"
-                if(names(assays(sce_cms)) %in% "logcounts"){
+                if( names(assays(sce_cms)) %in% "logcounts" ){
                     sce_cms <- runTSNE(sce_cms)
                 }else{
                     sce_cms <- runTSNE(sce_cms, exprs_values = "counts")
@@ -209,7 +239,7 @@ visOverview <- function(sce_cms, group, metric_prefix = "cms", dim_red = "TSNE",
             guides(color=guide_legend(override.aes=list(size=0.5))) +
             scale_color_viridis(option = "B") +
             ggtitle(paste0(cms_res_var, " : ", group))
-        if( isTRUE(log10_val) & cms_res_var %in% colnames(cms_res)){
+        if( isTRUE(log10_val) & cms_res_var %in% colnames(cms_res) ){
             t_cms <- t_cms +
                 guides(color=guide_legend(
                     title=paste0("-log10(",cms_res_var, ")")))

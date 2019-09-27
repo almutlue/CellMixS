@@ -16,7 +16,7 @@ test_that("test that visHist works",{
                  "Error: 'res_object' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify colData(res_object) column to plot by `metric_prefix`.
+             * Specify colData(res_object) column to plot by `metric`.
              * Specify a matrix with results to plot as `res_object`.",
                  fixed = TRUE)
 
@@ -51,7 +51,7 @@ test_that("test that visOverview works",{
                  "Error: 'sce_cms' does not contain any metric results.
              Please continue by one of:
              * Run `cms` on your SingleCellExperiment object before plotting.
-             * Specify a colData(res_object) column in `metric_prefix`.",
+             * Specify a colData(res_object) column in `metric`.",
                fixed = TRUE)
     expect_error(visOverview(assay(sce), "batch"),
                  "Error:'sce_cms' must be a 'SingleCellExperiment' object.")

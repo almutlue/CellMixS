@@ -20,7 +20,7 @@ data.}
 of \code{sce_pre_list}.
 Needs to be one of \code{names(colData(sce_combined))}.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace to calculate
 LDF before integration. Default is "PCA".}

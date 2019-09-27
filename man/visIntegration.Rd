@@ -4,7 +4,8 @@
 \alias{visIntegration}
 \title{visIntegration}
 \usage{
-visIntegration(res_object, metric_prefix = "cms", violin = FALSE)
+visIntegration(res_object, metric = "cms", prefix = TRUE,
+  violin = FALSE, metric_name = "metric", metric_prefix = NULL)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, list, matrix or
@@ -12,12 +13,21 @@ data.frame. The SingleCellExperiment object should contain the result scores
 (cms) to compare within \code{colData(res_object)}. List, matrix or data
 frame should have result scores in list elements resp. columns.}
 
-\item{metric_prefix}{Character. Prefix to specify names of
-\code{colData(sce)} to be compared. Applys only if `res_object` is a
-\code{SingleCellExperiment} object. Default is 'cms'.}
+\item{metric}{Character vector. Specify names of \code{colData(sce)} to be
+compared. Applys only if `res_object` is a \code{SingleCellExperiment}
+object. Default is 'cms'. If prefix is TRUE all columns starting with
+`metric` will be compared and plotted.}
+
+\item{prefix}{Boolean. Is `metric` used to specify column's prefix(true) or
+complete column names (False).}
 
 \item{violin}{A logical. If true violin plots are plotted,
 while the default (FALSE) will plot ridge plots.}
+
+\item{metric_name}{Character. Name of the score metric.}
+
+\item{metric_prefix}{Former parameter to define prefix of the metric to be
+plotted. Will stop and ask for the new syntax.}
 }
 \value{
 a \code{ggplot} object.
@@ -40,7 +50,7 @@ sce <- sim_list[["batch20"]][, c(1:30,300:320)]
 sce_mnn <- cms(sce,"batch", k = 20, dim_red = "MNN", res_name = "MNN",
 n_dim = 2)
 
-visIntegration(sce_mnn, metric_prefix = "cms.", violin = TRUE)
+visIntegration(sce_mnn, metric = "cms.", violin = TRUE)
 
 }
 \seealso{

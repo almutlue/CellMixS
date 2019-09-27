@@ -15,7 +15,7 @@
 #' @param group Character. Name of group/batch variable that separates elements
 #' of \code{sce_pre_list}.
 #' Needs to be one of \code{names(colData(sce_combined))}.
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #' @param dim_red Character. Name of embeddings to use as subspace to calculate
 #' LDF before integration. Default is "PCA".
 #' @param dim_combined Character. Name of embeddings to use as subspace to
@@ -88,6 +88,10 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
         stop("Error: Names of 'sce_pre_list' must refer to levels within
              'colData(sce_combined)[,group]'.")
     }
+    if( k >= ncol(sce_combined) ){
+        warning("'k' exceeds number of cells. Is set to max (all cells).")
+        k <- ncol(sce_combined) - 1
+    }
 
     #Calculate LDF Difference
     cell_names <- sce_pre_list %>% map(colnames) %>% unlist()
@@ -131,7 +135,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
 #' @param group Character. Name of group/batch variable that separates elements
 #' of \code{sce_pre_list}.
 #' Needs to be one of \code{names(colData(sce_combined))}.
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #' @param dim_red Character. Name of embeddings to use as subspace to calculate
 #' LDF before integration. Default is "PCA".
 #' @param dim_combined Character. Name of embeddings to use as subspace to
@@ -154,9 +158,9 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
 #' 'k' can be used to define the level of local structure that is tested.
 #' The smaller 'k' the more focus is on detailed structures, while a large k
 #' will tets overall changes.
-#' K-nearest neighbours (KNN) are determined in the subspaces before integration
+#' K-nearest neighbours (knn) are determined in the subspaces before integration
 #' defined by 'dim_red'.
-#' The same set of KNN are used to determine LDF before and after integration.
+#' The same set of knn are used to determine LDF before and after integration.
 #'
 #'
 #' @family ldf functions

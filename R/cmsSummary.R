@@ -10,11 +10,17 @@
 #' data.frame. The SingleCellExperiment object should contain the result scores
 #' (cms) to compare within \code{colData(res_object)}. List, matrix or data
 #' frame should have result scores in list elements resp. columns.
-#' @param metric_prefix Character. Prefix to specify names of
-#' \code{colData(sce)} to be compared. Applys only if `res_object` is a
-#' \code{SingleCellExperiment} object. Default is 'cms'.
+#' @param metric Character vector. Specify names of \code{colData(sce)} to be
+#' compared. Applys only if `res_object` is a \code{SingleCellExperiment}
+#' object. Default is 'cms'. If prefix is TRUE all columns starting with
+#' `metric` will be compared and plotted.
+#' @param prefix Boolean. Is `metric` used to specify column's prefix(true) or
+#' complete column names (False).
 #' @param violin A logical. If true violin plots are plotted,
 #' while the default (FALSE) will plot ridge plots.
+#' @param metric_name Character. Name of the score metric.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #' @details Plots summarized cms scores from an \code{SingleCellExperiment}
 #' object, list or dataframe. This function is intended to visualize and
@@ -35,7 +41,7 @@
 #' sce_mnn <- cms(sce,"batch", k = 20, dim_red = "MNN", res_name = "MNN",
 #' n_dim = 2)
 #'
-#' visIntegration(sce_mnn, metric_prefix = "cms.", violin = TRUE)
+#' visIntegration(sce_mnn, metric = "cms.", violin = TRUE)
 #'
 #' @importFrom ggplot2 ggplot aes ylab xlab scale_color_manual theme_classic
 #' labs geom_violin
@@ -44,14 +50,27 @@
 #' @importFrom dplyr as_tibble select starts_with as_data_frame
 #' @importFrom magrittr %>%
 #' @importFrom methods is
-visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
+visIntegration <- function(res_object, metric = "cms", prefix = TRUE,
+                           violin = FALSE, metric_name = "metric",
+                           metric_prefix = NULL){
+    #Check input params
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
 
     # Prepare data for plotting
     if( is.list(res_object) ){
         average_table <- res_object %>% cbind.data.frame()
     }else if( is(res_object, "SingleCellExperiment") ){
-        average_table <- as_tibble(colData(res_object)) %>%
-            select(starts_with(metric_prefix))
+        if( prefix ){
+            average_table <- as_tibble(colData(res_object)) %>%
+                select(starts_with(metric))
+        }else{
+            average_table <- as_tibble(colData(res_object)) %>%
+                select(metric)
+        }
+
     }else{
         average_table <- as_data_frame(res_object)
     }
@@ -72,7 +91,7 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
                                                              fill="keycol")) +
             geom_violin()  +
             labs(title="Summarized metric", x="integration",
-                 y = paste0("average ", metric_prefix)) +
+                 y = paste0("average ", metric_name)) +
             scale_fill_manual(values = col_hist) + theme_classic()
     }else{
         summarized_metric <- ggplot(average_long, aes_string(y="keycol",
@@ -80,7 +99,7 @@ visIntegration <- function(res_object, metric_prefix = "cms", violin = FALSE){
                                                              fill="keycol")) +
             geom_density_ridges(scale = 1)  +
             labs(title="Summarized metric",y="integration",
-                 x = paste0("average ", metric_prefix)) +
+                 x = paste0("average ", metric_name)) +
             scale_fill_manual(values= col_hist) + theme_classic()
     }
     summarized_metric

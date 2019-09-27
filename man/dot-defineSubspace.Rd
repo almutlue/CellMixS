@@ -36,7 +36,7 @@ Only if no subspace is defined or present it will perform a PCA using
 \code{\link{ldfSce}}, \code{\link{cms}}.
 
 Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.filterLocMin}}, \code{\link{.ldfKnn}},
-  \code{\link{.smoothCms}}
+  \code{\link{.filterKnn}}, \code{\link{.filterLocMin}},
+  \code{\link{.ldfKnn}}, \code{\link{.smoothCms}}
 }
 \concept{helper functions}

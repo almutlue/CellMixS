@@ -7,3 +7,10 @@
   }
 }
 
+\section{Changes in version 1.1.3 (Sept 2019)}{
+  \itemize{
+    \item Add entropy and weighted isi function
+    \item Add evalIntegration function
+    \item Replace `metric_prefix` from plotting functions by `metric` parameter.
+  }
+}
