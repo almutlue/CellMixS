@@ -16,12 +16,11 @@
 #' @param res_name Character. Appendix of the result score's name
 #' (e.g. method used to combine batches).
 #'
-#' @details The entropy function calculates the shannon entropy of the group
+#' @details The entropy function calculates the Shannon entropy of the group
 #' variable within each cell's k-nearest neighbourhood.
-#' For balanced batches the shannon entropy close to 1 indicates high randomness
+#' For balanced batches a Shannon entropy close to 1 indicates high randomness
 #' and mixing. For unbalanced batches entropy should be interpreted with
 #' caution, but could work as a relative measure in a comparative setting.
-#'
 #'
 #' @return A \code{SingleCellExperiment} with the entropy score within colData.
 #' @export
@@ -43,16 +42,16 @@
 entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
                      n_dim = 10, res_name = NULL){
     #------------------Check input parameter ---------------------------------#
-    if(!is(sce, "SingleCellExperiment")){
+    if( !is(sce, "SingleCellExperiment") ){
         stop("Error: 'sce' must be a 'SingleCellExperiment' object.")
     }
-    if(!group %in% names(colData(sce))){
+    if( !group %in% names(colData(sce)) ){
         stop("Error: 'group' variable must be in 'colData(sce)'")
     }
-    if(!is(colData(sce)[,group], "factor")){
+    if( !is(colData(sce)[,group], "factor") ){
         sce[[group]] <- as.factor(colData(sce)[, group])
     }
-    colData(sce)[,group] <- droplevels(colData(sce)[,group])
+    colData(sce)[, group] <- droplevels(colData(sce)[, group])
     if( k >= ncol(sce) ){
         warning("'k' exceeds number of cells. Is set to max (all cells).")
         k <- ncol(sce) - 1
@@ -65,7 +64,7 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
     #determine knn
     knn <- findKNN(subspace, k = k) %>% map(set_rownames, cell_names)
 
-    # group assignment of knn cells for each cell
+    #group assignment of knn cells for each cell
     knn[[group]] <- matrix(
         colData(sce)[as.numeric(as.character(knn$index)), group],
         nrow = nrow(knn$index)) %>%
@@ -103,7 +102,7 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 #' @param assay_name Character. Name of the assay to use for PCA.
 #' Only relevant if no existing 'dim_red' is provided.
 #' @param n_dim Numeric. Number of dimensions to include to define the subspace.
-#' @param weight Boolean. If True batch probabilities to calculate the isi
+#' @param weight Boolean. If TRUE, batch probabilities to calculate the isi
 #'  score are weighted by the mean distance of their cells towards the cell
 #'  of interest. Relevant for metrics: 'isi'.
 #' @param res_name Character. Appendix of the result score's name
@@ -112,13 +111,12 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 #'@details The isi function calculates the inverse Simpson index of the group
 #' variable within each cell's k-nearest neighbourhood.
 #' The Simpson index describes the probability that two entities are taken at
-#' random from the dataset and it's inverse represent the effective number of
+#' random from the dataset and its inverse represent the effective number of
 #' batches in a neighbourhood. The inverse Simpson index has been proposed as a
-#' diversity score for batch mixing in single cell RNAseq by Korunsky et al..
+#' diversity score for batch mixing in single cell RNAseq by Korunsky et al.
 #' They provide a distance-based neighborhood weightening in their Lisi package.
-#' This will be made available here as soon as it is published on CRAN or
-#' BioConductor. If the option weight is enabled a simplified way of weightening
-#'  probabilities distance based is run.
+#' Here, we provide a simplified way of weightening probabilitities, if the 
+#' \code{weight} argument is enabled.
 #' @return A \code{SingleCellExperiment} with the entropy score within colData.
 #' @export
 #'
@@ -144,16 +142,16 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 isi <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
                  n_dim = 10, weight = TRUE, res_name = NULL){
     #------------------Check input parameter ---------------------------------#
-    if(!is(sce, "SingleCellExperiment")){
+    if( !is(sce, "SingleCellExperiment") ){
         stop("Error: 'sce' must be a 'SingleCellExperiment' object.")
     }
-    if(!group %in% names(colData(sce))){
+    if( !group %in% names(colData(sce)) ){
         stop("Error: 'group' variable must be in 'colData(sce)'")
     }
-    if(!is(colData(sce)[,group], "factor")){
+    if( !is(colData(sce)[,group], "factor") ){
         sce[[group]] <- as.factor(colData(sce)[, group])
     }
-    colData(sce)[,group] <- droplevels(colData(sce)[,group])
+    colData(sce)[, group] <- droplevels(colData(sce)[, group])
     if( k >= ncol(sce) ){
         warning("'k' exceeds number of cells. Is set to max (all cells).")
         k <- ncol(sce) - 1
