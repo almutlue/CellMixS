@@ -4,7 +4,8 @@
 \alias{visHist}
 \title{visHist}
 \usage{
-visHist(res_object, metric = "cms", prefix = TRUE, n_col = 1)
+visHist(res_object, metric = "cms", prefix = TRUE, n_col = 1,
+  metric_prefix = NULL)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, matrix or data.frame.
@@ -21,6 +22,9 @@ be plotted.}
 complete column names (False).}
 
 \item{n_col}{Numeric. Number of columns of the pval histogram.}
+
+\item{metric_prefix}{Former parameter to define prefix of the metric to be
+plotted. Will stop and ask for the new syntax.}
 }
 \value{
 a \code{ggplot} object.

@@ -16,6 +16,8 @@
 #' @param prefix Boolean. Is `metric` used to specify column's prefix(true) or
 #' complete column names (False).
 #' @param n_col Numeric. Number of columns of the pval histogram.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #'
 #' @details Plots metric score distribution similar to a pvalue histogram
@@ -44,8 +46,13 @@
 #' @importFrom dplyr as_tibble select starts_with
 #' @importFrom SingleCellExperiment colData
 #' @importFrom methods is
-visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1){
+visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1,
+                    metric_prefix = NULL){
     ## Check input structure and select data to plot
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
     if( is(res_object, "SingleCellExperiment") ){
         #select columns to plot
         if( prefix ){
@@ -100,6 +107,8 @@ visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1){
 #' @param log10_val Logical. Indicating if -log10(metric) should be plotted.
 #' @param other_var Character string. Name(s) of other variables to be plotted
 #' asided. Need correspond to one of \code{colData(sce)}.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #' @details Plots reduced dimensions of cells colored by group variable and
 #' metric score. If 'red_dim' is not defined in \code{reducedDimNames(sce)} a
@@ -135,8 +144,13 @@ visHist <- function(res_object, metric = "cms", prefix = TRUE, n_col = 1){
 #' @importFrom magrittr %>% set_colnames
 #' @importFrom methods is
 visOverview <- function(sce_cms, group, metric = "cms", prefix = TRUE,
-                        dim_red = "TSNE", log10_val = FALSE, other_var = NULL){
+                        dim_red = "TSNE", log10_val = FALSE, other_var = NULL,
+                        metric_prefix = NULL){
     ## Check input structure and select data to plot
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
     if( !is(sce_cms, "SingleCellExperiment") ){
         stop("Error:'sce_cms' must be a 'SingleCellExperiment' object.")
     }

@@ -5,7 +5,8 @@
 \title{visOverview}
 \usage{
 visOverview(sce_cms, group, metric = "cms", prefix = TRUE,
-  dim_red = "TSNE", log10_val = FALSE, other_var = NULL)
+  dim_red = "TSNE", log10_val = FALSE, other_var = NULL,
+  metric_prefix = NULL)
 }
 \arguments{
 \item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
@@ -29,6 +30,9 @@ Default is "TSNE".}
 
 \item{other_var}{Character string. Name(s) of other variables to be plotted
 asided. Need correspond to one of \code{colData(sce)}.}
+
+\item{metric_prefix}{Former parameter to define prefix of the metric to be
+plotted. Will stop and ask for the new syntax.}
 }
 \value{
 a \code{ggplot} object.

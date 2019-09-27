@@ -13,7 +13,7 @@ isi(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(colData(sce))}.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace for distance
 distributions. Default is "PCA".}
@@ -23,7 +23,7 @@ Only relevant if no existing 'dim_red' is provided.}
 
 \item{n_dim}{Numeric. Number of dimensions to include to define the subspace.}
 
-\item{weight}{Boolean. If True batch probabilities to calculate the isi
+\item{weight}{Boolean. If TRUE, batch probabilities to calculate the isi
 score are weighted by the mean distance of their cells towards the cell
 of interest. Relevant for metrics: 'isi'.}
 
@@ -40,13 +40,12 @@ isi
 The isi function calculates the inverse Simpson index of the group
 variable within each cell's k-nearest neighbourhood.
 The Simpson index describes the probability that two entities are taken at
-random from the dataset and it's inverse represent the effective number of
+random from the dataset and its inverse represent the effective number of
 batches in a neighbourhood. The inverse Simpson index has been proposed as a
-diversity score for batch mixing in single cell RNAseq by Korunsky et al..
-They provide a distance-based neighborhood weightening in their Lisi package.
-This will be made available here as soon as it is published on CRAN or
-BioConductor. If the option weight is enabled a simplified way of weightening
- probabilities distance based is run.
+diversity score for batch mixing in single cell RNAseq by Korunsky et al.
+They provide a distance-based neighbourhood weightening in their Lisi package.
+Here, we provide a simplified way of weightening probabilitities, if the
+\code{weight} argument is enabled.
 }
 \examples{
 library(SingleCellExperiment)

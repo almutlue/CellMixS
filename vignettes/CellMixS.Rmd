@@ -103,6 +103,7 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(purrr)
     library(ggplot2)
+    library(scater)
 })
 ```
 
@@ -161,10 +162,10 @@ The **cellspecific mixing score** `cms` tests for each cell the hypothesis that
 batch-specific distance distributions towards it's k-nearest neighbouring (knn) 
 cells are derived from the same unspecified underlying distribution using the 
 Anderson-Darling test [@Scholz1987]. Results from the `cms` function are two 
-scores *cms* and *cms_smooth*, where the latter is the weighted mean of the cms within 
-each cell's neighbourhood. They can be interpreted as the probability that 
-batches within this cell's neighbourhood are equally mixed. A high `cms` score 
-refers to good mixing, while a low score indicates batch-specific bias. 
+scores *cms* and *cms_smooth*, where the latter is the weighted mean of the cms 
+within each cell's neighbourhood. They can be interpreted as the data's 
+probability within an equally mixed neighbourhood. A high `cms` score refers to 
+good mixing, while a low score indicates batch-specific bias. 
 The test considers differences in the number of cells from each batch. 
 This facilitates the `cms` score to differentiate between unbalanced batches 
 (e.g. one celltype being more abundant in a specific batch) and a biased 
@@ -307,7 +308,8 @@ sce20 <- cms(sce20, k = 30, group = "batch",
              dim_red = "MNN", res_name = "MNN", n_dim = 3, cell_min = 4)
 
 # Run limma
-limma_corrected <- removeBatchEffect(counts(sce20), batch = sce20$batch)
+sce20 <- scater::normalize(sce20)
+limma_corrected <- removeBatchEffect(logcounts(sce20), batch = sce20$batch)
 # Add corrected counts to sce
 assay(sce20, "lim_corrected") <- limma_corrected 
 
@@ -345,7 +347,7 @@ dataset's internal structures are preserved.
 **local density factor** before and after data integration [@Latecki2007]. 
 The local density factor is a relative measure of the cell density around a cell 
 compared to the densities within its neighbourhood. Local density factors are 
-calculated on the same set of k cells from the cell's kNN before integration. 
+calculated on the same set of k cells from the cell's knn before integration. 
 In an optimal case relative densities (according to the same set of cells) 
 should not change by integration and the `ldfDiff` score should be close to 0. 
 In general the overall distribution of `ldfDiff` should be centered around 0 

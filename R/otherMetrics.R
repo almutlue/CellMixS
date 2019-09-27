@@ -6,7 +6,7 @@
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}.
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #' @param dim_red Character. Name of embeddings to use as subspace for distance
 #' distributions. Default is "PCA".
 #' @param assay_name Character. Name of the assay to use for PCA.
@@ -96,7 +96,7 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}.
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #' @param dim_red Character. Name of embeddings to use as subspace for distance
 #' distributions. Default is "PCA".
 #' @param assay_name Character. Name of the assay to use for PCA.
@@ -114,8 +114,8 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 #' random from the dataset and its inverse represent the effective number of
 #' batches in a neighbourhood. The inverse Simpson index has been proposed as a
 #' diversity score for batch mixing in single cell RNAseq by Korunsky et al.
-#' They provide a distance-based neighborhood weightening in their Lisi package.
-#' Here, we provide a simplified way of weightening probabilitities, if the 
+#' They provide a distance-based neighbourhood weightening in their Lisi package.
+#' Here, we provide a simplified way of weightening probabilitities, if the
 #' \code{weight} argument is enabled.
 #' @return A \code{SingleCellExperiment} with the entropy score within colData.
 #' @export
@@ -173,7 +173,7 @@ isi <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 
     #----------------- calculate Inverse simpson index -----------------------#
     #We simplify the LISI score implemented in harmony by using a
-    #fixed neighborhood of knn.
+    #fixed neighbourhood of knn.
     knn[["p"]] <- lapply(batch_ids, function(batch){
         idx <- apply(knn[[group]], 1, function(cell){
             id <- which(cell %in% batch)

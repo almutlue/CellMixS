@@ -11,6 +11,6 @@
   \itemize{
     \item Add entropy and weighted isi function
     \item Add evalIntegration function
-    \item Remove metric_prefix from plotting functions
+    \item Replace `metric_prefix` from plotting functions by `metric` parameter.
   }
 }

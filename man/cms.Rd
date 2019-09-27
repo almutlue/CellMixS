@@ -12,7 +12,7 @@ cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(colData(sce))}}
@@ -27,7 +27,7 @@ Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 \item{res_name}{Character. Appendix of the result score's name
 (e.g. method used to combine batches).}
 
-\item{k_min}{Numeric. Minimum number of Knn to include.
+\item{k_min}{Numeric. Minimum number of knn to include.
 Default is NA (see Details).}
 
 \item{smooth}{Logical. Indicating if cms results should be smoothened within

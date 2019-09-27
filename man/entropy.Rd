@@ -13,7 +13,7 @@ entropy(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(colData(sce))}.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace for distance
 distributions. Default is "PCA".}
@@ -34,9 +34,9 @@ A \code{SingleCellExperiment} with the entropy score within colData.
 entropy
 }
 \details{
-The entropy function calculates the shannon entropy of the group
+The entropy function calculates the Shannon entropy of the group
 variable within each cell's k-nearest neighbourhood.
-For balanced batches the shannon entropy close to 1 indicates high randomness
+For balanced batches a Shannon entropy close to 1 indicates high randomness
 and mixing. For unbalanced batches entropy should be interpreted with
 caution, but could work as a relative measure in a comparative setting.
 }

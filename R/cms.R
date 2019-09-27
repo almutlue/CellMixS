@@ -8,7 +8,7 @@
 #' subspace of integrated data.
 #'
 #' @param sce A \code{SingleCellExperiment} object with the combined data.
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(colData(sce))}
 #' @param dim_red Character. Name of embeddings to use as subspace for distance
@@ -18,7 +18,7 @@
 #' Must be one of \code{names(assays(sce))}. Default is "logcounts".
 #' @param res_name Character. Appendix of the result score's name
 #' (e.g. method used to combine batches).
-#' @param k_min Numeric. Minimum number of Knn to include.
+#' @param k_min Numeric. Minimum number of knn to include.
 #' Default is NA (see Details).
 #' @param smooth Logical. Indicating if cms results should be smoothened within
 #' each neighbourhood using the weigthed mean.

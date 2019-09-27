@@ -14,11 +14,11 @@ Needs to be one of \code{rownames(knn)}.}
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(knn)}.}
 
-\item{knn}{List with three elements. First "index" with indices of KNN cells.
-Second "distance" with distances to KNN cells. Third a slot named by
-\code{group} variable with group level of KNN cells.}
+\item{knn}{List with three elements. First "index" with indices of knn cells.
+Second "distance" with distances to knn cells. Third a slot named by
+\code{group} variable with group level of knn cells.}
 
-\item{k_min}{Numeric. Minimum number of Knn to include.
+\item{k_min}{Numeric. Minimum number of knn to include.
 Default is NA (see Details).}
 
 \item{batch_min}{Numeric. Minimum number of cells per batch to include in to

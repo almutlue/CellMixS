@@ -12,7 +12,7 @@ test_that("test that output of evalIntegration is correct",{
     #input
     sce_all <- evalIntegration(metrics = c("cms", "isi", "entropy", "ldfDiff"),
                                sce, sce_pre_list = pre, "batch", k = 10)
-    sce_seur <- evalIntegration(metrics = c("local_structure", "mixing_metric"),
+    sce_seur <- evalIntegration(metrics = c("localStructure", "mixingMetric"),
                                 sce, "batch", k = 10, n_dim = 2, n_dim_orig = 2)
     sce_all <- evalIntegration("isi", sce_all, "batch", k = 10, weight = FALSE,
                                res_name = "wisi")
@@ -53,17 +53,17 @@ test_that("test that output of evalIntegration is correct",{
     #evalIntegration
     expect_error(evalIntegration(metrics = c("isi", "entropy", "new_quatsch"),
                                  sce, "batch", k = 20),
-                 "Error: 'metrics' is unknown. Please define one of 'cms', 'isi',
-             'ldfDiff', 'mixing_metric', 'local_structure', 'entropy'",
+                 "Error: 'metrics' is unknown. Please define one or more of 'cms', 'isi',
+             'ldfDiff', 'mixingMetric', 'localStructure', 'entropy'",
                  fixed = TRUE)
     expect_error(evalIntegration("new_quatsch", sce, "batch", k = 20),
-                 "Error: 'metrics' is unknown. Please define one of 'cms', 'isi',
-             'ldfDiff', 'mixing_metric', 'local_structure', 'entropy'",
+                 "Error: 'metrics' is unknown. Please define one or more of 'cms', 'isi',
+             'ldfDiff', 'mixingMetric', 'localStructure', 'entropy'",
                  fixed = TRUE)
-    expect_error(evalIntegration("mixing_metric", sce$batch, "batch", k = 20),
+    expect_error(evalIntegration("mixingMetric", sce$batch, "batch", k = 20),
                  "Error: 'sce' must be a 'SingleCellExperiment' object.",
                  fixed = TRUE)
-    expect_error(evalIntegration("mixing_metric", sce, "batch", k = 20,
+    expect_error(evalIntegration("mixingMetric", sce, "batch", k = 20,
                                  res_name = c("mm", 'mm_smooth')),
                  "Error: Define 'res_name' for all metrics to calculate'",
                  fixed = TRUE)
@@ -86,10 +86,10 @@ test_that("test that output of evalIntegration is correct",{
                  "Please specify 'k', the number of nearest neigbours to check
                  for equal mixing, e.g. median of cells/celltype.",
                  fixed = TRUE)
-    expect_warning(evalIntegration("mixing_metric", sce, "batch", k = 100),
+    expect_warning(evalIntegration("mixingMetric", sce, "batch", k = 100),
                    "'k' exceeds number of cells. Is set to max (all cells).",
                    fixed = TRUE)
-    expect_warning(evalIntegration("mixing_metric", sce, "batch", k = 10,
+    expect_warning(evalIntegration("mixingMetric", sce, "batch", k = 10,
                                    n_dim = 40),
                    "'n_dim' exceeds number of provided reduced dimensions.
                     Is set to max (all dims).",

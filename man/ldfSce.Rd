@@ -23,7 +23,7 @@ Names need to correspond to levels in \code{colData(sce_combined)$group} and
 of \code{sce_pre_list}.
 Needs to be one of \code{names(colData(sce_combined))}.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
 \item{dim_red}{Character. Name of embeddings to use as subspace to calculate
 LDF before integration. Default is "PCA".}
@@ -59,9 +59,9 @@ or to the resp. "corrected" count data slot.
 'k' can be used to define the level of local structure that is tested.
 The smaller 'k' the more focus is on detailed structures, while a large k
 will tets overall changes.
-K-nearest neighbours (KNN) are determined in the subspaces before integration
+K-nearest neighbours (knn) are determined in the subspaces before integration
 defined by 'dim_red'.
-The same set of KNN are used to determine LDF before and after integration.
+The same set of knn are used to determine LDF before and after integration.
 }
 \examples{
 library(SingleCellExperiment)

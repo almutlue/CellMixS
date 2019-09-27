@@ -6,14 +6,14 @@
 \usage{
 evalIntegration(metrics, sce, group, dim_red = "PCA",
   assay_name = "logcounts", n_dim = 10, res_name = NULL, k = NULL,
-  k_min = NULL, smooth = NULL, cell_min = NULL, batch_min = NULL,
-  unbalanced = FALSE, weight = TRUE, k_pos = NULL,
-  sce_pre_list = NULL, dim_combined = NULL, assay_pre = NULL,
-  n_dim_orig = NULL, BPPARAM = SerialParam())
+  k_min = NA, smooth = TRUE, cell_min = 10, batch_min = NULL,
+  unbalanced = FALSE, weight = TRUE, k_pos = 5,
+  sce_pre_list = NULL, dim_combined = dim_red,
+  assay_pre = "logcounts", n_dim_orig = 10, BPPARAM = SerialParam())
 }
 \arguments{
 \item{metrics}{Character vector. Name of the metrics to apply. Must be one to
-all of 'cms', 'ldfDiff', 'isi', 'mixing_metric', 'local_structure',
+all of 'cms', 'ldfDiff', 'isi', 'mixingMetric', 'localStructure',
 'entropy'.}
 
 \item{sce}{\code{SingleCellExperiment} object, with the integrated data.}
@@ -21,7 +21,7 @@ all of 'cms', 'ldfDiff', 'isi', 'mixing_metric', 'local_structure',
 \item{group}{Character. Name of group/batch variable.
 Needs to be one of \code{names(colData(sce))}.}
 
-\item{dim_red}{Character. Name of embeddings to use as subspace for distance
+\item{dim_red}{Character. Name of embedding to use as subspace for distance
 distributions. Default is "PCA".}
 
 \item{assay_name}{Character. Name of the assay to use for PCA.
@@ -34,9 +34,9 @@ Must be one of \code{names(assays(sce))}. Default is "logcounts".}
 (e.g. method used to combine batches).
 Needs to have the same length as metrics or NULL.}
 
-\item{k}{Numeric. Number of k-nearest neighbours (Knn) to use.}
+\item{k}{Numeric. Number of k-nearest neighbours (knn) to use.}
 
-\item{k_min}{Numeric. Minimum number of Knn to include
+\item{k_min}{Numeric. Minimum number of knn to include
 (see \code{\link{cms}}). Relevant for metrics: 'cms'.}
 
 \item{smooth}{Logical. Indicating if cms results should be smoothened within
@@ -46,20 +46,20 @@ each neighbourhood using the weigthed mean. Relevant for metric: 'cms'.}
 included into the AD test. Should be > 4. Relevant for metric: 'cms'.}
 
 \item{batch_min}{Numeric. Minimum number of cells per batch to include in to
-the AD test. If set neighbours will be included until batch_min cells from
+the AD test. If set, neighbours will be included until batch_min cells from
 each batch are present. Relevant for metrics: 'cms'.}
 
-\item{unbalanced}{Boolean. If True neighbourhoods with only one batch present
+\item{unbalanced}{Boolean. If TRUE, neighbourhoods with only one batch present
 will be set to NA. This way they are not included into any summaries or
 smoothening. Relevant for metrics: 'cms'.}
 
-\item{weight}{Boolean. If True batch probabilities to calculate the isi
+\item{weight}{Boolean. If TRUE, batch probabilities to calculate the isi
 score are weighted by the mean distance of their cells towards the cell
 of interest. Relevant for metrics: 'isi'.}
 
 \item{k_pos}{Numeric. Position of cell to be used as reference within mixing
 metric. See \code{\link[Seurat]{MixingMetric}} for details.
-Relevant for metric: 'mixing_metric'}
+Relevant for metric: 'mixingMetric'}
 
 \item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single
 datasets before integration. Names should correspond to levels in
@@ -76,7 +76,7 @@ Relevant for metric 'ldfDiff'.}
 
 \item{n_dim_orig}{Number of PCs to use in original space.
 See \code{\link[Seurat]{LocalStruct}} for details.
-Relevant for metric 'local_structure'.}
+Relevant for metric 'localStructure'.}
 
 \item{BPPARAM}{A \linkS4class{BiocParallelParam} object specifying whether
 cms scores shall be calculated in parallel. Relevant for metric: 'cms'.}
@@ -92,11 +92,11 @@ structure are provided.
 }
 \details{
 evalIntegration is a wrapper function for different metrics to
-understand results of integrated single scell data sets.
-In general there are metrics evaluationg the *mixing* of datasets.
-So metrics that show whether there still is a bias for different datasets
+understand results of integrated single cell data sets.
+In general there are metrics evaluationg the *mixing* of datasets, that is,
+metrics that show whether there still is a bias for different datasets
 after integration. Furthermore there are metrics to evaluate how well the
-dataset internal structure has been retained. So metrics that show whether
+dataset internal structure has been retained, that is, metrics that show whether
 there has been (potentially biological) signal removed or noise added by
 integration.
 }
@@ -107,28 +107,29 @@ Here we provide the following metrics:
   \item{cms}{Cellspecific Mixing Score. Metric that tests the hypothesis
   that group-specific distance distributions of knn cells have the same
   underlying unspecified distribution. The score can be interpreted as the
-  probability of having unbiased data according to the batch variable
-  (see \code{\link{cms}}).}
-  \item{isi}{Inverse Simpson Index. Metric, that uses the Inverse Simpson’s
+  data's probability within an equally mixed neighbourhood according to the
+  batch variable (see \code{\link{cms}}).}
+  \item{isi}{Inverse Simpson Index. Metric that uses the Inverse Simpson’s
   Index to calculate the diversification within a specified
-  neighbourhood as the probability of sampling a cell from the same batch
-  twice. For 2 batches a score close to 2 indicates high randomness/mixing
+  neighbourhood. The Simpson index describes the probability that two
+  entities are taken at random from the dataset and its inverse represent the
+  effective number of batches in a neighbourhood.
   The inverse Simpson index has been proposed as a diversity score for batch
-  mixing in single cell RNAseq by Korunsky et al.. They provide a
-  distance-based neighborhood weightening in their Lisi package.}
-  \item{mixing_metric}{Mixing Metric. Metric using the median position of the
-   kth cell from each batch within it's knn as a score. The lower the better
+  mixing in single cell RNAseq by Korunsky et al. They provide a
+  distance-based neighbourhood weightening in their Lisi package.}
+  \item{mixingMetric}{Mixing Metric. Metric using the median position of the
+   kth cell from each batch within its knn as a score. The lower the better
    mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
    \item{entropy}{Shannon entropy. Metric calculating the Shannon entropy of
    the batch/group variable within each cell's k-nearest neigbours.
-   In a balanced batch the entropy is closer to 1 the higher the variables
+   For balanced batches the entropy is closer to 1 the higher the variables
    randomness. For unbalanced batches entropy should only be used as a
-   relative metric in a comparatibve setting (See \code{\link{entropy}}.)}
-   \item{ldfDiff}{Local density Factor differences. Metric, that determines
+   relative metric in a comparative setting (See \code{\link{entropy}}.)}
+   \item{ldfDiff}{Local density factor differences. Metric that determines
    cell-specific changes in the Local Density Factor before and after data
    integration. A metric/difference close to 0 indicates no distortion of
    the previous structure (see \code{\link{ldfDiff}}).}
-   \item{local_structure}{local structure. Metric that compares the
+   \item{localStructure}{Local structure. Metric that compares the
    intersection of knn from the same batch before and after integration
    returning the average between all groups. The higher the more neighbours
    were reproduced after integration (See \code{\link[Seurat]{LocalStruct}}.
@@ -144,7 +145,7 @@ sce_batch1 <- sce[,colData(sce)$batch == "1"]
 sce_batch2 <- sce[,colData(sce)$batch == "2"]
 pre <- list("1" = sce_batch1, "2" = sce_batch2)
 
-sce <- evalIntegration(metrics = c("cms", "mixing_metric", "isi", "entropy"), sce, "batch", k = 20)
+sce <- evalIntegration(metrics = c("cms", "mixingMetric", "isi", "entropy"), sce, "batch", k = 20)
 sce <- evalIntegration("ldfDiff", sce, "batch", k = 20, sce_pre_list = pre)
 
 }

@@ -5,7 +5,7 @@
 \title{visIntegration}
 \usage{
 visIntegration(res_object, metric = "cms", prefix = TRUE,
-  violin = FALSE, metric_name = "metric")
+  violin = FALSE, metric_name = "metric", metric_prefix = NULL)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, list, matrix or
@@ -25,6 +25,9 @@ complete column names (False).}
 while the default (FALSE) will plot ridge plots.}
 
 \item{metric_name}{Character. Name of the score metric.}
+
+\item{metric_prefix}{Former parameter to define prefix of the metric to be
+plotted. Will stop and ask for the new syntax.}
 }
 \value{
 a \code{ggplot} object.

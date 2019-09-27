@@ -8,10 +8,10 @@
 #' Needs to be one of \code{rownames(knn)}.
 #' @param group Character. Name of group/batch variable.
 #' Needs to be one of \code{names(knn)}.
-#' @param knn List with three elements. First "index" with indices of KNN cells.
-#' Second "distance" with distances to KNN cells. Third a slot named by
-#' \code{group} variable with group level of KNN cells.
-#' @param k_min Numeric. Minimum number of Knn to include.
+#' @param knn List with three elements. First "index" with indices of knn cells.
+#' Second "distance" with distances to knn cells. Third a slot named by
+#' \code{group} variable with group level of knn cells.
+#' @param k_min Numeric. Minimum number of knn to include.
 #' Default is NA (see Details).
 #' @param cell_min Numeric. Minimum number of cells from each group to be
 #' included into the AD test. Should be > 4 to make 'ad.test' working.
@@ -159,16 +159,16 @@
 #'
 #' Performs weighted smoothening of cms scores
 #'
-#' @param knn List with three elements. First "index" with indices of KNN cells.
-#' Second "distance" with distances to KNN cells. Third a slot named by
-#' \code{group} variable with group level of KNN cells.
+#' @param knn List with three elements. First "index" with indices of knn cells.
+#' Second "distance" with distances to knn cells. Third a slot named by
+#' \code{group} variable with group level of knn cells.
 #' @param cms_raw Matrix with raw cms scores for all cells specified in
 #' \code{cell_names} and \code{knn}. Colnames need to be "cms.
 #' @param cell_names Character vector with cell names corresponding to the
 #' rownames of the list elements in \code{knn} and \code{rownames(cms_raw)}.
-#' @param k_min Numeric. Minimum number of Knn to include.
+#' @param k_min Numeric. Minimum number of knn to include.
 #' Default is NA (see Details).
-#' @param k Numeric. Number of k-nearest neighbours (Knn) to use.
+#' @param k Numeric. Number of k-nearest neighbours (knn) to use.
 #'
 #' @details Internal function to smooth cms scores. In a complete random setting
 #'  cms scores are uniform distributed. To reduce the resulting random variance

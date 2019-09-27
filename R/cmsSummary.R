@@ -19,6 +19,8 @@
 #' @param violin A logical. If true violin plots are plotted,
 #' while the default (FALSE) will plot ridge plots.
 #' @param metric_name Character. Name of the score metric.
+#' @param metric_prefix Former parameter to define prefix of the metric to be
+#' plotted. Will stop and ask for the new syntax.
 #'
 #' @details Plots summarized cms scores from an \code{SingleCellExperiment}
 #' object, list or dataframe. This function is intended to visualize and
@@ -49,7 +51,13 @@
 #' @importFrom magrittr %>%
 #' @importFrom methods is
 visIntegration <- function(res_object, metric = "cms", prefix = TRUE,
-                           violin = FALSE, metric_name = "metric"){
+                           violin = FALSE, metric_name = "metric",
+                           metric_prefix = NULL){
+    #Check input params
+    if( !is.null(metric_prefix) ){
+        stop("'metric_prefix' has been replaced by the parameter 'metric'.
+             Please change it's name and check the man page.")
+    }
 
     # Prepare data for plotting
     if( is.list(res_object) ){

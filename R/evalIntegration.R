@@ -7,7 +7,7 @@
 #' structure are provided.
 #'
 #' @param metrics Character vector. Name of the metrics to apply. Must be one to
-#' all of 'cms', 'ldfDiff', 'isi', 'mixing_metric', 'local_structure',
+#' all of 'cms', 'ldfDiff', 'isi', 'mixingMetric', 'localStructure',
 #' 'entropy'.
 #' @param sce \code{SingleCellExperiment} object, with the integrated data.
 #' @param group Character. Name of group/batch variable.
@@ -21,8 +21,8 @@
 #' @param res_name Character vector. Appendix of the result score's name
 #' (e.g. method used to combine batches).
 #' Needs to have the same length as metrics or NULL.
-#' @param k  Numeric. Number of k-nearest neighbours (Knn) to use.
-#' @param k_min Numeric. Minimum number of Knn to include
+#' @param k  Numeric. Number of k-nearest neighbours (knn) to use.
+#' @param k_min Numeric. Minimum number of knn to include
 #' (see \code{\link{cms}}). Relevant for metrics: 'cms'.
 #' @param smooth Logical. Indicating if cms results should be smoothened within
 #' each neighbourhood using the weigthed mean. Relevant for metric: 'cms'.
@@ -39,7 +39,7 @@
 #' of interest. Relevant for metrics: 'isi'.
 #' @param k_pos Numeric. Position of cell to be used as reference within mixing
 #' metric. See \code{\link[Seurat]{MixingMetric}} for details.
-#' Relevant for metric: 'mixing_metric'
+#' Relevant for metric: 'mixingMetric'
 #' @param sce_pre_list A list of \code{SingleCellExperiment} objects with single
 #' datasets before integration. Names should correspond to levels in
 #' \code{colData(sce_combined)[,group]}. Relevant for metric: 'ldfDiff'
@@ -52,7 +52,7 @@
 #' Relevant for metric 'ldfDiff'.
 #' @param n_dim_orig Number of PCs to use in original space.
 #' See \code{\link[Seurat]{LocalStruct}} for details.
-#' Relevant for metric 'local_structure'.
+#' Relevant for metric 'localStructure'.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether
 #' cms scores shall be calculated in parallel. Relevant for metric: 'cms'.
 #'
@@ -71,16 +71,17 @@
 #'   \item{cms}{Cellspecific Mixing Score. Metric that tests the hypothesis
 #'   that group-specific distance distributions of knn cells have the same
 #'   underlying unspecified distribution. The score can be interpreted as the
-#'   probability of having unbiased data according to the batch variable
-#'   (see \code{\link{cms}}).}
+#'   data's probability within an equally mixed neighbourhood according to the
+#'   batch variable (see \code{\link{cms}}).}
 #'   \item{isi}{Inverse Simpson Index. Metric that uses the Inverse Simpson’s
 #'   Index to calculate the diversification within a specified
-#'   neighbourhood as the probability of sampling a cell from the same batch
-#'   twice. For 2 batches a score close to 2 indicates high randomness/mixing
+#'   neighbourhood. The Simpson index describes the probability that two
+#'   entities are taken at random from the dataset and its inverse represent the
+#'   effective number of batches in a neighbourhood.
 #'   The inverse Simpson index has been proposed as a diversity score for batch
 #'   mixing in single cell RNAseq by Korunsky et al. They provide a
-#'   distance-based neighborhood weightening in their Lisi package.}
-#'   \item{mixing_metric}{Mixing Metric. Metric using the median position of the
+#'   distance-based neighbourhood weightening in their Lisi package.}
+#'   \item{mixingMetric}{Mixing Metric. Metric using the median position of the
 #'    kth cell from each batch within its knn as a score. The lower the better
 #'    mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
 #'    \item{entropy}{Shannon entropy. Metric calculating the Shannon entropy of
@@ -92,7 +93,7 @@
 #'    cell-specific changes in the Local Density Factor before and after data
 #'    integration. A metric/difference close to 0 indicates no distortion of
 #'    the previous structure (see \code{\link{ldfDiff}}).}
-#'    \item{local_structure}{Local structure. Metric that compares the
+#'    \item{localStructure}{Local structure. Metric that compares the
 #'    intersection of knn from the same batch before and after integration
 #'    returning the average between all groups. The higher the more neighbours
 #'    were reproduced after integration (See \code{\link[Seurat]{LocalStruct}}.
@@ -120,10 +121,10 @@
 #' sce_batch2 <- sce[,colData(sce)$batch == "2"]
 #' pre <- list("1" = sce_batch1, "2" = sce_batch2)
 #'
-#' sce <- evalIntegration(metrics = c("cms", "mixing_metric", "isi", "entropy"), sce, "batch", k = 20)
+#' sce <- evalIntegration(metrics = c("cms", "mixingMetric", "isi", "entropy"), sce, "batch", k = 20)
 #' sce <- evalIntegration("ldfDiff", sce, "batch", k = 20, sce_pre_list = pre)
 #'
-#' @importFrom scater runPCA
+#' @importFrom scater runPCA normalize
 #' @importFrom SingleCellExperiment reducedDims colData counts reducedDims<-
 #' @importFrom Seurat as.Seurat LocalStruct MixingMetric
 #' @importFrom magrittr %>% set_names
@@ -131,18 +132,18 @@
 #' @importFrom SummarizedExperiment colData<- assays assay assay<-
 evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                             assay_name = "logcounts", n_dim = 10,
-                            res_name = NULL, k = NULL, k_min = NULL,
-                            smooth = NULL, cell_min = NULL, batch_min = NULL,
-                            unbalanced = FALSE, weight  = TRUE, k_pos = NULL,
-                            sce_pre_list = NULL, dim_combined = NULL,
-                            assay_pre = NULL, n_dim_orig = NULL,
+                            res_name = NULL, k = NULL, k_min = NA,
+                            smooth = TRUE, cell_min = 10, batch_min = NULL,
+                            unbalanced = FALSE, weight  = TRUE, k_pos = 5,
+                            sce_pre_list = NULL, dim_combined = dim_red,
+                            assay_pre = "logcounts", n_dim_orig = 10,
                             BPPARAM=SerialParam()){
     #------------------- Check input parameter----------------------
-    metric_params <- c("cms", "ldfDiff", "isi", "mixing_metric",
-                       "local_structure", "entropy")
+    metric_params <- c("cms", "ldfDiff", "isi", "mixingMetric",
+                       "localStructure", "entropy")
     if( !all(metrics %in% metric_params) ){
         stop("Error: 'metrics' is unknown. Please define one or more of 'cms', 'isi',
-             'ldfDiff', 'mixing_metric', 'local_structure', 'entropy'")
+             'ldfDiff', 'mixingMetric', 'localStructure', 'entropy'")
     }
     if( !is(sce, "SingleCellExperiment" )){
         stop("Error: 'sce' must be a 'SingleCellExperiment' object.")
@@ -167,15 +168,6 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
     #------------------ mixing-metrics ----------------------------
     if( "cms" %in% metrics ){
         #Set default parameter
-        if( is.null(k_min) ){
-            k_min <- NA
-        }
-        if( is.null(cell_min) ){
-            cell_min <- 10
-        }
-        if( is.null(smooth) ){
-            smooth <- TRUE
-        }
         if( is.null(res_name) ){
             res_name[["cms"]] <- NULL
         }
@@ -208,13 +200,10 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                    res_name = res_name[["isi"]], n_dim = n_dim)
     }
 
-    if( "mixing_metric" %in% metrics ){
+    if( "mixingMetric" %in% metrics ){
         #Set default parameter
         if( is.null(k) | default ){
             k <- 300
-        }
-        if( is.null(k_pos) ){
-            k_pos <- 5
         }
         #Check parameter
         if( k >= ncol(sce) ){
@@ -231,7 +220,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                                        n_dim)
         #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
-            assay(sce, "logcounts") <- log2(counts(sce) + 1)
+            sce <- normalize(sce)
         }
         if( is.null(rownames(sce)) ){
             rownames(sce) <- paste0("gene", seq_len(nrow(sce)))
@@ -243,7 +232,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                  dims = seq_len(n_dim),
                                  k = k_pos, max.k = k)
         if( !is.null(res_name) ){
-            colData(sce)[, paste0("mm.", res_name[["mixing_metric"]])] <- mix_dist
+            colData(sce)[, paste0("mm.", res_name[["mixingMetric"]])] <- mix_dist
         }else{
             colData(sce)[, "mm"] <- mix_dist
         }
@@ -271,15 +260,6 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
             stop("Please specify 'k', the number of nearest neigbours to check
                  for structual changes")
         }
-        if( is.null(dim_combined) ){
-            dim_combined <- dim_red
-        }
-        if( is.null(assay_name) ){
-            assay_name <- "logcounts"
-        }
-        if( is.null(assay_pre) ){
-            assay_pre <- "logcounts"
-        }
         if( is.null(res_name) ){
             res_name[["ldfDiff"]] <- NULL
         }
@@ -290,13 +270,10 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                        n_dim = n_dim, res_name = res_name[["ldfDiff"]])
         }
 
-    if( "local_structure" %in% metrics ){
+    if( "localStructure" %in% metrics ){
         #Set default parameter
         if( is.null(k) | default ){
             k <- 100
-        }
-        if( is.null(n_dim_orig) ){
-            n_dim_orig <- 10
         }
         #Check parameter
         if( k > min(table(droplevels(colData(sce)[, group]))) ){
@@ -314,7 +291,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                                        n_dim)
         #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
-            assay(sce, "logcounts") <- log2(counts(sce) + 1)
+            sce <- normalize(sce)
         }
         if( is.null(rownames(sce)) ){
             rownames(sce) <- paste0("gene", seq_len(nrow(sce)))
@@ -331,7 +308,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
         local_s_sce <- local_s_batch[colnames(sce)]
 
         if( !is.null(res_name) ){
-            colData(sce)[,paste0("localStruct.", res_name[["local_structure"]])] <-
+            colData(sce)[,paste0("localStruct.", res_name[["localStructure"]])] <-
                 local_s_sce
         }else{
             colData(sce)[,"localStruct"] <- local_s_sce
