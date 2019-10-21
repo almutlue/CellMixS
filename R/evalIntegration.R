@@ -124,7 +124,7 @@
 #' sce <- evalIntegration(metrics = c("cms", "mixingMetric", "isi", "entropy"), sce, "batch", k = 20)
 #' sce <- evalIntegration("ldfDiff", sce, "batch", k = 20, sce_pre_list = pre)
 #'
-#' @importFrom scater runPCA normalize
+#' @importFrom scater runPCA logNormCounts
 #' @importFrom SingleCellExperiment reducedDims colData counts reducedDims<-
 #' @importFrom Seurat as.Seurat LocalStruct MixingMetric
 #' @importFrom magrittr %>% set_names
@@ -220,7 +220,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                                        n_dim)
         #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
-            sce <- normalize(sce)
+            sce <- logNormCounts(sce)
         }
         if( is.null(rownames(sce)) ){
             rownames(sce) <- paste0("gene", seq_len(nrow(sce)))
@@ -291,7 +291,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                                                        n_dim)
         #Make sure it can be converted into seurat
         if( !"logcounts" %in% names(assays(sce)) ){
-            sce <- normalize(sce)
+            sce <- logNormCounts(sce)
         }
         if( is.null(rownames(sce)) ){
             rownames(sce) <- paste0("gene", seq_len(nrow(sce)))

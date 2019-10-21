@@ -308,7 +308,7 @@ sce20 <- cms(sce20, k = 30, group = "batch",
              dim_red = "MNN", res_name = "MNN", n_dim = 3, cell_min = 4)
 
 # Run limma
-sce20 <- scater::normalize(sce20)
+sce20 <- scater::logNormCounts(sce20)
 limma_corrected <- removeBatchEffect(logcounts(sce20), batch = sce20$batch)
 # Add corrected counts to sce
 assay(sce20, "lim_corrected") <- limma_corrected 
