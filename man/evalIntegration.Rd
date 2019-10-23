@@ -9,7 +9,7 @@ evalIntegration(metrics, sce, group, dim_red = "PCA",
   k_min = NA, smooth = TRUE, cell_min = 10, batch_min = NULL,
   unbalanced = FALSE, weight = TRUE, k_pos = 5,
   sce_pre_list = NULL, dim_combined = dim_red,
-  assay_pre = "logcounts", n_dim_orig = 10, BPPARAM = SerialParam())
+  assay_pre = "logcounts", n_combined = 10, BPPARAM = SerialParam())
 }
 \arguments{
 \item{metrics}{Character vector. Name of the metrics to apply. Must be one to
@@ -74,7 +74,7 @@ Only relevant if no existing 'dim_red' is provided.
 Must be one of \code{names(assays(sce_pre))}. Default is "logcounts".
 Relevant for metric 'ldfDiff'.}
 
-\item{n_dim_orig}{Number of PCs to use in original space.
+\item{n_combined}{Number of PCs to use in original space.
 See \code{\link[Seurat]{LocalStruct}} for details.
 Relevant for metric 'localStructure'.}
 
@@ -119,7 +119,9 @@ Here we provide the following metrics:
   distance-based neighbourhood weightening in their Lisi package.}
   \item{mixingMetric}{Mixing Metric. Metric using the median position of the
    kth cell from each batch within its knn as a score. The lower the better
-   mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
+   mixed is the neighbourhood. We implemented an equivalent version to the
+   one in the Seurat package (See \code{\link[Seurat]{MixingMetric}} and
+   \code{\link{mixMetric}}.)}
    \item{entropy}{Shannon entropy. Metric calculating the Shannon entropy of
    the batch/group variable within each cell's k-nearest neigbours.
    For balanced batches the entropy is closer to 1 the higher the variables
@@ -132,8 +134,10 @@ Here we provide the following metrics:
    \item{localStructure}{Local structure. Metric that compares the
    intersection of knn from the same batch before and after integration
    returning the average between all groups. The higher the more neighbours
-   were reproduced after integration (See \code{\link[Seurat]{LocalStruct}}.
-   )}
+   were reproduced after integration. Here we implemented an equivalent
+   version to the one in the Seurat package
+   (See \code{\link[Seurat]{LocalStruct}} and \code{\link{locStructure}}
+   ).}
 }
 }
 

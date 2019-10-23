@@ -401,7 +401,7 @@ the use of different metrics, as many of them emphasize different features of
 mixing. To provide an easy interface for thorough investigation of batch effects
 and data integration a wrapper function of a variety of metrics is included into
 `r BiocStyle::Biocpkg("CellMixS")`. `evalIntegration` calls one or all of `cms`,
-`ldfDiff`, `entropy`, `mixingMetric`, `localStruct` from the 
+`ldfDiff`, `entropy` or equivalents to `mixingMetric`, `localStruct` from the 
 `r BiocStyle::CRANpkg("Seurat")` package or `isi`, a simplfied version of the 
 local inverse Simpson index as suggested by [@Korsunsky2018]. `entropy` 
 calculates the Shannon entropy within each cell's *knn* describing the 

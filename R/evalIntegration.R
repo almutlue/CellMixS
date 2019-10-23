@@ -50,7 +50,7 @@
 #' Only relevant if no existing 'dim_red' is provided.
 #' Must be one of \code{names(assays(sce_pre))}. Default is "logcounts".
 #' Relevant for metric 'ldfDiff'.
-#' @param n_dim_orig Number of PCs to use in original space.
+#' @param n_combined Number of PCs to use in original space.
 #' See \code{\link[Seurat]{LocalStruct}} for details.
 #' Relevant for metric 'localStructure'.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object specifying whether
@@ -83,7 +83,9 @@
 #'   distance-based neighbourhood weightening in their Lisi package.}
 #'   \item{mixingMetric}{Mixing Metric. Metric using the median position of the
 #'    kth cell from each batch within its knn as a score. The lower the better
-#'    mixed is the neighbourhood (See \code{\link[Seurat]{MixingMetric}}.)}
+#'    mixed is the neighbourhood. We implemented an equivalent version to the
+#'    one in the Seurat package (See \code{\link[Seurat]{MixingMetric}} and
+#'    \code{\link{mixMetric}}.)}
 #'    \item{entropy}{Shannon entropy. Metric calculating the Shannon entropy of
 #'    the batch/group variable within each cell's k-nearest neigbours.
 #'    For balanced batches the entropy is closer to 1 the higher the variables
@@ -96,8 +98,10 @@
 #'    \item{localStructure}{Local structure. Metric that compares the
 #'    intersection of knn from the same batch before and after integration
 #'    returning the average between all groups. The higher the more neighbours
-#'    were reproduced after integration (See \code{\link[Seurat]{LocalStruct}}.
-#'    )}
+#'    were reproduced after integration. Here we implemented an equivalent
+#'    version to the one in the Seurat package
+#'    (See \code{\link[Seurat]{LocalStruct}} and \code{\link{locStructure}}
+#'    ).}
 #' }
 #'
 #' @return A \code{SingleCellExperiment} with the chosen metric's score within
@@ -124,9 +128,7 @@
 #' sce <- evalIntegration(metrics = c("cms", "mixingMetric", "isi", "entropy"), sce, "batch", k = 20)
 #' sce <- evalIntegration("ldfDiff", sce, "batch", k = 20, sce_pre_list = pre)
 #'
-#' @importFrom scater runPCA logNormCounts
 #' @importFrom SingleCellExperiment reducedDims colData counts reducedDims<-
-#' @importFrom Seurat as.Seurat LocalStruct MixingMetric
 #' @importFrom magrittr %>% set_names
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment colData<- assays assay assay<-
@@ -136,7 +138,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
                             smooth = TRUE, cell_min = 10, batch_min = NULL,
                             unbalanced = FALSE, weight  = TRUE, k_pos = 5,
                             sce_pre_list = NULL, dim_combined = dim_red,
-                            assay_pre = "logcounts", n_dim_orig = 10,
+                            assay_pre = "logcounts", n_combined = 10,
                             BPPARAM=SerialParam()){
     #------------------- Check input parameter----------------------
     metric_params <- c("cms", "ldfDiff", "isi", "mixingMetric",
@@ -206,36 +208,13 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
             k <- 300
         }
         #Check parameter
-        if( k >= ncol(sce) ){
-            warning("'k' exceeds number of cells. Is set to max (all cells).")
-            k <- ncol(sce) - 1
-        }
-        if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
-            warning("'n_dim' exceeds number of provided reduced dimensions.
-                    Is set to max (all dims).")
-            n_dim <- ncol(reducedDims(sce)[[dim_red]])
+        if( is.null(res_name) ){
+            res_name[["mixingMetric"]] <- NULL
         }
         #Run mixing metric
-        reducedDims(sce)[[dim_red]] <- .defineSubspace(sce, assay_name, dim_red,
-                                                       n_dim)
-        #Make sure it can be converted into seurat
-        if( !"logcounts" %in% names(assays(sce)) ){
-            sce <- logNormCounts(sce)
-        }
-        if( is.null(rownames(sce)) ){
-            rownames(sce) <- paste0("gene", seq_len(nrow(sce)))
-        }
-
-        seurat <- as.Seurat(sce)
-        mix_dist <- MixingMetric(seurat, grouping.var = group,
-                                 reduction = dim_red,
-                                 dims = seq_len(n_dim),
-                                 k = k_pos, max.k = k)
-        if( !is.null(res_name) ){
-            colData(sce)[, paste0("mm.", res_name[["mixingMetric"]])] <- mix_dist
-        }else{
-            colData(sce)[, "mm"] <- mix_dist
-        }
+        sce <- mixMetric(sce, k = k, group = group, dim_red = dim_red,
+                   assay_name = assay_name, k_pos = k_pos,
+                   res_name = res_name[["mixingMetric"]], n_dim = n_dim)
     }
 
     if( "entropy" %in% metrics ){
@@ -276,45 +255,17 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
             k <- 100
         }
         #Check parameter
-        if( k > min(table(droplevels(colData(sce)[, group]))) ){
-            warning("'k' exceeds number of cells/batch.
-                    Is set to min(cells/batch).")
-            k <- min(table(droplevels(colData(sce)[, group])))
-        }
         if( n_dim  > ncol(reducedDims(sce)[[dim_red]]) ){
             warning("'n_dim' exceeds number of provided reduced dimensions.
                     Is set to max (all dims).")
             n_dim <- ncol(reducedDims(sce)[[dim_red]])
         }
         #Run localStructure
-        reducedDims(sce)[[dim_red]] <- .defineSubspace(sce, assay_name, dim_red,
-                                                       n_dim)
-        #Make sure it can be converted into seurat
-        if( !"logcounts" %in% names(assays(sce)) ){
-            sce <- logNormCounts(sce)
-        }
-        if( is.null(rownames(sce)) ){
-            rownames(sce) <- paste0("gene", seq_len(nrow(sce)))
-        }
-        seurat <- as.Seurat(sce)
-        local_struct <- LocalStruct(seurat, grouping.var = group, neighbors = k,
-                                    reduction = dim_red,
-                                    reduced.dims = seq_len(n_dim),
-                                    orig.dims = seq_len(n_dim_orig))
-        #Transform batch-sorted list into vector with cells ordered by sce
-        cells_by_batch <- colnames(sce)[order(colData(sce)[,group])]
-        local_s_batch <- local_struct %>% unlist %>%
-            set_names(cells_by_batch)
-        local_s_sce <- local_s_batch[colnames(sce)]
-
-        if( !is.null(res_name) ){
-            colData(sce)[,paste0("localStruct.", res_name[["localStructure"]])] <-
-                local_s_sce
-        }else{
-            colData(sce)[,"localStruct"] <- local_s_sce
-        }
+        sce <- locStructure(sce, dim_combined = dim_combined, group = group,
+                            k = k, dim_red = dim_red, assay_name = assay_name,
+                            n_dim = n_dim, n_combined = n_combined,
+                            res_name = res_name[["mixingMetric"]])
     }
-
     return(sce)
 }
 
