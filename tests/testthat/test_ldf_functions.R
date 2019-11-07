@@ -25,10 +25,6 @@ test_that("test that output of ldfDiff is correct",{
     expect_equal(sum(sce_ldf_sameDim$diff_ldf), 0)
     expect_is(sce_ldf_mnn$diff_ldf.MNN, "numeric")
     expect_is(sce_ldf_tsne, "SingleCellExperiment")
-    expect_error(ldfDiff(sce_pre_list, sce, k = 500, group = "batch",
-                         n_dim = 5),
-                 "Parameter 'k' is greater than dataset size:
-            Please provide a valid value.")
 
     expect_error(ldfDiff(sce_pre_list, sce, k = 10, group = "batch",
                          dim_red = "tsne", assay_pre = "raw.counts"),
