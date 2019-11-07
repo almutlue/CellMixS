@@ -334,16 +334,16 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
 
     ## Check reduced dimensions
     cell_names <- colnames(sce_cms)
-    if(!dim_red %in% "TSNE"){
-        if(!dim_red %in% reducedDimNames(sce_cms)){
+    if( !dim_red %in% "TSNE" ){
+        if( !dim_red %in% reducedDimNames(sce_cms) ){
             stop("Ambigous parameter 'dim_red', provide one of:
                  * A dim_red method that is listed in reducedDimNames(sce_cms).
                  * Default('TSNE') will call runTSNE to calculate a subspace.")
         }
         red_dim <- as.data.frame(reducedDim(sce_cms, dim_red))
         }else{
-            if(is.null(reducedDim(sce_cms, "TSNE"))){
-                if(names(assays(sce_cms)) %in% "logcounts"){
+            if( !"TSNE" %in% reducedDimNames(sce_cms) ){
+                if( names(assays(sce_cms)) %in% "logcounts" ){
                     sce_cms <- runTSNE(sce_cms)
                 }else{
                     sce_cms <- runTSNE(sce_cms, exprs_values = "counts")
@@ -375,7 +375,7 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
                                 title = metric_var)) +
         scale_color_viridis(option = "B") + ggtitle(metric_var)
 
-    if(isTRUE(log10_val)){
+    if( isTRUE(log10_val) ){
         t_metric <- t_metric +
             guides(color=guide_legend(title=paste0("-log10(", metric_var, ")")))
     }
@@ -434,16 +434,16 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
     cell_names <- colnames(sce)
 
     ### ------ Start Check and prepare dim reduction slot --------####
-    if(!dim_red %in% "TSNE"){
-        if(!dim_red %in% reducedDimNames(sce)){
+    if( !dim_red %in% "TSNE" ){
+        if( !dim_red %in% reducedDimNames(sce) ){
             stop("Please provide a dim_red method listed in reducedDims of sce")
         }
         red_dim <- as.data.frame(reducedDim(sce, dim_red))
     }else{
         #use tsne from scater package (check for availability first)
-        if(is.null(reducedDim(sce, "TSNE"))){
+        if( !"TSNE" %in% reducedDimNames(sce) ){
             #use "logcounts" if availabe otherwise "counts"
-            if(names(assays(sce)) %in% "logcounts"){
+            if( names(assays(sce)) %in% "logcounts" ){
                 sce <- runTSNE(sce)
             }else{
                 sce <- runTSNE(sce, exprs_values = "counts")
@@ -478,7 +478,9 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
         t_group <- t_group + scale_color_manual(values = col_group)
     }
     t_group
-}
+    }
+
+
 
 
 
