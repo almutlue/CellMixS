@@ -264,7 +264,7 @@ evalIntegration <- function(metrics, sce, group, dim_red = "PCA",
         sce <- locStructure(sce, dim_combined = dim_combined, group = group,
                             k = k, dim_red = dim_red, assay_name = assay_name,
                             n_dim = n_dim, n_combined = n_combined,
-                            res_name = res_name[["mixingMetric"]])
+                            res_name = res_name[["localStructure"]])
     }
     return(sce)
 }

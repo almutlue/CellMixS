@@ -84,7 +84,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
     if( !group %in% names(colData(sce_combined)) ){
         stop("Error: 'group' variable must be in 'colData(sce)'")
     }
-    if( !all(names(sce_pre_list) %in% levels(colData(sce_combined)[,group])) ){
+    if( !all(names(sce_pre_list) %in% levels(as.factor(colData(sce_combined)[,group]))) ){
         stop("Error: Names of 'sce_pre_list' must refer to levels within
              'colData(sce_combined)[,group]'.")
     }
