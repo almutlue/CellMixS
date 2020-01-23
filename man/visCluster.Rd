@@ -43,6 +43,7 @@ visCluster(sce_cms, "batch")
 \seealso{
 \code{\link{visIntegration}}
 
-Other visualize functions: \code{\link{visGroup}}
+Other visualize functions: 
+\code{\link{visGroup}()}
 }
 \concept{visualize functions}

@@ -40,6 +40,7 @@ visGroup(sce, "batch")
 \seealso{
 \code{\link{visOverview}}, \code{\link{visMetric}}
 
-Other visualize functions: \code{\link{visCluster}}
+Other visualize functions: 
+\code{\link{visCluster}()}
 }
 \concept{visualize functions}

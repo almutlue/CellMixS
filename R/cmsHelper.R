@@ -60,6 +60,7 @@
         knn_cell <- .filterKnn(knn_cell, batch_min, group = group, sce = sce)
     }
 
+
     #filter groups with to few cells (cell_min, default 4)
     groups_included <- knn_cell %>% group_by_at(group) %>%
         summarize("n_group" = n()) %>%
@@ -74,9 +75,16 @@
             dist <- knn_cell$distance[which(knn_cell[, group] %in% group_level)]
         })
         names(dist_included) <- groups_included
-        #perform AD test with remaining cells
-        k_samp <- ad.test(dist_included)
-        p <- mean(k_samp[["ad"]][, " asympt. P-value"])
+        #filter cells with the same representation
+        if( any(map(dist_included, sum) == 0) ){
+            warning("Distances equal to 0 - cells with identical
+                    representations detected. NA assigned!")
+            p <- NA
+        }else{
+            #perform AD test with remaining cell
+            k_samp <- ad.test(dist_included)
+            p <- mean(k_samp[["ad"]][, " asympt. P-value"])
+        }
     }
     p
 }

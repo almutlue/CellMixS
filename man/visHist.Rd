@@ -4,8 +4,13 @@
 \alias{visHist}
 \title{visHist}
 \usage{
-visHist(res_object, metric = "cms", prefix = TRUE, n_col = 1,
-  metric_prefix = NULL)
+visHist(
+  res_object,
+  metric = "cms",
+  prefix = TRUE,
+  n_col = 1,
+  metric_prefix = NULL
+)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, matrix or data.frame.
@@ -50,7 +55,8 @@ visHist(sce_cms)
 
 }
 \seealso{
-Other visualize metric functions: \code{\link{visMetric}},
-  \code{\link{visOverview}}
+Other visualize metric functions: 
+\code{\link{visMetric}()},
+\code{\link{visOverview}()}
 }
 \concept{visualize metric functions}

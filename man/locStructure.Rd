@@ -4,9 +4,17 @@
 \alias{locStructure}
 \title{locStructure}
 \usage{
-locStructure(sce, group, dim_combined, k = 100, dim_red = "PCA",
-  assay_name = "logcounts", n_dim = 10, n_combined = 10,
-  res_name = NULL)
+locStructure(
+  sce,
+  group,
+  dim_combined,
+  k = 100,
+  dim_red = "PCA",
+  assay_name = "logcounts",
+  n_dim = 10,
+  n_combined = 10,
+  res_name = NULL
+)
 }
 \arguments{
 \item{sce}{\code{SingleCellExperiment} object, with the integrated data.}

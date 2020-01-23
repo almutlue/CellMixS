@@ -4,9 +4,18 @@
 \alias{ldfDiff}
 \title{ldfDiff}
 \usage{
-ldfDiff(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
-  dim_combined = dim_red, assay_pre = "logcounts",
-  assay_combined = "logcounts", n_dim = 20, res_name = NULL)
+ldfDiff(
+  sce_pre_list,
+  sce_combined,
+  group,
+  k = 75,
+  dim_red = "PCA",
+  dim_combined = dim_red,
+  assay_pre = "logcounts",
+  assay_combined = "logcounts",
+  n_dim = 20,
+  res_name = NULL
+)
 }
 \arguments{
 \item{sce_pre_list}{A list of \code{SingleCellExperiment} objects with single
@@ -82,6 +91,7 @@ Springer Berlin Heidelberg.
 \seealso{
 \code{\link{ldfSce}}, \code{\link{.ldfKnn}}.
 
-Other ldf functions: \code{\link{ldfSce}}
+Other ldf functions: 
+\code{\link{ldfSce}()}
 }
 \concept{ldf functions}

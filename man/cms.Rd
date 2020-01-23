@@ -4,10 +4,21 @@
 \alias{cms}
 \title{cms}
 \usage{
-cms(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
-  res_name = NULL, k_min = NA, smooth = TRUE, n_dim = 20,
-  cell_min = 10, batch_min = NULL, unbalanced = FALSE,
-  BPPARAM = SerialParam())
+cms(
+  sce,
+  k,
+  group,
+  dim_red = "PCA",
+  assay_name = "logcounts",
+  res_name = NULL,
+  k_min = NA,
+  smooth = TRUE,
+  n_dim = 20,
+  cell_min = 10,
+  batch_min = NULL,
+  unbalanced = FALSE,
+  BPPARAM = SerialParam()
+)
 }
 \arguments{
 \item{sce}{A \code{SingleCellExperiment} object with the combined data.}

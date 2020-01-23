@@ -4,8 +4,7 @@
 \alias{visMetric}
 \title{visMetric}
 \usage{
-visMetric(sce_cms, metric_var = "cms", dim_red = "TSNE",
-  log10_val = FALSE)
+visMetric(sce_cms, metric_var = "cms", dim_red = "TSNE", log10_val = FALSE)
 }
 \arguments{
 \item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
@@ -44,7 +43,8 @@ visMetric(sce_cms)
 \seealso{
 \code{\link{visOverview}}, \code{\link{visGroup}}
 
-Other visualize metric functions: \code{\link{visHist}},
-  \code{\link{visOverview}}
+Other visualize metric functions: 
+\code{\link{visHist}()},
+\code{\link{visOverview}()}
 }
 \concept{visualize metric functions}

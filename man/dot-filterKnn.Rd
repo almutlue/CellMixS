@@ -27,9 +27,11 @@ data.frame with two columns (index, distance) for filtered knn cells.
 \seealso{
 \code{\link{.cmsCell}}
 
-Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.defineSubspace}},
-  \code{\link{.filterLocMin}}, \code{\link{.ldfKnn}},
-  \code{\link{.smoothCms}}
+Other helper functions: 
+\code{\link{.cmsCell}()},
+\code{\link{.defineSubspace}()},
+\code{\link{.filterLocMin}()},
+\code{\link{.ldfKnn}()},
+\code{\link{.smoothCms}()}
 }
 \concept{helper functions}

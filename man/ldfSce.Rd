@@ -4,9 +4,18 @@
 \alias{ldfSce}
 \title{ldfSce}
 \usage{
-ldfSce(sce_name, sce_pre_list, sce_combined, group, k = 75,
-  dim_red = "PCA", dim_combined = dim_red, assay_pre = "logcounts",
-  assay_combined = "logcounts", n_dim = 20)
+ldfSce(
+  sce_name,
+  sce_pre_list,
+  sce_combined,
+  group,
+  k = 75,
+  dim_red = "PCA",
+  dim_combined = dim_red,
+  assay_pre = "logcounts",
+  assay_combined = "logcounts",
+  n_dim = 20
+)
 }
 \arguments{
 \item{sce_name}{Character. Name of the element in \code{sce_pre_list} to
@@ -83,6 +92,7 @@ Springer Berlin Heidelberg.
 \seealso{
 \code{\link{ldfDiff}}, \code{\link{.ldfKnn}}.
 
-Other ldf functions: \code{\link{ldfDiff}}
+Other ldf functions: 
+\code{\link{ldfDiff}()}
 }
 \concept{ldf functions}

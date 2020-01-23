@@ -4,8 +4,14 @@
 \alias{visIntegration}
 \title{visIntegration}
 \usage{
-visIntegration(res_object, metric = "cms", prefix = TRUE,
-  violin = FALSE, metric_name = "metric", metric_prefix = NULL)
+visIntegration(
+  res_object,
+  metric = "cms",
+  prefix = TRUE,
+  violin = FALSE,
+  metric_name = "metric",
+  metric_prefix = NULL
+)
 }
 \arguments{
 \item{res_object}{\code{SingleCellExperiment} object, list, matrix or
