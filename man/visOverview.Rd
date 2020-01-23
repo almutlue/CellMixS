@@ -4,9 +4,16 @@
 \alias{visOverview}
 \title{visOverview}
 \usage{
-visOverview(sce_cms, group, metric = "cms", prefix = TRUE,
-  dim_red = "TSNE", log10_val = FALSE, other_var = NULL,
-  metric_prefix = NULL)
+visOverview(
+  sce_cms,
+  group,
+  metric = "cms",
+  prefix = TRUE,
+  dim_red = "TSNE",
+  log10_val = FALSE,
+  other_var = NULL,
+  metric_prefix = NULL
+)
 }
 \arguments{
 \item{sce_cms}{A \code{SingleCellExperiment} object with the result scores
@@ -62,7 +69,8 @@ visOverview(sce_cms, "batch", other_var = "batch")
 \seealso{
 \code{\link{visMetric}}, \code{\link{visGroup}}
 
-Other visualize metric functions: \code{\link{visHist}},
-  \code{\link{visMetric}}
+Other visualize metric functions: 
+\code{\link{visHist}()},
+\code{\link{visMetric}()}
 }
 \concept{visualize metric functions}

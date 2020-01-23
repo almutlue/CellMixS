@@ -4,8 +4,16 @@
 \alias{.cmsCell}
 \title{.cmsCell}
 \usage{
-.cmsCell(cell, group, knn, k_min = NA, batch_min = NULL,
-  cell_min = 4, unbalanced = FALSE, sce)
+.cmsCell(
+  cell,
+  group,
+  knn,
+  k_min = NA,
+  batch_min = NULL,
+  cell_min = 4,
+  unbalanced = FALSE,
+  sce
+)
 }
 \arguments{
 \item{cell}{Character. Name of the cell to calculate cms for.
@@ -54,8 +62,11 @@ different cluster to be included.
 \seealso{
 \code{\link{ad.test}}, \code{\link{cms}}, \code{\link{.smoothCms}}
 
-Other helper functions: \code{\link{.defineSubspace}},
-  \code{\link{.filterKnn}}, \code{\link{.filterLocMin}},
-  \code{\link{.ldfKnn}}, \code{\link{.smoothCms}}
+Other helper functions: 
+\code{\link{.defineSubspace}()},
+\code{\link{.filterKnn}()},
+\code{\link{.filterLocMin}()},
+\code{\link{.ldfKnn}()},
+\code{\link{.smoothCms}()}
 }
 \concept{helper functions}

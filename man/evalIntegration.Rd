@@ -4,12 +4,28 @@
 \alias{evalIntegration}
 \title{evalIntegration}
 \usage{
-evalIntegration(metrics, sce, group, dim_red = "PCA",
-  assay_name = "logcounts", n_dim = 10, res_name = NULL, k = NULL,
-  k_min = NA, smooth = TRUE, cell_min = 10, batch_min = NULL,
-  unbalanced = FALSE, weight = TRUE, k_pos = 5,
-  sce_pre_list = NULL, dim_combined = dim_red,
-  assay_pre = "logcounts", n_combined = 10, BPPARAM = SerialParam())
+evalIntegration(
+  metrics,
+  sce,
+  group,
+  dim_red = "PCA",
+  assay_name = "logcounts",
+  n_dim = 10,
+  res_name = NULL,
+  k = NULL,
+  k_min = NA,
+  smooth = TRUE,
+  cell_min = 10,
+  batch_min = NULL,
+  unbalanced = FALSE,
+  weight = TRUE,
+  k_pos = 5,
+  sce_pre_list = NULL,
+  dim_combined = dim_red,
+  assay_pre = "logcounts",
+  n_combined = 10,
+  BPPARAM = SerialParam()
+)
 }
 \arguments{
 \item{metrics}{Character vector. Name of the metrics to apply. Must be one to

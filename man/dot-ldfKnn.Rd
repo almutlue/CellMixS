@@ -42,8 +42,11 @@ integration on the same set of cells.
 \seealso{
 \code{\link{ldfSce}}
 
-Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.defineSubspace}}, \code{\link{.filterKnn}},
-  \code{\link{.filterLocMin}}, \code{\link{.smoothCms}}
+Other helper functions: 
+\code{\link{.cmsCell}()},
+\code{\link{.defineSubspace}()},
+\code{\link{.filterKnn}()},
+\code{\link{.filterLocMin}()},
+\code{\link{.smoothCms}()}
 }
 \concept{helper functions}

@@ -4,8 +4,16 @@
 \alias{isi}
 \title{isi}
 \usage{
-isi(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
-  n_dim = 10, weight = TRUE, res_name = NULL)
+isi(
+  sce,
+  group,
+  k,
+  dim_red = "PCA",
+  assay_name = "logcounts",
+  n_dim = 10,
+  weight = TRUE,
+  res_name = NULL
+)
 }
 \arguments{
 \item{sce}{\code{SingleCellExperiment} object, with the integrated data.}

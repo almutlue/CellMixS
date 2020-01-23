@@ -28,8 +28,11 @@ is specified as parameter in \code{\link{.cmsCell}} or \code{\link{cms}}.
 \seealso{
 \code{\link{.cmsCell}}
 
-Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.defineSubspace}}, \code{\link{.filterKnn}},
-  \code{\link{.ldfKnn}}, \code{\link{.smoothCms}}
+Other helper functions: 
+\code{\link{.cmsCell}()},
+\code{\link{.defineSubspace}()},
+\code{\link{.filterKnn}()},
+\code{\link{.ldfKnn}()},
+\code{\link{.smoothCms}()}
 }
 \concept{helper functions}

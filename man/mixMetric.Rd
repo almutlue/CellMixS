@@ -4,8 +4,16 @@
 \alias{mixMetric}
 \title{mixMetric}
 \usage{
-mixMetric(sce, group, k = 300, dim_red = "PCA",
-  assay_name = "logcounts", n_dim = 10, k_pos = 5, res_name = NULL)
+mixMetric(
+  sce,
+  group,
+  k = 300,
+  dim_red = "PCA",
+  assay_name = "logcounts",
+  n_dim = 10,
+  k_pos = 5,
+  res_name = NULL
+)
 }
 \arguments{
 \item{sce}{\code{SingleCellExperiment} object, with the integrated data.}

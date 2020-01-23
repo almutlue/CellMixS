@@ -39,8 +39,11 @@ Internal function to smooth cms scores. In a complete random setting
 \seealso{
 \code{\link{.cmsCell}}, \code{\link{cms}}
 
-Other helper functions: \code{\link{.cmsCell}},
-  \code{\link{.defineSubspace}}, \code{\link{.filterKnn}},
-  \code{\link{.filterLocMin}}, \code{\link{.ldfKnn}}
+Other helper functions: 
+\code{\link{.cmsCell}()},
+\code{\link{.defineSubspace}()},
+\code{\link{.filterKnn}()},
+\code{\link{.filterLocMin}()},
+\code{\link{.ldfKnn}()}
 }
 \concept{helper functions}
