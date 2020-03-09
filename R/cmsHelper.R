@@ -149,7 +149,7 @@
     min_indices <- which(table(knn_cell[,group]) >= batch_min)
     max_indices <- which(table(knn_cell[,group]) < batch_min)
     if( length(max_indices) > 0 ){
-        max_cell <- table(knn_cell[,group])[[max_indices]]
+        max_cell <- table(knn_cell[,group])[max_indices]
         batch_k[max_indices] <- max_cell
         warning(paste0("There are less than 'batch_min' cells of each batch in
                 a reasonable sized neighbourhood. ", max_cell," number of cells

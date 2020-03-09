@@ -1,7 +1,7 @@
 Package: CellMixS
 Type: Package
 Title: Evaluate Cellspecific Mixing 
-Version: 1.3.3
+Version: 1.3.4
 Author: Almut Lütge
 Maintainer: Almut Lütge <almut.luetge@uzh.ch>
 Description: Evaluate Cellspecific Mixing Scores (CMS) for different batches/groups in scRNA-seq data. 
