@@ -189,7 +189,7 @@ visOverview <- function(sce_cms, group, metric = "cms", prefix = TRUE,
             #used tsne from scater package (check for availability first)
             if( !"TSNE" %in% reducedDimNames(sce_cms) ){
                 #use "logcounts" if availabe otherwise "counts"
-                if( names(assays(sce_cms)) %in% "logcounts" ){
+                if( "logcounts" %in% names(assays(sce_cms)) ){
                     sce_cms <- runTSNE(sce_cms)
                 }else{
                     sce_cms <- runTSNE(sce_cms, exprs_values = "counts")
@@ -343,7 +343,7 @@ visMetric<- function(sce_cms, metric_var = "cms", dim_red = "TSNE",
         red_dim <- as.data.frame(reducedDim(sce_cms, dim_red))
         }else{
             if( !"TSNE" %in% reducedDimNames(sce_cms) ){
-                if( names(assays(sce_cms)) %in% "logcounts" ){
+                if( "logcounts" %in% names(assays(sce_cms)) ){
                     sce_cms <- runTSNE(sce_cms)
                 }else{
                     sce_cms <- runTSNE(sce_cms, exprs_values = "counts")
@@ -443,7 +443,7 @@ visGroup <- function(sce, group, dim_red = "TSNE"){
         #use tsne from scater package (check for availability first)
         if( !"TSNE" %in% reducedDimNames(sce) ){
             #use "logcounts" if availabe otherwise "counts"
-            if( names(assays(sce)) %in% "logcounts" ){
+            if( "logcounts" %in% names(assays(sce)) ){
                 sce <- runTSNE(sce)
             }else{
                 sce <- runTSNE(sce, exprs_values = "counts")

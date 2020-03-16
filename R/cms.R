@@ -110,6 +110,9 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
         warning("'k' exceeds number of cells. Is set to max (all cells).")
         k <- ncol(sce) - 1
     }
+    if( is.null(colnames(sce)) ){
+        colnames(sce) <- paste0("cell_", seq_len(ncol(sce)))
+    }
     #----------------- determine knn matrix ----------------------------------#
     cell_names <- colnames(sce)
     names(cell_names) <- cell_names
