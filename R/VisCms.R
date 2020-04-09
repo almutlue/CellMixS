@@ -207,10 +207,10 @@ visOverview <- function(sce_cms, group, metric = "cms", prefix = TRUE,
     df <- data.frame(sample_id = cell_names,
                      group_var = as.factor(colData(sce_cms)[, group]),
                      red_Dim1=red_dim$red_dim1,
-                     red_Dim2=red_dim$red_dim2) %>%
-        bind_cols(cms_res, other_var_tib)
+                     red_Dim2=red_dim$red_dim2)
 
-
+    df <- cbind(df, cms_res, other_var_tib)
+    df <- df[, unique(colnames(df))]
     # use of -log10 values (for very low cms)
     if( isTRUE(log10_val )){
         mi_log10 <- function(x)(-log10(x))

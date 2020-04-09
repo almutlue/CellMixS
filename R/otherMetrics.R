@@ -197,18 +197,18 @@ isi <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
     }) %>% set_names(batch_ids)
 
     #Get distance based weights
-    knn[["weights"]] <- lapply(batch_ids, function(batch){
+    knn[["weights"]] <- do.call("cbind", lapply(batch_ids, function(batch){
         weights <- knn[["p"]][[batch]][,"weights"]
-    }) %>% set_names(batch_ids) %>% bind_rows
+    })) %>% set_colnames(batch_ids)
     knn[["weights"]] <- knn[["weights"]]/rowSums(knn[["weights"]]) *
         length(batch_ids)
 
     #Calculate p^2
-    knn[["p2"]] <- lapply(batch_ids, function(batch){
+    knn[["p2"]] <- do.call("cbind", lapply(batch_ids, function(batch){
         p <- knn[["p"]][[batch]][,"p"]
-    }) %>% set_names(batch_ids) %>% bind_rows
+    })) %>% set_colnames(batch_ids)
     if( weight ){
-        knn[["p2"]] <-(data.frame(knn[["p2"]]) * data.frame(knn[["weights"]]))^2
+        knn[["p2"]] <-(knn[["p2"]] * knn[["weights"]])^2
     }else{
         knn[["p2"]] <- knn[["p2"]]^2
     }

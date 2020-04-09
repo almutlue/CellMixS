@@ -199,7 +199,7 @@
 
     # cms assignment of knn cells for each cell
     knn[["cms"]] <- cell_names %>%
-        map(function(cell_id) cms_raw[knn[["index"]][cell_id, ], "cms"]) %>%
+        map(function(cell_id) unname(cms_raw[knn[["index"]][cell_id, ], "cms"])) %>%
         bind_rows() %>% t()
 
 
