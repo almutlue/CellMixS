@@ -14,3 +14,11 @@
     \item Replace `metric_prefix` from plotting functions by `metric` parameter.
   }
 }
+
+\section{Changes in version 1.3.7 (Apr 2020)}{
+  \itemize{
+    \item Add input checks for colnames
+    \item Include score and warning for identical cells
+  }
+}
+
