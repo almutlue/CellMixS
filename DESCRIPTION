@@ -1,17 +1,19 @@
 Package: CellMixS
 Type: Package
 Title: Evaluate Cellspecific Mixing 
-Version: 1.5.0
-Author: Almut Lütge
-Maintainer: Almut Lütge <almut.luetge@uzh.ch>
-Description: Evaluate Cellspecific Mixing Scores (CMS) for different batches/groups in scRNA-seq data. 
+Version: 1.5.1
+Authors@R: c(person("Almut", "Lütge", role = c("aut", "cre"), email = "almut.luetge@uzh.ch"))
+Description: CellMixS provides metrics and functions to evaluate batch effects, 
+             data integration and batch effect correction in single cell trancriptome
+             data with single cell resolution. Results can be visualized and summarised
+             on different levels, e.g. on cell, celltype or dataset level. 
 License: GPL (>=2)
-Imports: BiocNeighbors, ggplot2, scater, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges, stats, purrr, listarrays, methods, BiocParallel, BiocGenerics
+Imports: BiocNeighbors, ggplot2, scater, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges, stats, purrr, methods, BiocParallel, BiocGenerics
 Depends: kSamples, R (>= 3.6)
 biocViews: SingleCell, Transcriptomics, GeneExpression, BatchEffect
 BugReports: https://github.com/almutlue/CellMixS/issues
 URL: https://github.com/almutlue/CellMixS
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Suggests: BiocStyle, knitr, rmarkdown, testthat, limma

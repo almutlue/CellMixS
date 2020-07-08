@@ -70,12 +70,14 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
         nrow = nrow(knn$index)) %>%
         set_rownames(cell_names)
 
+    n_batch <- length(levels(colData(sce)[,group]))
+
     #----------------- calculate entropy  ----------------------------------#
     entropy <- apply(knn[[group]], 1, function(x){
         freq_batch = table(x)/length(x)
         freq_batch_positive = freq_batch[freq_batch > 0]
         shannon <- -sum(freq_batch_positive * log(freq_batch_positive))/
-            log(length(levels(as.factor(x))))
+            log(n_batch)
     })
 
     #Add to colData of sce
