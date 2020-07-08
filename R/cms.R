@@ -79,7 +79,6 @@
 #' @importFrom BiocNeighbors findKNN
 #' @importFrom magrittr %>% set_rownames set_colnames
 #' @importFrom purrr %>% map
-#' @importFrom listarrays set_dimnames
 #' @importFrom dplyr bind_rows .data
 #' @importFrom methods is
 #' @importFrom SummarizedExperiment colData<-
