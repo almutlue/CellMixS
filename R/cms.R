@@ -156,7 +156,7 @@ cms <- function(sce, k, group, dim_red = "PCA", assay_name = "logcounts",
     if(!is.null(res_name)){
         res_cms <- res_cms %>% set_colnames(paste0(colnames(.), ".", res_name))
     }
-    colData(sce) <- cbind(colData(sce), res_cms)
+    colData(sce)[,colnames(res_cms)] <- res_cms
     sce
 }
 

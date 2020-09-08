@@ -114,7 +114,7 @@ ldfDiff <- function(sce_pre_list, sce_combined, group, k = 75, dim_red = "PCA",
         diff <- diff %>% set_colnames(paste0(colnames(.), ".", res_name))
     }
 
-    colData(sce_combined) <- cbind(colData(sce_combined), diff)
+    colData(sce_combined)[, colnames(diff)] <- diff
     sce_combined
 }
 

@@ -1,7 +1,7 @@
 Package: CellMixS
 Type: Package
 Title: Evaluate Cellspecific Mixing 
-Version: 1.5.1
+Version: 1.5.2
 Authors@R: c(person("Almut", "Lütge", role = c("aut", "cre"), email = "almut.luetge@uzh.ch"))
 Description: CellMixS provides metrics and functions to evaluate batch effects, 
              data integration and batch effect correction in single cell trancriptome

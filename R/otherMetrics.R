@@ -89,6 +89,7 @@ entropy <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
     stopifnot(all(rownames(entropy) == colnames(sce)))
 
     colData(sce) <- cbind(colData(sce), entropy)
+    colData(sce)[,colnames(entropy)] <- entropy
     sce
 }
 
@@ -225,7 +226,7 @@ isi <- function(sce, group, k, dim_red = "PCA", assay_name = "logcounts",
         in_simpson <- in_simpson %>% set_colnames(res_name)
     }
     stopifnot(all(rownames(in_simpson) == colnames(sce)))
-    colData(sce) <- cbind(colData(sce), in_simpson)
+    colData(sce)[,colnames(in_simpson)] <- in_simpson
     sce
 }
 
@@ -348,7 +349,7 @@ mixMetric <- function(sce, group, k = 300, dim_red = "PCA",
         mm <- mm %>% set_colnames(res_name)
     }
     stopifnot(all(rownames(mm) == colnames(sce)))
-    colData(sce) <- cbind(colData(sce), mm)
+    colData(sce)[,colnames(mm)] <- mm
     sce
 }
 
@@ -472,7 +473,7 @@ locStructure <- function(sce, group, dim_combined, k = 100, dim_red = "PCA",
         gr_overlap <- gr_overlap %>% set_colnames(res_name)
     }
     stopifnot(all(rownames(gr_overlap) == colnames(sce)))
-    colData(sce) <- cbind(colData(sce), gr_overlap)
+    colData(sce)[,colnames(gr_overlap)] <- gr_overlap
     sce
 }
 
