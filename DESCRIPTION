@@ -9,11 +9,11 @@ Description: CellMixS provides metrics and functions to evaluate batch effects,
              on different levels, e.g. on cell, celltype or dataset level. 
 License: GPL (>=2)
 Imports: BiocNeighbors, ggplot2, scater, viridis, cowplot, SummarizedExperiment, SingleCellExperiment, tidyr, magrittr, dplyr, ggridges, stats, purrr, methods, BiocParallel, BiocGenerics
-Depends: kSamples, R (>= 3.6)
+Depends: kSamples, R (>= 4.0)
 biocViews: SingleCell, Transcriptomics, GeneExpression, BatchEffect
 BugReports: https://github.com/almutlue/CellMixS/issues
 URL: https://github.com/almutlue/CellMixS
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
-Suggests: BiocStyle, knitr, rmarkdown, testthat, limma
+Suggests: BiocStyle, knitr, rmarkdown, testthat, limma, Rtsne
